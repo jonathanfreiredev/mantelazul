@@ -103,7 +103,7 @@ export async function SidebarDrawer() {
               className="cursor-pointer"
               asChild
             >
-              <Link href="/recipes/create">
+              <Link href="/recipes/new">
                 <ItemMedia>
                   <PlusIcon className="size-5" />
                 </ItemMedia>

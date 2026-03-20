@@ -1,20 +1,25 @@
 import { redirect } from "next/navigation";
-import { SignupForm } from "~/components/signup-form";
+import { ProfileForm } from "~/components/profile-form";
 import { getSession } from "~/server/better-auth/server";
 
-export default async function SignupPage() {
+export default async function ProfilePage() {
   const session = await getSession();
 
   const isLoggedIn = !!session?.session;
 
-  if (isLoggedIn) {
+  if (!isLoggedIn) {
     redirect("/");
   }
 
   return (
     <main className="">
       <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
-        <SignupForm />
+        <ProfileForm
+          user={{
+            name: session?.user.name || "",
+            email: session?.user.email || "",
+          }}
+        />
       </div>
     </main>
   );

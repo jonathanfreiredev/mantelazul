@@ -29,8 +29,8 @@ export function CategoriesNavbar({ currentCategory }: CategoriesNavbarProps) {
           );
         })}
 
-        <Button variant="default" className="ml-auto">
-          New Recipe
+        <Button variant="default" className="ml-auto hidden sm:flex">
+          <Link href="/recipes/new">New Recipe</Link>
         </Button>
       </div>
     </div>

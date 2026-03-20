@@ -1,14 +1,12 @@
-import { headers } from "next/headers";
 import Link from "next/link";
-import { auth } from "~/server/better-auth";
+import { getSession } from "~/server/better-auth/server";
 import { DropdownAvatarMenu } from "./dropdown-avatar-menu";
 import { Logo } from "./logo";
 import { SidebarDrawer } from "./sidebar-drawer";
 import { SignInOrSignUpButton } from "./sign-in-or-sign-up-button";
 
 export async function Header() {
-  const resHeaders = await headers();
-  const session = await auth.api.getSession({ headers: resHeaders });
+  const session = await getSession();
 
   const isLoggedIn = !!session?.session;
 

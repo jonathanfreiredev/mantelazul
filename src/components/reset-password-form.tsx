@@ -1,6 +1,5 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -24,35 +23,34 @@ import {
 } from "./ui/field";
 import { Input } from "./ui/input";
 
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.email({ message: "Please enter a valid email address" }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters long" }),
-  confirmPassword: z.string().min(8, {
-    message: "Confirm Password must be at least 8 characters long",
-  }),
-});
+const formSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters" }),
+    confirmPassword: z
+      .string()
+      .min(8, { message: "Confirm Password must be at least 8 characters" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+  });
 
-export function SignupForm({
+export const ResetPasswordForm = ({
+  token,
   className,
   ...props
-}: React.ComponentProps<"div">) {
-  const router = useRouter();
-
+}: React.ComponentProps<"div"> & { token: string }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
       password: "",
       confirmPassword: "",
     },
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    const { confirmPassword, ...signupData } = data;
+    const { confirmPassword, ...resetData } = data;
 
     if (data.password !== data.confirmPassword) {
       toast.error("Passwords do not match!", {
@@ -62,21 +60,17 @@ export function SignupForm({
       return;
     }
 
-    await authClient.signUp.email({
-      ...signupData,
+    await authClient.resetPassword({
+      newPassword: data.password,
+      token,
       fetchOptions: {
-        onSuccess() {
-          toast.success("Account created successfully!", {
-            description: "Welcome to Saborio.",
+        async onSuccess() {
+          toast.success("Password reset successfully!", {
             position: "bottom-right",
           });
-          form.reset();
-
-          router.replace("/");
-          router.refresh();
         },
         onError(error) {
-          toast.error("Failed to log in!", {
+          toast.error("Failed to reset password!", {
             description: error.error.message,
             position: "bottom-right",
           });
@@ -92,60 +86,15 @@ export function SignupForm({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create your account</CardTitle>
+          <CardTitle className="text-xl">Reset password</CardTitle>
           <CardDescription>
-            Enter your email below to create your account
+            Enter your new password below to reset your password.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form id="form-signup" onSubmit={form.handleSubmit(onSubmit)}>
+          <form id="form-reset-password" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldSet className="mb-5 w-full">
               <FieldGroup>
-                <Controller
-                  name="name"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="name">Name</FieldLabel>
-                      <Input
-                        {...field}
-                        id="name"
-                        type="text"
-                        autoComplete="off"
-                        placeholder="John Doe"
-                        required
-                      />
-
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="email"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="email">Email</FieldLabel>
-                      <Input
-                        {...field}
-                        id="email"
-                        type="email"
-                        autoComplete="off"
-                        placeholder="jonathan@example.com"
-                        required
-                      />
-                      <FieldDescription>
-                        Choose a unique email for your account.
-                      </FieldDescription>
-
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
                 <Field>
                   <Field className="grid grid-cols-2 gap-4">
                     <Controller
@@ -197,20 +146,21 @@ export function SignupForm({
                     Must be at least 8 characters long.
                   </FieldDescription>
                 </Field>
-                <Field>
-                  <Button
-                    type="submit"
-                    form="form-signup"
-                    disabled={form.formState.isSubmitting}
-                  >
-                    Create Account
-                  </Button>
-                </Field>
               </FieldGroup>
             </FieldSet>
+
+            <Field>
+              <Button
+                type="submit"
+                form="form-reset-password"
+                disabled={form.formState.isSubmitting}
+              >
+                Reset Password
+              </Button>
+            </Field>
           </form>
         </CardContent>
       </Card>
     </div>
   );
-}
+};

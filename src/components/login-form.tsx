@@ -6,7 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { cn } from "~/lib/utils";
-import { signIn } from "~/server/better-auth/client";
+import { authClient } from "~/server/better-auth/client";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -15,7 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { DialogClose } from "./ui/dialog";
 import {
   Field,
   FieldDescription,
@@ -49,7 +48,7 @@ export const LoginForm = ({
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     // Do something with the form values.
-    await signIn.email({
+    await authClient.signIn.email({
       ...data,
       rememberMe: true,
       fetchOptions: {

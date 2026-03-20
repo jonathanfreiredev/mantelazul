@@ -2,7 +2,7 @@
 import { LogInIcon, LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useSession, signOut } from "~/server/better-auth/client";
+import { authClient } from "~/server/better-auth/client";
 import { Item, ItemContent, ItemMedia, ItemTitle } from "./ui/item";
 import Link from "next/link";
 import { DrawerClose } from "./ui/drawer";
@@ -10,7 +10,7 @@ import { DrawerClose } from "./ui/drawer";
 export function SidebarDrawerAuth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const { data, isPending } = useSession();
+  const { data, isPending } = authClient.useSession();
 
   if (isPending) return null;
 
@@ -41,7 +41,7 @@ export function SidebarDrawerAuth() {
               if (isSubmitting) return;
 
               setIsSubmitting(true);
-              await signOut();
+              await authClient.signOut();
               router.refresh();
               setIsSubmitting(false);
             }}

@@ -1,10 +1,9 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { LoginForm } from "~/components/login-form";
-import { auth } from "~/server/better-auth";
+import { getSession } from "~/server/better-auth/server";
 
 export default async function LoginPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSession();
 
   const isLoggedIn = !!session?.session;
 

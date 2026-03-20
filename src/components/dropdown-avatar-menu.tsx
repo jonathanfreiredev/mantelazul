@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { signOut } from "~/server/better-auth/client";
+import { authClient } from "~/server/better-auth/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import Link from "next/link";
 
 interface DropdownAvatarMenuProps {
   user: {
@@ -38,8 +39,12 @@ export const DropdownAvatarMenu = ({ user }: DropdownAvatarMenuProps) => {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>Profile</DropdownMenuItem>
-        <DropdownMenuItem>My Recipes</DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/profile">Profile</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/recipes">My Recipes</Link>
+        </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 
@@ -47,8 +52,8 @@ export const DropdownAvatarMenu = ({ user }: DropdownAvatarMenuProps) => {
           variant="destructive"
           onClick={async () => {
             setIsSubmitting(true);
-            await signOut();
-            router.refresh();
+            await authClient.signOut();
+            window.location.reload();
             setIsSubmitting(false);
           }}
           disabled={isSubmitting}
