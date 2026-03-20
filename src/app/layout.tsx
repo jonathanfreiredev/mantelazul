@@ -7,6 +7,7 @@ import { Header } from "~/components/header";
 import { ThemeProvider } from "~/components/providers/theme-provider";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "sonner";
+import { Footer } from "~/components/footer";
 
 export const metadata: Metadata = {
   title: "Saborio",
@@ -41,6 +42,7 @@ export default function RootLayout({
           >
             <Header />
             {children}
+            <Footer />
             <Toaster />
           </ThemeProvider>
         </TRPCReactProvider>

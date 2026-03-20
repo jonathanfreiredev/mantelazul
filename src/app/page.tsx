@@ -1,10 +1,14 @@
 import Image from "next/image";
+import Link from "next/link";
 import { CarouselMainCategory } from "~/components/home/carousel-main-category";
 import { CategoriesNavbar } from "~/components/home/categories-navbar";
 import { Button } from "~/components/ui/button";
 import { categories } from "~/lib/categories-list";
+import { capitalize } from "~/lib/utils";
 
 export default async function Home() {
+  const [explore, mains, desserts, drinks, sides, everything] = categories;
+
   return (
     <main className="">
       <CategoriesNavbar currentCategory="explore" />
@@ -20,20 +24,22 @@ export default async function Home() {
           <div className="flex h-full w-full flex-col text-gray-800 lg:flex-row">
             <div className="flex flex-1 flex-col items-center gap-4 px-2 lg:items-start">
               <h2 className="text-center text-5xl sm:text-7xl lg:text-left">
-                Mains
+                {capitalize(mains?.name || "mains")}
               </h2>
               <p className="max-w-125 text-center lg:text-left">
-                {categories[1]?.description}
+                {mains?.description}
               </p>
 
               <div className="flex justify-center lg:justify-start">
-                <Button
-                  variant="default"
-                  size="lg"
-                  className="hover:opacity-80"
-                >
-                  View recipes
-                </Button>
+                <Link href={mains?.href || "/mains"}>
+                  <Button
+                    variant="default"
+                    size="lg"
+                    className="hover:opacity-80"
+                  >
+                    View recipes
+                  </Button>
+                </Link>
               </div>
             </div>
 
@@ -54,16 +60,18 @@ export default async function Home() {
 
             <div className="flex flex-col items-center gap-5 p-5 text-white sm:p-15 lg:items-start">
               <h2 className="text-center text-5xl sm:text-7xl lg:text-left">
-                Drinks
+                {capitalize(drinks?.name || "drinks")}
               </h2>
               <p className="max-w-125 text-center lg:text-left">
-                {categories[3]?.description}
+                {drinks?.description}
               </p>
 
               <div className="flex justify-center lg:justify-start">
-                <Button variant="secondary" size="lg">
-                  View recipes
-                </Button>
+                <Link href={drinks?.href || "/drinks"}>
+                  <Button variant="secondary" size="lg">
+                    View recipes
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -77,16 +85,18 @@ export default async function Home() {
 
             <div className="flex w-full flex-col items-center gap-5 p-5 text-white sm:p-15 lg:items-start">
               <h2 className="text-center text-5xl sm:text-7xl lg:text-left">
-                Desserts
+                {capitalize(desserts?.name || "desserts")}
               </h2>
               <p className="max-w-125 text-center lg:text-left">
-                {categories[2]?.description}
+                {desserts?.description}
               </p>
 
               <div className="flex justify-center lg:justify-start">
-                <Button variant="secondary" size="lg">
-                  View recipes
-                </Button>
+                <Link href={desserts?.href || "/desserts"}>
+                  <Button variant="secondary" size="lg">
+                    View recipes
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -102,16 +112,18 @@ export default async function Home() {
 
           <div className="flex flex-col items-center gap-5 p-5 text-white sm:p-15 lg:items-start">
             <h2 className="text-center text-5xl sm:text-7xl lg:text-left">
-              Sides
+              {capitalize(sides?.name || "sides")}
             </h2>
             <p className="max-w-125 text-center lg:text-left">
-              {categories[4]?.description}
+              {sides?.description}
             </p>
 
             <div className="flex justify-center lg:justify-start">
-              <Button variant="secondary" size="lg">
-                View recipes
-              </Button>
+              <Link href={sides?.href || "/sides"}>
+                <Button variant="secondary" size="lg">
+                  View recipes
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

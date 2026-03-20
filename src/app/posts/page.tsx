@@ -73,7 +73,7 @@ export default async function Home() {
                       // redirect(res.url);
                     }}
                   >
-                    Sign in
+                    Log in
                   </button>
                 </form>
               ) : (

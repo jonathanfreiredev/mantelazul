@@ -1,4 +1,11 @@
-export const categories = [
+export type CategoryPage = {
+  name: string;
+  href: string;
+  imageUrl: string;
+  description: string;
+};
+
+export const categories: CategoryPage[] = [
   {
     name: "explore",
     href: "/",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { categories } from "~/lib/categories-list";
 import { capitalize } from "~/lib/utils";
+import { Button } from "../ui/button";
 
 interface CategoriesNavbarProps {
   currentCategory: string;
@@ -8,8 +9,8 @@ interface CategoriesNavbarProps {
 
 export function CategoriesNavbar({ currentCategory }: CategoriesNavbarProps) {
   return (
-    <div className="h-12 border-b bg-zinc-100 sm:h-20">
-      <div className="no-scrollbar flex h-full overflow-x-auto px-2">
+    <div className="h-12 border-b bg-zinc-100 sm:h-20 dark:bg-zinc-300">
+      <div className="no-scrollbar flex h-full items-center overflow-x-auto px-2">
         {categories.map((cat) => {
           const isActive = currentCategory === cat.name;
 
@@ -19,7 +20,7 @@ export function CategoriesNavbar({ currentCategory }: CategoriesNavbarProps) {
               href={cat.href}
               className={`flex h-full items-center px-4 text-sm whitespace-nowrap sm:text-base ${
                 isActive
-                  ? "border-b-2 border-black font-semibold"
+                  ? "border-b-3 border-black font-semibold dark:border-white dark:text-shadow-xs"
                   : "text-gray-500 hover:text-black"
               }`}
             >
@@ -27,6 +28,10 @@ export function CategoriesNavbar({ currentCategory }: CategoriesNavbarProps) {
             </Link>
           );
         })}
+
+        <Button variant="default" className="ml-auto">
+          New Recipe
+        </Button>
       </div>
     </div>
   );
