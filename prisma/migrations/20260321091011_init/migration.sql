@@ -97,6 +97,7 @@ CREATE TABLE "recipe" (
 CREATE TABLE "ingredient" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "quantity" TEXT NOT NULL,
     "unit" "Unit" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

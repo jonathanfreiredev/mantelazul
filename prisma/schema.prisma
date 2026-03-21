@@ -140,7 +140,9 @@ enum Unit {
 model Ingredient {
   id        String   @id @default(cuid())
   name      String
+  quantity  Decimal  @db.Decimal(10, 3)
   unit      Unit
+  order     Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
