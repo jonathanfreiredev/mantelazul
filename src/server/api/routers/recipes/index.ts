@@ -238,7 +238,7 @@ export const recipesRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  getBySlug: protectedProcedure
+  getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ ctx, input }): Promise<RecipeDto> => {
       const recipe = await ctx.db.recipe.findUnique({
@@ -292,7 +292,7 @@ export const recipesRouter = createTRPCRouter({
         skip,
       } = input;
 
-      const take = 20;
+      const take = 3;
 
       const whereClause: Prisma.RecipeWhereInput = {};
 

@@ -80,7 +80,7 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
       </div>
       <CardHeader>
         <Link href={`/recipes/${recipe.slug}`}>
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex items-center justify-between gap-2">
             <div className="nowrap line-clamp-1">{recipe.title}</div>
 
             <RecipeLikeButton recipeId={recipe.id} />

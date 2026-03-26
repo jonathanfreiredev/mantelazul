@@ -10,7 +10,7 @@ import {
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { breakpoints, useMediaQuery } from "~/hooks/use-media-query";
-import { api } from "~/trpc/react";
+import { useGetAllRecipes } from "~/hooks/useGetAllRecipes";
 import { RecipeCard } from "./recipe-card";
 import { Button } from "./ui/button";
 import {
@@ -37,7 +37,7 @@ import {
 } from "./ui/input-group";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
-type OrderBy = "createdAt" | "likesCount";
+export type OrderBy = "createdAt" | "likesCount";
 
 interface RecipesProps {
   authorId?: string;
@@ -60,6 +60,7 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
     categoryPage || null,
   );
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
+  const [search, setSearch] = useState("");
   const [skip, setSkip] = useState(0);
 
   //Draft values for filters
@@ -72,16 +73,14 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
   );
   const [draftSearch, setDraftSearch] = useState("");
 
-  const [search, setSearch] = useState("");
-
   const isDesktop = useMediaQuery(breakpoints.md);
   const pathname = usePathname();
 
   const {
     data: resRecipes,
-    isLoading,
+    isFetching,
     isError,
-  } = api.recipes.getAll.useQuery({
+  } = useGetAllRecipes({
     authorId,
     orderBy,
     category: category || undefined,
@@ -90,13 +89,13 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
     skip,
   });
 
-  if (isLoading) {
+  if (isFetching && skip === 0) {
     return <p className="text-muted-foreground mt-4 text-center">Loading...</p>;
   }
 
-  if (isError || !resRecipes) return null;
+  if (isError) return null;
 
-  const recipes = resRecipes.recipes || [];
+  const { recipes, pagination } = resRecipes;
 
   const clearFilters = () => {
     setDraftCategory(null);
@@ -117,12 +116,14 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
 
   return (
     <div className="flex w-full flex-col items-center px-5 sm:px-10">
-      <div className="ms-center my-7 flex w-full flex-col items-center gap-4 sm:flex-row">
+      <div className="ms-center mt-7 flex w-full flex-col items-center gap-4 sm:flex-row">
         <Field className="max-w-sm">
           <InputGroup>
             <InputGroupInput
               id="inline-start-input"
               value={draftSearch}
+              autoComplete="off"
+              className="focus:outline-none"
               onChange={(e) => {
                 setDraftSearch(e.target.value);
               }}
@@ -304,6 +305,11 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
         </div>
       </div>
 
+      <div className="text-muted-foreground my-4 self-start text-sm">
+        {pagination?.total || "Loading"}{" "}
+        {pagination ? (pagination.total === 1 ? "recipe" : "recipes") : " "}
+      </div>
+
       <div className="mb-10 grid w-full max-w-400 grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
         {recipes.map((recipe) => (
           <RecipeCard key={recipe.id} recipe={recipe} isEditable={isEditable} />
@@ -313,6 +319,19 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
       {recipes.length === 0 && (
         <div className="mb-10 flex h-full w-full items-center justify-center">
           <p className="text-muted-foreground text-center">No recipes found.</p>
+        </div>
+      )}
+
+      {pagination && pagination.hasNextPage && (
+        <div className="mb-10 flex justify-center">
+          <Button
+            disabled={isFetching}
+            onClick={() => {
+              setSkip((prev) => prev + pagination.take);
+            }}
+          >
+            {isFetching ? "Loading..." : "Load more"}
+          </Button>
         </div>
       )}
     </div>
