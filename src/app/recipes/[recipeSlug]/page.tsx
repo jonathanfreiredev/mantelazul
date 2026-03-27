@@ -1,4 +1,4 @@
-import { Recipe } from "~/components/recipe";
+import { Recipe } from "~/components/recipe-page/recipe";
 import { api, HydrateClient } from "~/trpc/server";
 
 interface RecipePageProps {

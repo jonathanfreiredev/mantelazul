@@ -263,7 +263,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
         <FieldSeparator />
 
         <FieldSet>
-          <FieldLegend>Time Information</FieldLegend>
+          <FieldLegend>Time information</FieldLegend>
           <FieldDescription>
             Enter the preparation, cooking, and resting times for the recipe.
             This will help users plan their cooking accordingly.
@@ -365,7 +365,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
         <FieldSeparator />
 
         <FieldSet>
-          <FieldLegend>Nutritional Information</FieldLegend>
+          <FieldLegend>Nutritional information per serving</FieldLegend>
           <FieldDescription>
             Enter the nutritional information for the recipe. This will help
             users understand the nutritional content of the dish.

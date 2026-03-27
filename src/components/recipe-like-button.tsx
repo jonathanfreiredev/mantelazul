@@ -1,14 +1,22 @@
 "use client";
 import { HeartIcon } from "lucide-react";
-import { Button } from "./ui/button";
-import { api } from "~/trpc/react";
 import { motion } from "motion/react";
+import { cn } from "~/lib/utils";
+import { api } from "~/trpc/react";
 
 interface RecipeLikeButtonProps {
   recipeId: string;
+  className?: string;
+  positionIcon?: "top" | "bottom" | "left" | "right";
+  size?: "sm" | "md" | "base" | "lg" | "xl";
 }
 
-export function RecipeLikeButton({ recipeId }: RecipeLikeButtonProps) {
+export function RecipeLikeButton({
+  recipeId,
+  className,
+  positionIcon = "right",
+  size = "base",
+}: RecipeLikeButtonProps) {
   const utils = api.useUtils();
 
   const toggleLike = api.likes.toggleLike.useMutation({
@@ -45,36 +53,55 @@ export function RecipeLikeButton({ recipeId }: RecipeLikeButtonProps) {
   const likesCount = likeData.likesCount;
 
   return (
-    <div className="flex items-center gap-1">
-      <span className="text-sm">{likesCount}</span>
-      <Button
-        variant="ghost"
-        size="icon"
-        className={isLiked ? "text-red-500" : ""}
-        disabled={toggleLike.isPending}
-        onClick={async (e) => {
-          e.preventDefault();
-          toggleLike.mutate({ recipeId });
-        }}
+    <motion.div
+      key={isLiked ? "liked" : "not-liked"}
+      initial={{ scale: 1 }}
+      animate={{
+        scale: isLiked ? [1, 1.4, 1] : 1,
+      }}
+      transition={{
+        duration: 0.3,
+        ease: "easeInOut",
+      }}
+      whileTap={{ scale: 0.8 }}
+      className={cn(
+        "flex items-center gap-1",
+        positionIcon === "top" || positionIcon === "bottom"
+          ? "flex-col"
+          : "flex-row",
+        className ? className : "text-sm",
+      )}
+      onClick={async (e) => {
+        if (toggleLike.isPending) return;
+
+        e.preventDefault();
+        toggleLike.mutate({ recipeId });
+      }}
+    >
+      <span
+        className={cn(
+          positionIcon === "top" || positionIcon === "left" ? "order-2" : "",
+        )}
       >
-        <motion.div
-          key={isLiked ? "liked" : "not-liked"}
-          initial={{ scale: 1 }}
-          animate={{
-            scale: isLiked ? [1, 1.4, 1] : 1,
-          }}
-          transition={{
-            duration: 0.3,
-            ease: "easeInOut",
-          }}
-          whileTap={{ scale: 0.8 }}
-        >
-          <HeartIcon
-            fill={isLiked ? "red" : "none"}
-            className="transition-colors"
-          />
-        </motion.div>
-      </Button>
-    </div>
+        {likesCount}
+      </span>
+
+      <HeartIcon
+        fill={isLiked ? "red" : "none"}
+        className={cn(
+          "transition-colors",
+          size === "sm"
+            ? "size-4"
+            : size === "lg"
+              ? "size-7"
+              : size === "xl"
+                ? "size-8"
+                : size === "base"
+                  ? "size-6"
+                  : "size-5",
+          isLiked ? "text-red-500" : "",
+        )}
+      />
+    </motion.div>
   );
 }

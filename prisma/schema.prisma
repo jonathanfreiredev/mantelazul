@@ -135,7 +135,7 @@ model Recipe {
   likes       RecipeLike[]
   cookbooks   CookbookRecipe[]
 
-  author   User?   @relation(fields: [authorId], references: [id])
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId String?
 
   @@index([title])

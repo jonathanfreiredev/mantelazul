@@ -30,6 +30,7 @@ import {
 } from "./ui/drawer";
 import { Field, FieldGroup, FieldSet } from "./ui/field";
 import { SortableList } from "./ui/sortable-list";
+import Image from "next/image";
 
 interface RecipeStepsFormProps {
   recipe: RecipeDto;
@@ -158,7 +159,19 @@ export const RecipeStepsForm = ({
                     >
                       <Drawer direction={isDesktop ? "right" : "bottom"}>
                         <DrawerTrigger className="flex w-full flex-col items-start gap-2">
-                          <p>{field.description}</p>
+                          <div className="flex items-center gap-4">
+                            {field.image && (
+                              <div className="relative flex h-15 w-20 items-center justify-center rounded-md">
+                                <Image
+                                  src={field.image.preview}
+                                  alt={`Step ${index + 1} image`}
+                                  fill
+                                  className="rounded-lg object-cover"
+                                />
+                              </div>
+                            )}
+                            <p>{field.description}</p>
+                          </div>
                         </DrawerTrigger>
                         <DrawerContent>
                           <DrawerHeader>

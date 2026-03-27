@@ -83,7 +83,11 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
           <CardTitle className="flex items-center justify-between gap-2">
             <div className="nowrap line-clamp-1">{recipe.title}</div>
 
-            <RecipeLikeButton recipeId={recipe.id} />
+            <RecipeLikeButton
+              recipeId={recipe.id}
+              size="md"
+              className="text-md"
+            />
           </CardTitle>
           <CardDescription className="line-clamp-2">
             {recipe.description}
