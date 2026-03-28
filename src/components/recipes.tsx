@@ -36,6 +36,7 @@ import {
   InputGroupInput,
 } from "./ui/input-group";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { capitalize } from "~/lib/utils";
 
 export type OrderBy = "createdAt" | "likesCount";
 
@@ -47,9 +48,11 @@ interface RecipesProps {
 
 enum CategoryEnum {
   MAIN_COURSE = "Main Course",
-  SIDE_DISH = "Side Dish",
   DESSERT = "Dessert",
   DRINK = "Drink",
+  STARTER = "Starter",
+  SNACK = "Snack",
+  BREAKFAST = "Breakfast",
 }
 
 export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
@@ -237,11 +240,9 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
                               <FieldTitle>
                                 {key === Category.MAIN_COURSE
                                   ? "Main Course"
-                                  : key === Category.SIDE_DISH
-                                    ? "Side Dish"
-                                    : key === Category.DESSERT
-                                      ? "Dessert"
-                                      : key === Category.DRINK && "Drink"}
+                                  : capitalize(
+                                      key.toLowerCase().replace(/_/g, " "),
+                                    )}
                               </FieldTitle>
                             </FieldContent>
                             <RadioGroupItem value={value} id={value} />

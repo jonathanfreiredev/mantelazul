@@ -10,9 +10,11 @@ interface MainsPageProps {
 
 export const categoryMapping = {
   mains: Category.MAIN_COURSE,
+  starters: Category.STARTER,
   desserts: Category.DESSERT,
   drinks: Category.DRINK,
-  sides: Category.SIDE_DISH,
+  snacks: Category.SNACK,
+  breakfast: Category.BREAKFAST,
   everything: undefined,
 };
 

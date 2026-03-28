@@ -1,10 +1,18 @@
 import z from "zod";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "../../trpc";
 
 export const likesRouter = createTRPCRouter({
-  isLikedByUser: protectedProcedure
+  isLikedByUser: publicProcedure
     .input(z.object({ recipeId: z.string() }))
     .query(async ({ ctx, input }) => {
+      if (!ctx.session?.user) {
+        return { isLiked: false, likesCount: 0 };
+      }
+
       const [likeByUser, likesCount] = await ctx.db.$transaction([
         ctx.db.recipeLike.findUnique({
           where: {

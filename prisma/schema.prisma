@@ -100,7 +100,9 @@ enum Category {
   MAIN_COURSE
   DESSERT
   DRINK
-  SIDE_DISH
+  STARTER
+  SNACK
+  BREAKFAST
 }
 
 model Recipe {

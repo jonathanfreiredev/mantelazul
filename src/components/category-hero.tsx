@@ -13,9 +13,11 @@ export function CategoryHero({ currentCategory }: CategoryHeroProps) {
 
   const textColors: Record<string, string> = {
     mains: "text-gray-800",
+    starters: "text-white",
     desserts: "text-white",
     drinks: "text-white",
-    sides: "text-white",
+    snacks: "text-white",
+    breakfast: "text-white",
     everything: "text-white",
   };
 

@@ -1,6 +1,7 @@
 "use client";
 import { HeartIcon } from "lucide-react";
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
@@ -9,6 +10,7 @@ interface RecipeLikeButtonProps {
   className?: string;
   positionIcon?: "top" | "bottom" | "left" | "right";
   size?: "sm" | "md" | "base" | "lg" | "xl";
+  isLoggedIn: boolean;
 }
 
 export function RecipeLikeButton({
@@ -16,8 +18,11 @@ export function RecipeLikeButton({
   className,
   positionIcon = "right",
   size = "base",
+  isLoggedIn,
 }: RecipeLikeButtonProps) {
   const utils = api.useUtils();
+
+  const router = useRouter();
 
   const toggleLike = api.likes.toggleLike.useMutation({
     onMutate: async () => {
@@ -65,16 +70,22 @@ export function RecipeLikeButton({
       }}
       whileTap={{ scale: 0.8 }}
       className={cn(
-        "flex items-center gap-1",
+        "flex cursor-pointer items-center gap-1",
         positionIcon === "top" || positionIcon === "bottom"
           ? "flex-col"
           : "flex-row",
         className ? className : "text-sm",
       )}
       onClick={async (e) => {
+        e.preventDefault();
+
         if (toggleLike.isPending) return;
 
-        e.preventDefault();
+        if (!isLoggedIn) {
+          router.push("/login");
+          return;
+        }
+
         toggleLike.mutate({ recipeId });
       }}
     >

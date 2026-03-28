@@ -238,6 +238,25 @@ export const recipesRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  tooglePublicationStatus: protectedProcedure
+    .input(z.object({ recipeId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const recipe = await ctx.db.recipe.findUnique({
+        where: { id: input.recipeId },
+      });
+
+      if (!recipe) {
+        throw new Error("Recipe not found");
+      }
+
+      const updatedRecipe = await ctx.db.recipe.update({
+        where: { id: input.recipeId },
+        data: { published: !recipe.published },
+      });
+
+      return updatedRecipe;
+    }),
+
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ ctx, input }): Promise<RecipeDto> => {
@@ -271,6 +290,21 @@ export const recipesRouter = createTRPCRouter({
       };
     }),
 
+  getPublicationStatus: publicProcedure
+    .input(z.object({ recipeId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const recipe = await ctx.db.recipe.findUnique({
+        where: { id: input.recipeId },
+        select: { published: true },
+      });
+
+      if (!recipe) {
+        throw new Error("Recipe not found");
+      }
+
+      return { published: recipe.published };
+    }),
+
   getAll: publicProcedure
     .input(
       z.object({
@@ -298,6 +332,8 @@ export const recipesRouter = createTRPCRouter({
 
       if (authorId) {
         whereClause.authorId = authorId;
+      } else {
+        whereClause.published = true;
       }
 
       if (search) {

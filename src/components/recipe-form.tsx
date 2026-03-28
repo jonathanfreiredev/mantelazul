@@ -1,7 +1,12 @@
 "use client";
+import { Category, Difficulty } from "generated/prisma/enums";
+import { TrashIcon } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 import { Controller } from "react-hook-form";
+import { capitalize } from "~/lib/utils";
 import { ImageUpload } from "./image-uploader/image-upload";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -28,8 +33,6 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "./ui/input-group";
-import { useState } from "react";
-import { Textarea } from "./ui/textarea";
 import {
   Select,
   SelectContent,
@@ -37,10 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Category, Difficulty, Unit } from "generated/prisma/enums";
-import { capitalize } from "~/lib/utils";
-import { Button } from "./ui/button";
-import { TrashIcon } from "lucide-react";
+import { Textarea } from "./ui/textarea";
 
 interface RecipeFormProps {
   control: any;
@@ -212,11 +212,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
                     <SelectItem key={key} value={value}>
                       {key === Category.MAIN_COURSE
                         ? "Main Course"
-                        : key === Category.SIDE_DISH
-                          ? "Side Dish"
-                          : key === Category.DESSERT
-                            ? "Dessert"
-                            : key === Category.DRINK && "Drink"}
+                        : capitalize(key.toLowerCase().replace(/_/g, " "))}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -7,7 +7,7 @@ import { categories } from "~/lib/categories-list";
 import { capitalize } from "~/lib/utils";
 
 export default async function Home() {
-  const [explore, mains, desserts, drinks, sides, everything] = categories;
+  const [explore, mains, desserts, drinks, breakfast, everything] = categories;
 
   return (
     <>
@@ -104,22 +104,22 @@ export default async function Home() {
 
         <div className="relative h-[calc(100vh-12rem)] max-h-220 w-full">
           <Image
-            src="/images/baked-tuna-pasta.webp"
-            alt="Baked tuna pasta"
+            src={breakfast?.imageUrl || ""}
+            alt="Picnic"
             fill
             className="absolute -z-10 object-cover"
           />
 
           <div className="flex flex-col items-center gap-5 p-5 text-white sm:p-15 lg:items-start">
             <h2 className="text-center text-5xl sm:text-7xl lg:text-left">
-              {capitalize(sides?.name || "sides")}
+              {capitalize(breakfast?.name || "breakfast")}
             </h2>
             <p className="max-w-125 text-center lg:text-left">
-              {sides?.description}
+              {breakfast?.description}
             </p>
 
             <div className="flex justify-center lg:justify-start">
-              <Link href={sides?.href || "/sides"}>
+              <Link href={breakfast?.href || "/breakfast"}>
                 <Button variant="secondary" size="lg">
                   View recipes
                 </Button>

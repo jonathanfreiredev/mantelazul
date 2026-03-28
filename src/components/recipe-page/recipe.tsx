@@ -9,6 +9,8 @@ import { TimesSection } from "./times-section";
 import { IngredientsSection } from "./ingredients-section";
 import { StepsSection } from "./steps-section";
 import { NutritionalInfoSection } from "./nutritional-info-section";
+import { authClient } from "~/server/better-auth/client";
+import { EditRecipeButton } from "../edit-recipe-button";
 
 interface RecipeProps {
   slug: string;
@@ -18,6 +20,12 @@ export function Recipe({ slug }: RecipeProps) {
   const [recipe] = api.recipes.getBySlug.useSuspenseQuery({
     slug,
   });
+
+  const { data, isPending } = authClient.useSession();
+
+  if (isPending) return null;
+
+  const isLoggedIn = !!data?.session;
 
   return (
     <div className="mx-auto flex w-full max-w-230 flex-col items-center sm:px-10">
@@ -42,6 +50,7 @@ export function Recipe({ slug }: RecipeProps) {
             className="text-md text-gray-800"
             size="xl"
             positionIcon="top"
+            isLoggedIn={isLoggedIn}
           />
 
           <ShareButton
@@ -50,6 +59,15 @@ export function Recipe({ slug }: RecipeProps) {
             size="xl"
             positionIcon="top"
           />
+
+          {isLoggedIn && data.user.id === recipe.authorId && (
+            <EditRecipeButton
+              recipeSlug={recipe.slug}
+              className="text-md text-gray-800"
+              size="xl"
+              positionIcon="top"
+            />
+          )}
         </div>
 
         {recipe.authorId && (

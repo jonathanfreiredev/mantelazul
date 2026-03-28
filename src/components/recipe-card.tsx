@@ -6,10 +6,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { authClient } from "~/server/better-auth/client";
 import { api } from "~/trpc/react";
 import { RecipeLikeButton } from "./recipe-like-button";
 import { Button } from "./ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +24,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { RecipePublishButton } from "./recipe-publish-button";
+import { Separator } from "./ui/separator";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -27,6 +36,7 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteRecipe = api.recipes.delete.useMutation();
   const router = useRouter();
+  const { data, isPending } = authClient.useSession();
 
   const handleDelete = async () => {
     if (!isEditable) return;
@@ -42,6 +52,10 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
     }
     setIsDeleting(false);
   };
+
+  if (isPending) return null;
+
+  const isLoggedIn = !!data?.session;
 
   return (
     <Card className="relative w-full rounded-sm pt-0">
@@ -87,6 +101,7 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
               recipeId={recipe.id}
               size="md"
               className="text-md"
+              isLoggedIn={isLoggedIn}
             />
           </CardTitle>
           <CardDescription className="line-clamp-2">
@@ -94,6 +109,16 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
           </CardDescription>
         </Link>
       </CardHeader>
+
+      {isLoggedIn && data.user.id === recipe.authorId && (
+        <div className="flex flex-col px-4">
+          <Separator className="my-4" />
+
+          <div className="pt-2">
+            <RecipePublishButton recipeId={recipe.id} />
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

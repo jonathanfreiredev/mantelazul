@@ -20,6 +20,13 @@ export const categories: CategoryPage[] = [
       "Discover our collection of main dishes with a variety of flavors and ingredients to satisfy every palate.",
   },
   {
+    name: "starters",
+    href: "/starters",
+    imageUrl: "/images/fries-food.webp",
+    description:
+      "Kick off your meal with our delicious starter recipes, featuring a variety of flavors and ingredients to tantalize your taste buds.",
+  },
+  {
     name: "desserts",
     href: "/desserts",
     imageUrl: "/images/macarons.webp",
@@ -34,11 +41,18 @@ export const categories: CategoryPage[] = [
       "Quench your thirst with our refreshing drink recipes, from vibrant cocktails to soothing mocktails.",
   },
   {
-    name: "sides",
-    href: "/sides",
-    imageUrl: "/images/baked-tuna-pasta.webp",
+    name: "snacks",
+    href: "/snacks",
+    imageUrl: "/images/snack.webp",
     description:
-      "Discover our collection of delicious side dishes, from crispy roasted vegetables to creamy mashed potatoes.",
+      "Satisfy your cravings with our delicious snack recipes, perfect for any time of day.",
+  },
+  {
+    name: "breakfast",
+    href: "/breakfast",
+    imageUrl: "/images/breakfast.webp",
+    description:
+      "Start your day with our delicious breakfast recipes, featuring a variety of options to energize your mornings.",
   },
   {
     name: "everything",

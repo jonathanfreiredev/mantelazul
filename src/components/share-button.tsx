@@ -36,7 +36,7 @@ export function ShareButton({
           }}
           whileTap={{ opacity: 0.6, scale: 0.9 }}
           className={cn(
-            "flex items-center gap-1 transition-colors",
+            "flex cursor-pointer items-center gap-1 transition-colors",
             positionIcon === "top" || positionIcon === "bottom"
               ? "flex-col"
               : "flex-row",

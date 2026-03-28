@@ -22,7 +22,9 @@ export const Category = {
   MAIN_COURSE: 'MAIN_COURSE',
   DESSERT: 'DESSERT',
   DRINK: 'DRINK',
-  SIDE_DISH: 'SIDE_DISH'
+  STARTER: 'STARTER',
+  SNACK: 'SNACK',
+  BREAKFAST: 'BREAKFAST'
 } as const
 
 export type Category = (typeof Category)[keyof typeof Category]
