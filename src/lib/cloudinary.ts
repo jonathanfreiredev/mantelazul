@@ -12,7 +12,7 @@ export function uploadToCloudinary(buffer: Buffer): Promise<any> {
     cloudinary.uploader
       .upload_stream(
         {
-          upload_preset: "saborio",
+          upload_preset: "mantelazul",
         },
         (error, result) => {
           if (error) reject(error);
@@ -26,7 +26,7 @@ export function uploadToCloudinary(buffer: Buffer): Promise<any> {
 export function deleteFromCloudinary(publicId: string): Promise<any> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.destroy(
-      `saborio/${publicId}`,
+      `mantelazul/${publicId}`,
       {
         resource_type: "image",
       },

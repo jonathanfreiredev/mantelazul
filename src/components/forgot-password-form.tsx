@@ -43,7 +43,7 @@ export const ForgotPasswordForm = ({
       redirectTo:
         process.env.NODE_ENV === "development"
           ? "http://localhost:3000/forgot-password"
-          : "https://saborio.jonathanfreire.com/forgot-password",
+          : "https://mantelazul.jonathanfreire.com/forgot-password",
       fetchOptions: {
         async onSuccess() {
           toast.success("Password reset email sent!", {

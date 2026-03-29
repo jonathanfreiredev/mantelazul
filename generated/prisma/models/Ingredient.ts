@@ -217,7 +217,7 @@ export type IngredientGroupByOutputType = {
   _max: IngredientMaxAggregateOutputType | null
 }
 
-type GetIngredientGroupByPayload<T extends IngredientGroupByArgs> = Prisma.PrismaPromise<
+export type GetIngredientGroupByPayload<T extends IngredientGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<IngredientGroupByOutputType, T['by']> &
       {

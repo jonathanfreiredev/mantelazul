@@ -67,7 +67,7 @@ export function SignupForm({
       fetchOptions: {
         onSuccess() {
           toast.success("Account created successfully!", {
-            description: "Welcome to Saborio.",
+            description: "Welcome to Mantel Azul.",
             position: "bottom-right",
           });
           form.reset();

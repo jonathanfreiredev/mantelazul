@@ -38,7 +38,7 @@ export function AuthorSection({ authorId }: AuthorSectionProps) {
                 {resAuthor.name}
               </span>
               <span className="text-sm text-gray-500">
-                Food Editor at Saborio
+                Food Editor at Mantel Azul
               </span>{" "}
             </>
           ) : (

@@ -206,7 +206,7 @@ export type StepGroupByOutputType = {
   _max: StepMaxAggregateOutputType | null
 }
 
-type GetStepGroupByPayload<T extends StepGroupByArgs> = Prisma.PrismaPromise<
+export type GetStepGroupByPayload<T extends StepGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<StepGroupByOutputType, T['by']> &
       {

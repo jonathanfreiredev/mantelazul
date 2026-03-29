@@ -7,7 +7,16 @@ import { categories } from "~/lib/categories-list";
 import { capitalize } from "~/lib/utils";
 
 export default async function Home() {
-  const [explore, mains, desserts, drinks, breakfast, everything] = categories;
+  const [
+    explore,
+    mains,
+    starters,
+    desserts,
+    drinks,
+    snacks,
+    breakfast,
+    everything,
+  ] = categories;
 
   return (
     <>

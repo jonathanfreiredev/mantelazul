@@ -10,7 +10,7 @@ import { Toaster } from "sonner";
 import { Footer } from "~/components/footer";
 
 export const metadata: Metadata = {
-  title: "Saborio",
+  title: "Mantel Azul",
   description:
     "Full-stack recipe app with Next.js, tRPC, Prisma, and Tailwind.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],

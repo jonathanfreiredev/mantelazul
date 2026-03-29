@@ -11,7 +11,7 @@ export function BackgroundCategory() {
       />
 
       <div className="absolute z-10 flex h-full items-center justify-center">
-        <h1 className="text-3xl font-bold">Welcome to Saborio!</h1>
+        <h1 className="text-3xl font-bold">Welcome to Mantel Azul!</h1>
       </div>
     </div>
   );

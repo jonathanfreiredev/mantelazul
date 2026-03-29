@@ -1,4 +1,10 @@
 -- CreateEnum
+CREATE TYPE "Difficulty" AS ENUM ('EASY', 'MEDIUM', 'HARD');
+
+-- CreateEnum
+CREATE TYPE "Category" AS ENUM ('MAIN_COURSE', 'DESSERT', 'DRINK', 'STARTER', 'SNACK', 'BREAKFAST');
+
+-- CreateEnum
 CREATE TYPE "Unit" AS ENUM ('GRAM', 'KILOGRAM', 'LITER', 'MILLILITER', 'CUP', 'TABLESPOON', 'TEASPOON', 'UNIT');
 
 -- CreateTable
@@ -75,10 +81,13 @@ CREATE TABLE "recipe" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
+    "published" BOOLEAN NOT NULL DEFAULT false,
     "slug" TEXT NOT NULL,
     "imageUrl" TEXT,
     "defaultServings" INTEGER NOT NULL,
     "likesCount" INTEGER NOT NULL DEFAULT 0,
+    "difficulty" "Difficulty" NOT NULL DEFAULT 'EASY',
+    "category" "Category" NOT NULL DEFAULT 'MAIN_COURSE',
     "preparationTime" INTEGER NOT NULL,
     "cookingTime" INTEGER NOT NULL,
     "restingTime" INTEGER NOT NULL,
@@ -97,8 +106,9 @@ CREATE TABLE "recipe" (
 CREATE TABLE "ingredient" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "quantity" TEXT NOT NULL,
+    "quantity" DECIMAL(10,3) NOT NULL,
     "unit" "Unit" NOT NULL,
+    "order" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "recipeId" TEXT NOT NULL,
@@ -214,10 +224,10 @@ ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "recipe" ADD CONSTRAINT "recipe_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ingredient" ADD CONSTRAINT "ingredient_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "recipe"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ingredient" ADD CONSTRAINT "ingredient_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "step" ADD CONSTRAINT "step_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "recipe"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "step" ADD CONSTRAINT "step_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "recipe_tag" ADD CONSTRAINT "recipe_tag_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -226,10 +236,10 @@ ALTER TABLE "recipe_tag" ADD CONSTRAINT "recipe_tag_recipeId_fkey" FOREIGN KEY (
 ALTER TABLE "recipe_tag" ADD CONSTRAINT "recipe_tag_tagId_fkey" FOREIGN KEY ("tagId") REFERENCES "tag"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "recipe_like" ADD CONSTRAINT "recipe_like_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "recipe_like" ADD CONSTRAINT "recipe_like_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "recipe_like" ADD CONSTRAINT "recipe_like_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "recipe"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "recipe_like" ADD CONSTRAINT "recipe_like_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "cookbook" ADD CONSTRAINT "cookbook_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;

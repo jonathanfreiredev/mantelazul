@@ -151,7 +151,7 @@ export type RecipeTagGroupByOutputType = {
   _max: RecipeTagMaxAggregateOutputType | null
 }
 
-type GetRecipeTagGroupByPayload<T extends RecipeTagGroupByArgs> = Prisma.PrismaPromise<
+export type GetRecipeTagGroupByPayload<T extends RecipeTagGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<RecipeTagGroupByOutputType, T['by']> &
       {

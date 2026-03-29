@@ -54,7 +54,7 @@ export const LoginForm = ({
       fetchOptions: {
         onSuccess() {
           toast.success("Logged in successfully!", {
-            description: "Welcome back to Saborio.",
+            description: "Welcome back to Mantel Azul.",
             position: "bottom-right",
           });
           form.reset();
