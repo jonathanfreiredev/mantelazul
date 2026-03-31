@@ -24,7 +24,10 @@ const mains = [
 ];
 
 export function CarouselMainCategory() {
-  console.log("Rendering CarouselMainCategory with mains");
+  console.log(
+    "Rendering CarouselMainCategory with mains",
+    process.env.NODE_ENV,
+  );
   return (
     <div className="relative h-full w-full">
       <Carousel className="h-full w-full">
