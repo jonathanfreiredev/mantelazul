@@ -10,7 +10,6 @@ export const auth = betterAuth({
       "localhost:5173",
       "mantelazul.com",
       "www.mantelazul.com",
-      "mantelazul.jonathanfreire.com",
       "*.vercel.app",
     ],
     protocol: process.env.NODE_ENV === "development" ? "http" : "https",
