@@ -2,6 +2,8 @@ name: Prisma Migrate on Push
 
 on:
   push:
+    paths:
+      - prisma/migrations/**
     branches:
       - main
 
