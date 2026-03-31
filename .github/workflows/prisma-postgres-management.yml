@@ -17,9 +17,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: "pnpm"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Set environment variables
         run: |
@@ -27,4 +31,4 @@ jobs:
           echo "NODE_ENV=production" >> $GITHUB_ENV
 
       - name: Apply Prisma migrations
-        run: npx prisma migrate deploy
+        run: pnpm prisma migrate deploy
