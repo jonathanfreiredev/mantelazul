@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { CreateRecipeForm } from "~/components/create-recipe-form";
+import { TabsRecipeForm } from "~/components/tabs-recipe-form";
 import { getSession } from "~/server/better-auth/server";
 
 export default async function NewRecipesPage() {
@@ -12,8 +13,8 @@ export default async function NewRecipesPage() {
   }
 
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+    <TabsRecipeForm formType="create" step="details" recipeSlug="">
       <CreateRecipeForm />
-    </div>
+    </TabsRecipeForm>
   );
 }

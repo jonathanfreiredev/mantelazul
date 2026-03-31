@@ -121,7 +121,7 @@ export const RecipeStepsForm = ({
 
     await updateStepsMutation.mutateAsync(input);
 
-    router.push(`/recipes`);
+    router.push(`/recipes/${recipe.slug}/update/tags`);
   }
 
   return (

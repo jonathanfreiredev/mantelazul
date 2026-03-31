@@ -42,6 +42,7 @@ export type OrderBy = "createdAt" | "likesCount";
 
 interface RecipesProps {
   authorId?: string;
+  cookbookId?: string;
   categoryPage?: Category;
   isEditable: boolean;
 }
@@ -55,7 +56,12 @@ enum CategoryEnum {
   BREAKFAST = "Breakfast",
 }
 
-export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
+export function Recipes({
+  authorId,
+  cookbookId,
+  categoryPage,
+  isEditable,
+}: RecipesProps) {
   // State for filters and pagination
   const [openedDrawer, setOpenedDrawer] = useState(false);
   const [orderBy, setOrderBy] = useState<OrderBy>("createdAt");
@@ -85,6 +91,7 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
     isError,
   } = useGetAllRecipes({
     authorId,
+    cookbookId,
     orderBy,
     category: category || undefined,
     difficulty: difficulty || undefined,
@@ -118,8 +125,8 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
   };
 
   return (
-    <div className="flex w-full flex-col items-center px-5 sm:px-10">
-      <div className="ms-center mt-7 flex w-full flex-col items-center gap-4 sm:flex-row">
+    <div className="flex w-full flex-col items-center">
+      <div className="mt-7 flex w-full flex-col items-center gap-4 sm:flex-row">
         <Field className="max-w-sm">
           <InputGroup>
             <InputGroupInput
@@ -223,7 +230,8 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
                 </FieldSet>
 
                 {(pathname.includes("everything") ||
-                  pathname.includes("recipes")) && (
+                  pathname.includes("recipes") ||
+                  pathname.includes("cookbooks")) && (
                   <FieldSet className="flex flex-col gap-2">
                     <FieldLegend variant="label">Category</FieldLegend>
                     <RadioGroup
@@ -307,13 +315,17 @@ export function Recipes({ authorId, categoryPage, isEditable }: RecipesProps) {
       </div>
 
       <div className="text-muted-foreground my-4 self-start text-sm">
-        {pagination?.total || "Loading"}{" "}
+        {pagination?.total || ""}{" "}
         {pagination ? (pagination.total === 1 ? "recipe" : "recipes") : " "}
       </div>
 
       <div className="mb-10 grid w-full max-w-400 grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
         {recipes.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} isEditable={isEditable} />
+          <RecipeCard
+            key={recipe.id}
+            recipe={recipe}
+            isEditable={isEditable && recipe.authorId === authorId}
+          />
         ))}
       </div>
 

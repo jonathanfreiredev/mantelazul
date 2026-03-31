@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Recipes } from "~/components/recipes";
-import { Button } from "~/components/ui/button";
+import { Cookbooks } from "~/components/cookbooks/cookbooks";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { getSession } from "~/server/better-auth/server";
 import { api, HydrateClient } from "~/trpc/server";
 
-export default async function RecipesPage() {
+export default async function CookbooksPage() {
   const session = await getSession();
 
   const isLoggedIn = !!session?.session;
@@ -15,32 +14,23 @@ export default async function RecipesPage() {
     redirect("/");
   }
 
-  void api.recipes.getAll.prefetch({
-    authorId: session.user.id,
-    orderBy: "createdAt",
-    skip: 0,
-  });
+  void api.cookbooks.getAll.prefetch();
 
   return (
     <HydrateClient>
       <div className="flex h-full w-full flex-col items-center py-6 md:py-10">
-        <Tabs value="recipes">
+        <Tabs value="cookbooks">
           <TabsList className="py-4" variant="line">
-            <TabsTrigger value="recipes" asChild className="p-3 text-xl">
+            <TabsTrigger value="recipes" asChild>
               <Link href="/recipes">My recipes</Link>
             </TabsTrigger>
-            <TabsTrigger value="cookbooks" asChild>
+            <TabsTrigger value="cookbooks" asChild className="p-3 text-xl">
               <Link href="/cookbooks">My cookbooks</Link>
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <Button variant="default" className="mt-6">
-          <Link href="/recipes/new">Create new recipe</Link>
-        </Button>
-        <div className="flex w-full px-5 sm:px-10">
-          <Recipes authorId={session.user.id} isEditable />
-        </div>
+        <Cookbooks />
       </div>
     </HydrateClient>
   );

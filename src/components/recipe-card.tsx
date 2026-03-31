@@ -9,14 +9,18 @@ import { toast } from "sonner";
 import { authClient } from "~/server/better-auth/client";
 import { api } from "~/trpc/react";
 import { RecipeLikeButton } from "./recipe-like-button";
+import { RecipePublishButton } from "./recipe-publish-button";
 import { Button } from "./ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +28,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { RecipePublishButton } from "./recipe-publish-button";
 import { Separator } from "./ui/separator";
 
 interface RecipeCardProps {
@@ -33,6 +36,7 @@ interface RecipeCardProps {
 }
 
 export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
+  const [openDelete, setOpenDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteRecipe = api.recipes.delete.useMutation();
   const router = useRouter();
@@ -82,8 +86,8 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={handleDelete}
                   disabled={isDeleting}
+                  onClick={() => setOpenDelete(true)}
                 >
                   Delete
                 </DropdownMenuItem>
@@ -92,6 +96,7 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
           </DropdownMenu>
         )}
       </div>
+
       <CardHeader>
         <Link href={`/recipes/${recipe.slug}`}>
           <CardTitle className="flex items-center justify-between gap-2">
@@ -109,6 +114,26 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
           </CardDescription>
         </Link>
       </CardHeader>
+
+      <Dialog open={openDelete} onOpenChange={setOpenDelete}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription>This action cannot be undone.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="justify-end">
+            <DialogClose asChild>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                Delete
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {isLoggedIn && data.user.id === recipe.authorId && (
         <div className="flex flex-col px-4">

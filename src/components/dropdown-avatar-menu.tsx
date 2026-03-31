@@ -42,8 +42,13 @@ export const DropdownAvatarMenu = ({ user }: DropdownAvatarMenuProps) => {
         <DropdownMenuItem asChild>
           <Link href="/profile">Profile</Link>
         </DropdownMenuItem>
+
         <DropdownMenuItem asChild>
           <Link href="/recipes">My Recipes</Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href="/cookbooks">My Cookbooks</Link>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

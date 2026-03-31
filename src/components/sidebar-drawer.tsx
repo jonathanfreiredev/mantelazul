@@ -107,6 +107,24 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
               className="cursor-pointer"
               asChild
             >
+              <Link href={isLoggedIn ? "/cookbooks" : "/login"}>
+                <ItemMedia>
+                  <NotepadTextIcon className="size-5" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>My cookbooks</ItemTitle>
+                </ItemContent>
+              </Link>
+            </Item>
+          </DrawerClose>
+
+          <DrawerClose asChild>
+            <Item
+              variant="default"
+              size="sm"
+              className="cursor-pointer"
+              asChild
+            >
               <Link href={isLoggedIn ? "/recipes/new" : "/login"}>
                 <ItemMedia>
                   <PlusIcon className="size-5" />

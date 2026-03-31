@@ -16,7 +16,7 @@ export async function CategoriesNavbar({
   const isLoggedIn = !!session?.session;
 
   return (
-    <div className="h-12 border-b bg-zinc-100 sm:h-20 dark:bg-zinc-300">
+    <div className="h-12 border-b bg-slate-200 sm:h-20 dark:bg-slate-400">
       <div className="no-scrollbar flex h-full items-center overflow-x-auto px-2">
         {categories.map((cat) => {
           const isActive = currentCategory === cat.name;

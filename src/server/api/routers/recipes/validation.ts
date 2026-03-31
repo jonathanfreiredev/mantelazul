@@ -57,3 +57,7 @@ export const recipeStepsSchema = z.object({
     )
     .min(1, "At least one step is required"),
 });
+
+export const recipeTagsSchema = z.object({
+  tags: z.array(z.string().min(1, "Tag cannot be empty").trim()),
+});

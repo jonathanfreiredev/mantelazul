@@ -1,5 +1,5 @@
-import { BreadcrumbRecipeForm } from "~/components/breadcrumb-recipe-form";
 import { RecipeIngredientsForm } from "~/components/recipe-ingredients-form";
+import { TabsRecipeForm } from "~/components/tabs-recipe-form";
 import { api } from "~/trpc/server";
 
 export default async function UpdateRecipeIngredientsPage({
@@ -14,9 +14,12 @@ export default async function UpdateRecipeIngredientsPage({
   });
 
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-4 p-6 md:p-10">
-      <BreadcrumbRecipeForm step="ingredients" recipeSlug={recipeSlug} />
+    <TabsRecipeForm
+      formType="update"
+      step="ingredients"
+      recipeSlug={recipeSlug}
+    >
       <RecipeIngredientsForm recipe={recipe} />
-    </div>
+    </TabsRecipeForm>
   );
 }

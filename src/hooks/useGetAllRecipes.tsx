@@ -6,6 +6,7 @@ import type { RecipeDto } from "~/types/recipe";
 
 interface UseGetAllRecipesParams {
   authorId?: string;
+  cookbookId?: string;
   orderBy?: OrderBy;
   category?: Category;
   difficulty?: Difficulty;
@@ -15,6 +16,7 @@ interface UseGetAllRecipesParams {
 
 export function useGetAllRecipes({
   authorId,
+  cookbookId,
   orderBy,
   category,
   difficulty,
@@ -26,6 +28,7 @@ export function useGetAllRecipes({
 
   const { data: resRecipes, ...resQuery } = api.recipes.getAll.useQuery({
     authorId,
+    cookbookId,
     orderBy,
     category: category || undefined,
     difficulty: difficulty || undefined,

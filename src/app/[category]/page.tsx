@@ -32,10 +32,14 @@ export default async function CategoryPage({ params }: MainsPageProps) {
       <CategoriesNavbar currentCategory={category} />
       <CategoryHero currentCategory={category} />
 
-      <Recipes
-        categoryPage={categoryMapping[category as keyof typeof categoryMapping]}
-        isEditable={false}
-      />
+      <div className="flex w-full px-5 sm:px-10">
+        <Recipes
+          categoryPage={
+            categoryMapping[category as keyof typeof categoryMapping]
+          }
+          isEditable={false}
+        />
+      </div>
     </>
   );
 }

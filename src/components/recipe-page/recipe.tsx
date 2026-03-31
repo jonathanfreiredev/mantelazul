@@ -11,6 +11,8 @@ import { StepsSection } from "./steps-section";
 import { NutritionalInfoSection } from "./nutritional-info-section";
 import { authClient } from "~/server/better-auth/client";
 import { EditRecipeButton } from "../edit-recipe-button";
+import { TagsSection } from "./tags-section";
+import { SaveRecipeButton } from "../save-recipe-button";
 
 interface RecipeProps {
   slug: string;
@@ -60,6 +62,14 @@ export function Recipe({ slug }: RecipeProps) {
             positionIcon="top"
           />
 
+          <SaveRecipeButton
+            recipeId={recipe.id}
+            className="text-md text-gray-800"
+            size="xl"
+            positionIcon="top"
+            isLoggedIn={isLoggedIn}
+          />
+
           {isLoggedIn && data.user.id === recipe.authorId && (
             <EditRecipeButton
               recipeSlug={recipe.slug}
@@ -105,6 +115,14 @@ export function Recipe({ slug }: RecipeProps) {
         <Separator className="my-6 w-full" />
 
         <StepsSection steps={recipe.steps} />
+
+        {recipe.tags.length > 0 && (
+          <>
+            <Separator className="my-6 w-full" />
+
+            <TagsSection tags={recipe.tags.map((recipeTag) => recipeTag.tag)} />
+          </>
+        )}
       </div>
     </div>
   );

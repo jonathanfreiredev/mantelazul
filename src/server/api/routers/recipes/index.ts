@@ -238,6 +238,54 @@ export const recipesRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  updateTags: protectedProcedure
+    .input(
+      z.object({
+        recipeId: z.string(),
+        tags: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { recipeId, tags } = input;
+
+      await ctx.db.recipeTag.deleteMany({
+        where: { recipeId },
+      });
+
+      const uniqueTags = Array.from(new Set(tags));
+
+      for (const tagName of uniqueTags) {
+        const slug = slugify(tagName, {
+          replacement: "-",
+          lower: true,
+          strict: true,
+          trim: true,
+        });
+
+        let tag = await ctx.db.tag.findUnique({
+          where: { slug: slug },
+        });
+
+        if (!tag) {
+          tag = await ctx.db.tag.create({
+            data: {
+              name: tagName,
+              slug,
+            },
+          });
+        }
+
+        await ctx.db.recipeTag.create({
+          data: {
+            recipeId,
+            tagId: tag.id,
+          },
+        });
+      }
+
+      return { success: true };
+    }),
+
   tooglePublicationStatus: protectedProcedure
     .input(z.object({ recipeId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -309,6 +357,7 @@ export const recipesRouter = createTRPCRouter({
     .input(
       z.object({
         authorId: z.string().optional(),
+        cookbookId: z.string().optional(),
         orderBy: z.enum(["createdAt", "likesCount"]).optional(),
         category: z.enum(Category).optional(),
         difficulty: z.enum(Difficulty).optional(),
@@ -319,6 +368,7 @@ export const recipesRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const {
         authorId,
+        cookbookId,
         orderBy = "createdAt",
         category,
         difficulty,
@@ -333,13 +383,30 @@ export const recipesRouter = createTRPCRouter({
       if (authorId) {
         whereClause.authorId = authorId;
       } else {
-        whereClause.published = true;
+        if (!cookbookId) {
+          whereClause.published = true;
+        }
+      }
+
+      if (cookbookId) {
+        whereClause.cookbooks = {
+          some: {
+            cookbookId,
+          },
+        };
       }
 
       if (search) {
         whereClause.OR = [
           { title: { contains: search, mode: "insensitive" } },
           { description: { contains: search, mode: "insensitive" } },
+          {
+            tags: {
+              some: {
+                tag: { name: { contains: search, mode: "insensitive" } },
+              },
+            },
+          },
         ];
       } else {
         if (category) {
