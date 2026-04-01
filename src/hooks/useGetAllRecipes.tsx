@@ -1,6 +1,6 @@
 import type { Category, Difficulty } from "generated/prisma/enums";
 import { useEffect, useState } from "react";
-import type { OrderBy } from "~/components/recipes";
+import type { OrderBy } from "~/components/recipes/recipes";
 import { api } from "~/trpc/react";
 import type { RecipeDto } from "~/types/recipe";
 

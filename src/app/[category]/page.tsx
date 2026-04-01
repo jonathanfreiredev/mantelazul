@@ -1,7 +1,7 @@
 import { Category } from "generated/prisma/enums";
 import { CategoryHero } from "~/components/category-hero";
 import { CategoriesNavbar } from "~/components/home/categories-navbar";
-import { Recipes } from "~/components/recipes";
+import { Recipes } from "~/components/recipes/recipes";
 import { api } from "~/trpc/server";
 
 interface MainsPageProps {

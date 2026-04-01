@@ -5,22 +5,22 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
+} from "../ui/card";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldSet,
-} from "./ui/field";
-import { Input } from "./ui/input";
+} from "../ui/field";
+import { Input } from "../ui/input";
 
 const formSchema = z.object({
   email: z.email({ message: "Please enter a valid email address" }),

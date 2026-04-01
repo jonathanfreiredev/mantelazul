@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { LoginForm } from "~/components/login-form";
+import { LoginForm } from "~/components/auth/login-form";
 import { getSession } from "~/server/better-auth/server";
 
 export default async function LoginPage() {

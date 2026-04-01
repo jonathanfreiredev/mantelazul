@@ -1,8 +1,8 @@
 "use client";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
-import { Field, FieldLabel } from "./ui/field";
-import { Switch } from "./ui/switch";
+import { Field, FieldLabel } from "../ui/field";
+import { Switch } from "../ui/switch";
 
 interface RecipePublishButtonProps {
   recipeId: string;

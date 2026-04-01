@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 
 interface BreadcrumbRecipeFormProps {
   recipeSlug: string;

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { ProfileForm } from "~/components/profile-form";
+import { ProfileForm } from "~/components/auth/profile-form";
 import { getSession } from "~/server/better-auth/server";
 
 export default async function ProfilePage() {

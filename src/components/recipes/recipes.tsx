@@ -12,7 +12,7 @@ import { useState } from "react";
 import { breakpoints, useMediaQuery } from "~/hooks/use-media-query";
 import { useGetAllRecipes } from "~/hooks/useGetAllRecipes";
 import { RecipeCard } from "./recipe-card";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -20,7 +20,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "./ui/drawer";
+} from "../ui/drawer";
 import {
   Field,
   FieldContent,
@@ -28,14 +28,14 @@ import {
   FieldLegend,
   FieldSet,
   FieldTitle,
-} from "./ui/field";
+} from "../ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "./ui/input-group";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+} from "../ui/input-group";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { capitalize } from "~/lib/utils";
 
 export type OrderBy = "createdAt" | "likesCount";

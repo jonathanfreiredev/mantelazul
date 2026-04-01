@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
-import { ImageUpload } from "./image-uploader/image-upload";
+import { ImageUpload } from "../image-uploader/image-upload";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
+} from "../ui/dialog";
+import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
 import { TrashIcon } from "lucide-react";
 
 interface RecipeStepFormProps {

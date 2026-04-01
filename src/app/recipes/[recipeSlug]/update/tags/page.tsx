@@ -1,5 +1,5 @@
-import { RecipeTagsForm } from "~/components/recipe-tags-form";
-import { TabsRecipeForm } from "~/components/tabs-recipe-form";
+import { RecipeTagsForm } from "~/components/recipes/recipe-tags-form";
+import { TabsRecipeForm } from "~/components/recipes/tabs-recipe-form";
 import { api, HydrateClient } from "~/trpc/server";
 
 export default async function UpdateRecipeTagsPage({

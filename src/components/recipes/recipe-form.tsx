@@ -5,8 +5,8 @@ import Image from "next/image";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { capitalize } from "~/lib/utils";
-import { ImageUpload } from "./image-uploader/image-upload";
-import { Button } from "./ui/button";
+import { ImageUpload } from "../image-uploader/image-upload";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from "../ui/dialog";
 import {
   Field,
   FieldContent,
@@ -25,22 +25,22 @@ import {
   FieldLegend,
   FieldSeparator,
   FieldSet,
-} from "./ui/field";
-import { Input } from "./ui/input";
+} from "../ui/field";
+import { Input } from "../ui/input";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
-} from "./ui/input-group";
+} from "../ui/input-group";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Textarea } from "./ui/textarea";
+} from "../ui/select";
+import { Textarea } from "../ui/textarea";
 
 interface RecipeFormProps {
   control: any;

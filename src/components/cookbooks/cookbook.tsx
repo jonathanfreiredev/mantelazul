@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { api } from "~/trpc/react";
-import { Recipes } from "../recipes";
+import { Recipes } from "../recipes/recipes";
 import { Separator } from "../ui/separator";
 
 interface CookbookProps {

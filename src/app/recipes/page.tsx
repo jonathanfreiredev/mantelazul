@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Recipes } from "~/components/recipes";
+import { Recipes } from "~/components/recipes/recipes";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { getSession } from "~/server/better-auth/server";

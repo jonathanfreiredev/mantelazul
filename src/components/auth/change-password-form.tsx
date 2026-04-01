@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Field,
   FieldDescription,
@@ -13,8 +13,8 @@ import {
   FieldGroup,
   FieldLabel,
   FieldSet,
-} from "./ui/field";
-import { Input } from "./ui/input";
+} from "../ui/field";
+import { Input } from "../ui/input";
 
 const formSchema = z.object({
   currentPassword: z

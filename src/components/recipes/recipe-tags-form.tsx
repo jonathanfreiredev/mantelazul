@@ -8,14 +8,14 @@ import { cn } from "~/lib/utils";
 import { recipeTagsSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/react";
 import type { RecipeDto } from "~/types/recipe";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
+} from "../ui/card";
 import {
   Combobox,
   ComboboxChip,
@@ -27,14 +27,14 @@ import {
   ComboboxList,
   ComboboxValue,
   useComboboxAnchor,
-} from "./ui/combobox";
+} from "../ui/combobox";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldSet,
-} from "./ui/field";
+} from "../ui/field";
 import { PlusIcon } from "lucide-react";
 
 interface RecipeTagsFormProps {

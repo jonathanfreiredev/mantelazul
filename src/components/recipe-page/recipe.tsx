@@ -1,8 +1,8 @@
 "use client";
 import { api } from "~/trpc/react";
 import Image from "next/image";
-import { RecipeLikeButton } from "../recipe-like-button";
-import { ShareButton } from "../share-button";
+import { RecipeLikeButton } from "../recipes/recipe-like-button";
+import { ShareButton } from "../recipes/share-button";
 import { Separator } from "../ui/separator";
 import { AuthorSection } from "./author-section";
 import { TimesSection } from "./times-section";
@@ -10,9 +10,9 @@ import { IngredientsSection } from "./ingredients-section";
 import { StepsSection } from "./steps-section";
 import { NutritionalInfoSection } from "./nutritional-info-section";
 import { authClient } from "~/server/better-auth/client";
-import { EditRecipeButton } from "../edit-recipe-button";
+import { EditRecipeButton } from "../recipes/edit-recipe-button";
 import { TagsSection } from "./tags-section";
-import { SaveRecipeButton } from "../save-recipe-button";
+import { SaveRecipeButton } from "../recipes/save-recipe-button";
 
 interface RecipeProps {
   slug: string;

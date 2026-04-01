@@ -376,7 +376,7 @@ export const recipesRouter = createTRPCRouter({
         skip,
       } = input;
 
-      const take = 3;
+      const take = 15;
 
       const whereClause: Prisma.RecipeWhereInput = {};
 

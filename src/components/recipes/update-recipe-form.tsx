@@ -2,59 +2,66 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { cn } from "~/lib/utils";
 import { recipeSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/react";
+import type { RecipeDto } from "~/types/recipe";
 import { RecipeForm } from "./recipe-form";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Field } from "./ui/field";
-import { Category, Difficulty } from "generated/prisma/enums";
-import { toast } from "sonner";
+} from "../ui/card";
+import { Field } from "../ui/field";
 
-export const CreateRecipeForm = ({
+interface UpdateRecipeFormProps {
+  recipe: RecipeDto;
+}
+
+export const UpdateRecipeForm = ({
+  recipe,
   className,
   ...props
-}: React.ComponentProps<"div">) => {
+}: React.ComponentProps<"div"> & UpdateRecipeFormProps) => {
   const router = useRouter();
 
-  const createRecipeMutation = api.recipes.create.useMutation();
+  const updateRecipeMutation = api.recipes.update.useMutation();
 
   const form = useForm<z.infer<typeof recipeSchema>>({
     resolver: zodResolver(recipeSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      category: Category.MAIN_COURSE,
-      difficulty: Difficulty.EASY,
-      image: null,
-      defaultServings: 1,
-      preparationTime: 0,
-      cookingTime: 0,
-      restingTime: 0,
-      calories: 0,
-      carbohydrates: 0,
-      protein: 0,
-      fat: 0,
-      tags: [],
+      title: recipe.title,
+      description: recipe.description,
+      category: recipe.category,
+      difficulty: recipe.difficulty,
+      image: recipe.imageUrl
+        ? { file: new File([], "image.jpg"), preview: recipe.imageUrl }
+        : null,
+      defaultServings: recipe.defaultServings,
+      preparationTime: recipe.preparationTime,
+      cookingTime: recipe.cookingTime,
+      restingTime: recipe.restingTime,
+      calories: recipe.calories,
+      carbohydrates: recipe.carbohydrates,
+      protein: recipe.protein,
+      fat: recipe.fat,
+      tags: recipe.tags.map((recipeTag) => recipeTag.tag.name),
     },
   });
 
   async function onSubmit(data: z.infer<typeof recipeSchema>) {
     const { image, ...restData } = data;
 
-    let imageUrl: string | null = null;
+    let imageUrl: string | null = recipe.imageUrl;
 
-    if (data.image && data.image.preview.startsWith("blob:")) {
+    if (image && image.preview.startsWith("blob:")) {
       const formData = new FormData();
-      formData.append("file", data.image.file);
+      formData.append("file", image.file);
 
       const response = await fetch("/api/images/upload", {
         method: "POST",
@@ -69,25 +76,29 @@ export const CreateRecipeForm = ({
       const resImage: { url: string } = await response.json();
 
       imageUrl = resImage.url;
+    } else if (image === null) {
+      imageUrl = null;
     }
 
-    const recipe = await createRecipeMutation.mutateAsync(
+    const updatedRecipe = await updateRecipeMutation.mutateAsync(
       {
-        ...restData,
-        imageUrl,
+        id: recipe.id,
+        recipe: {
+          ...restData,
+          imageUrl,
+        },
       },
       {
         onError: (error) => {
           toast.error("Failed to create recipe", {
-            description: error.message,
             position: "bottom-right",
           });
         },
       },
     );
 
-    if (recipe) {
-      router.push(`/recipes/${recipe.slug}/update/ingredients`);
+    if (updatedRecipe) {
+      router.push(`/recipes/${updatedRecipe.slug}/update/ingredients`);
     }
   }
 
@@ -98,9 +109,9 @@ export const CreateRecipeForm = ({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">New Recipe</CardTitle>
+          <CardTitle className="text-xl">Update Recipe</CardTitle>
           <CardDescription>
-            Fill out the form below to create a new recipe.
+            Fill out the form below to update your recipe details.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -113,7 +124,7 @@ export const CreateRecipeForm = ({
                 form="form-create-recipe"
                 disabled={form.formState.isSubmitting}
               >
-                Create Recipe
+                Update Recipe
               </Button>
             </Field>
           </form>

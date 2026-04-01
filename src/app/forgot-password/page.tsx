@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { ForgotPasswordForm } from "~/components/forgot-password-form";
-import { ResetPasswordForm } from "~/components/reset-password-form";
+import { ForgotPasswordForm } from "~/components/auth/forgot-password-form";
+import { ResetPasswordForm } from "~/components/auth/reset-password-form";
 import { getSession } from "~/server/better-auth/server";
 
 interface ForgotPasswordPageProps {

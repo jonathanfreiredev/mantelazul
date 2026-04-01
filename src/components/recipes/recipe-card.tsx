@@ -10,8 +10,8 @@ import { authClient } from "~/server/better-auth/client";
 import { api } from "~/trpc/react";
 import { RecipeLikeButton } from "./recipe-like-button";
 import { RecipePublishButton } from "./recipe-publish-button";
-import { Button } from "./ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "../ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import {
   Dialog,
   DialogClose,
@@ -20,15 +20,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
+} from "../ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Separator } from "./ui/separator";
+} from "../ui/dropdown-menu";
+import { Separator } from "../ui/separator";
 
 interface RecipeCardProps {
   recipe: Recipe;

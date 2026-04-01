@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
-import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemGroup,
   ItemTitle,
-} from "./ui/item";
+} from "../ui/item";
 
 interface SaveRecipeButtonProps {
   recipeId: string;

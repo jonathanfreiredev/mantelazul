@@ -1,24 +1,23 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Unit } from "generated/prisma/enums";
 import { XIcon } from "lucide-react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { breakpoints, useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
-import { recipeIngredientsSchema } from "~/server/api/routers/recipes/validation";
+import { recipeStepsSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/react";
 import type { RecipeDto } from "~/types/recipe";
-import { RecipeIngredientForm } from "./recipe-ingredient-form";
-import { Button } from "./ui/button";
+import { RecipeStepForm } from "./recipe-step-form";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
+} from "../ui/card";
 import {
   Drawer,
   DrawerClose,
@@ -28,58 +27,101 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "./ui/drawer";
-import { Field, FieldGroup, FieldSet } from "./ui/field";
-import { SortableList } from "./ui/sortable-list";
+} from "../ui/drawer";
+import { Field, FieldGroup, FieldSet } from "../ui/field";
+import { SortableList } from "../ui/sortable-list";
+import Image from "next/image";
 
-interface RecipeIngredientsFormProps {
+interface RecipeStepsFormProps {
   recipe: RecipeDto;
 }
 
-export const RecipeIngredientsForm = ({
+export const RecipeStepsForm = ({
   recipe,
   className,
   ...props
-}: React.ComponentProps<"div"> & RecipeIngredientsFormProps) => {
+}: React.ComponentProps<"div"> & RecipeStepsFormProps) => {
   const isDesktop = useMediaQuery(breakpoints.md);
   const router = useRouter();
 
-  const updateIngredientsMutation = api.recipes.updateIngredients.useMutation();
+  const updateStepsMutation = api.recipes.updateSteps.useMutation();
 
-  const form = useForm<z.infer<typeof recipeIngredientsSchema>>({
-    resolver: zodResolver(recipeIngredientsSchema),
+  const form = useForm<z.infer<typeof recipeStepsSchema>>({
+    resolver: zodResolver(recipeStepsSchema),
     defaultValues: {
-      ingredients: recipe.ingredients.map((ingredient) => ({
-        name: ingredient.name,
-        quantity: ingredient.quantity.toString(),
-        unit: ingredient.unit,
-        order: ingredient.order,
+      steps: recipe.steps.map((step) => ({
+        id: step.id,
+        description: step.description,
+        imageUrl: step.imageUrl,
+        order: step.order,
+        image: step.imageUrl
+          ? { file: new File([], "image.jpg"), preview: step.imageUrl }
+          : null,
       })),
     },
   });
 
   const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
-    name: "ingredients",
+    name: "steps",
   });
 
-  const watchIngredients = form.watch("ingredients");
+  const watchSteps = form.watch("steps");
   const controlledFields = fields.map((field, index) => {
     return {
       ...field,
-      ...watchIngredients[index],
+      ...watchSteps[index],
     };
   });
 
-  async function onSubmit(data: z.infer<typeof recipeIngredientsSchema>) {
+  async function onSubmit(data: z.infer<typeof recipeStepsSchema>) {
+    const steps: {
+      description: string;
+      order: number;
+      imageUrl: string | null;
+    }[] = [];
+
+    for (const step of data.steps) {
+      let imageUrl: string | null = step.imageUrl;
+
+      if (step.image && step.image.preview.startsWith("blob:")) {
+        const formData = new FormData();
+        formData.append("file", step.image.file);
+
+        const response = await fetch("/api/images/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          console.error("Image upload failed");
+          return;
+        }
+
+        const resImage: { url: string } = await response.json();
+
+        imageUrl = resImage.url;
+      } else if (step.image === null) {
+        imageUrl = null;
+      }
+
+      steps.push({
+        description: step.description,
+        order: step.order,
+        imageUrl,
+      });
+    }
+
     const input = {
       recipeId: recipe.id,
-      ingredients: data.ingredients,
+      steps,
     };
 
-    await updateIngredientsMutation.mutateAsync(input);
+    console.log("Submitting steps:", input);
 
-    router.push(`/recipes/${recipe.slug}/update/steps`);
+    await updateStepsMutation.mutateAsync(input);
+
+    router.push(`/recipes/${recipe.slug}/update/tags`);
   }
 
   return (
@@ -89,15 +131,15 @@ export const RecipeIngredientsForm = ({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Ingredients</CardTitle>
+          <CardTitle className="text-xl">Steps</CardTitle>
           <CardDescription>
-            Add the ingredients for your recipe. You can specify the quantity
-            and unit for each ingredient to ensure your recipe is accurate and
-            easy to follow.
+            Update the steps for your recipe. You can add, edit, reorder, or
+            remove steps as needed to ensure your recipe is clear and easy to
+            follow.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form id="form-ingredients" onSubmit={form.handleSubmit(onSubmit)}>
+          <form id="form-steps" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldSet className="mb-5 w-full">
               <FieldGroup className="w-full">
                 <SortableList
@@ -117,21 +159,30 @@ export const RecipeIngredientsForm = ({
                     >
                       <Drawer direction={isDesktop ? "right" : "bottom"}>
                         <DrawerTrigger className="flex w-full flex-col items-start gap-2">
-                          <p>{field.name}</p>
-                          <div className="flex flex-row items-center gap-1 text-gray-700">
-                            <p>{field.quantity}</p>
-                            <p>{field.unit.toLowerCase()}</p>
+                          <div className="flex items-center gap-4">
+                            {field.image && (
+                              <div className="relative flex h-15 w-20 items-center justify-center rounded-md">
+                                <Image
+                                  src={field.image.preview}
+                                  alt={`Step ${index + 1} image`}
+                                  fill
+                                  className="rounded-lg object-cover"
+                                />
+                              </div>
+                            )}
+                            <p>{field.description}</p>
                           </div>
                         </DrawerTrigger>
                         <DrawerContent>
                           <DrawerHeader>
-                            <DrawerTitle>Edit Ingredient</DrawerTitle>
+                            <DrawerTitle>Edit Step</DrawerTitle>
                             <DrawerDescription>
-                              Update the details of your ingredient below.
+                              Make changes to your step here. Click save when
+                              you're done.
                             </DrawerDescription>
                           </DrawerHeader>
 
-                          <RecipeIngredientForm
+                          <RecipeStepForm
                             index={index}
                             fieldId={field.id}
                             control={form.control}
@@ -151,7 +202,7 @@ export const RecipeIngredientsForm = ({
                           variant="outline"
                           size="icon-sm"
                           onClick={() => remove(index)}
-                          aria-label={`Remove ingredient ${field.name}`}
+                          aria-label={`Remove ingredient ${field.description}`}
                         >
                           <XIcon />
                         </Button>
@@ -166,14 +217,14 @@ export const RecipeIngredientsForm = ({
                   size="sm"
                   onClick={() =>
                     append({
-                      name: "New ingredient",
-                      quantity: "0",
-                      unit: Unit.GRAM,
+                      description: "New Step",
+                      imageUrl: null,
                       order: fields.length,
+                      image: null,
                     })
                   }
                 >
-                  Add Ingredient
+                  Add Step
                 </Button>
               </FieldGroup>
             </FieldSet>
@@ -181,10 +232,10 @@ export const RecipeIngredientsForm = ({
             <Field>
               <Button
                 type="submit"
-                form="form-ingredients"
+                form="form-steps"
                 disabled={form.formState.isSubmitting}
               >
-                Save Ingredients
+                Save Steps
               </Button>
             </Field>
           </form>

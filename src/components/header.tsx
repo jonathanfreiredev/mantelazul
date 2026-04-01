@@ -3,7 +3,7 @@ import { getSession } from "~/server/better-auth/server";
 import { DropdownAvatarMenu } from "./dropdown-avatar-menu";
 import { Logo } from "./logo";
 import { SidebarDrawer } from "./sidebar-drawer";
-import { SignInOrSignUpButton } from "./sign-in-or-sign-up-button";
+import { SignInOrSignUpButton } from "./auth/sign-in-or-sign-up-button";
 
 export async function Header() {
   const session = await getSession();
