@@ -1,5 +1,5 @@
-import { RecipeStepsForm } from "~/components/recipe-steps-form";
-import { TabsRecipeForm } from "~/components/tabs-recipe-form";
+import { RecipeStepsForm } from "~/components/recipes/recipe-steps-form";
+import { TabsRecipeForm } from "~/components/recipes/tabs-recipe-form";
 import { api } from "~/trpc/server";
 
 export default async function UpdateRecipeStepsPage({

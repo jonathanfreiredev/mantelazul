@@ -42,3 +42,11 @@ export const Unit = {
 } as const
 
 export type Unit = (typeof Unit)[keyof typeof Unit]
+
+
+export const MessageRole = {
+  USER: 'USER',
+  ASSISTANT: 'ASSISTANT'
+} as const
+
+export type MessageRole = (typeof MessageRole)[keyof typeof MessageRole]

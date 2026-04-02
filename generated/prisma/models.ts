@@ -8,7 +8,6 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/Post'
 export type * from './models/User'
 export type * from './models/Session'
 export type * from './models/Account'
@@ -21,4 +20,6 @@ export type * from './models/RecipeTag'
 export type * from './models/RecipeLike'
 export type * from './models/Cookbook'
 export type * from './models/CookbookRecipe'
+export type * from './models/Chat'
+export type * from './models/Message'
 export type * from './commonInputTypes'

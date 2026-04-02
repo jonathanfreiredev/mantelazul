@@ -14,18 +14,6 @@ datasource db {
   provider = "postgresql"
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  createdBy   User   @relation(fields: [createdById], references: [id])
-  createdById String
-
-  @@index([name])
-}
-
 model User {
   id            String       @id
   name          String //@db.Text
@@ -36,10 +24,10 @@ model User {
   updatedAt     DateTime     @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
-  posts         Post[]
   recipes       Recipe[]
   recipeLikes   RecipeLike[]
   cookbooks     Cookbook[]
+  chat          Chat[]
 
   @@unique([email])
   @@map("user")
@@ -250,4 +238,36 @@ model CookbookRecipe {
 
   @@id([cookbookId, recipeId])
   @@map("cookbook_recipe")
+}
+
+// Models for AI Chat
+model Chat {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@map("chat")
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  role      MessageRole
+  content   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  chatId String
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@map("message")
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
 }

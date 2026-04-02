@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata, type Viewport } from "next";
-import { Lora } from "next/font/google";
+import { Instrument_Sans } from "next/font/google";
 
 import { Header } from "~/components/header";
 import { ThemeProvider } from "~/components/providers/theme-provider";
@@ -22,7 +22,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-const fontNext = Lora({
+const fontNext = Instrument_Sans({
   subsets: ["latin"],
   variable: "--font-next",
 });

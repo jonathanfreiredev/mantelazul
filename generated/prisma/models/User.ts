@@ -200,10 +200,10 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
-  posts?: Prisma.PostListRelationFilter
   recipes?: Prisma.RecipeListRelationFilter
   recipeLikes?: Prisma.RecipeLikeListRelationFilter
   cookbooks?: Prisma.CookbookListRelationFilter
+  chat?: Prisma.ChatListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -216,10 +216,10 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
-  posts?: Prisma.PostOrderByRelationAggregateInput
   recipes?: Prisma.RecipeOrderByRelationAggregateInput
   recipeLikes?: Prisma.RecipeLikeOrderByRelationAggregateInput
   cookbooks?: Prisma.CookbookOrderByRelationAggregateInput
+  chat?: Prisma.ChatOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -235,10 +235,10 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
-  posts?: Prisma.PostListRelationFilter
   recipes?: Prisma.RecipeListRelationFilter
   recipeLikes?: Prisma.RecipeLikeListRelationFilter
   cookbooks?: Prisma.CookbookListRelationFilter
+  chat?: Prisma.ChatListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -277,10 +277,10 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostCreateNestedManyWithoutCreatedByInput
   recipes?: Prisma.RecipeCreateNestedManyWithoutAuthorInput
   recipeLikes?: Prisma.RecipeLikeCreateNestedManyWithoutUserInput
   cookbooks?: Prisma.CookbookCreateNestedManyWithoutAuthorInput
+  chat?: Prisma.ChatCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -293,10 +293,10 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostUncheckedCreateNestedManyWithoutCreatedByInput
   recipes?: Prisma.RecipeUncheckedCreateNestedManyWithoutAuthorInput
   recipeLikes?: Prisma.RecipeLikeUncheckedCreateNestedManyWithoutUserInput
   cookbooks?: Prisma.CookbookUncheckedCreateNestedManyWithoutAuthorInput
+  chat?: Prisma.ChatUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -309,10 +309,10 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUpdateManyWithoutCreatedByNestedInput
   recipes?: Prisma.RecipeUpdateManyWithoutAuthorNestedInput
   recipeLikes?: Prisma.RecipeLikeUpdateManyWithoutUserNestedInput
   cookbooks?: Prisma.CookbookUpdateManyWithoutAuthorNestedInput
+  chat?: Prisma.ChatUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -325,10 +325,10 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUncheckedUpdateManyWithoutCreatedByNestedInput
   recipes?: Prisma.RecipeUncheckedUpdateManyWithoutAuthorNestedInput
   recipeLikes?: Prisma.RecipeLikeUncheckedUpdateManyWithoutUserNestedInput
   cookbooks?: Prisma.CookbookUncheckedUpdateManyWithoutAuthorNestedInput
+  chat?: Prisma.ChatUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -361,11 +361,6 @@ export type UserUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type UserScalarRelationFilter = {
-  is?: Prisma.UserWhereInput
-  isNot?: Prisma.UserWhereInput
-}
-
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -396,23 +391,18 @@ export type UserMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
+}
+
 export type UserNullableScalarRelationFilter = {
   is?: Prisma.UserWhereInput | null
   isNot?: Prisma.UserWhereInput | null
 }
 
-export type UserCreateNestedOneWithoutPostsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPostsInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutPostsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPostsInput
-  upsert?: Prisma.UserUpsertWithoutPostsInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPostsInput, Prisma.UserUpdateWithoutPostsInput>, Prisma.UserUncheckedUpdateWithoutPostsInput>
+export type StringFieldUpdateOperationsInput = {
+  set?: string
 }
 
 export type BoolFieldUpdateOperationsInput = {
@@ -421,6 +411,10 @@ export type BoolFieldUpdateOperationsInput = {
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
 }
 
 export type UserCreateNestedOneWithoutSessionsInput = {
@@ -495,80 +489,18 @@ export type UserUpdateOneRequiredWithoutCookbooksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCookbooksInput, Prisma.UserUpdateWithoutCookbooksInput>, Prisma.UserUncheckedUpdateWithoutCookbooksInput>
 }
 
-export type UserCreateWithoutPostsInput = {
-  id: string
-  name: string
-  email: string
-  emailVerified?: boolean
-  image?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  recipes?: Prisma.RecipeCreateNestedManyWithoutAuthorInput
-  recipeLikes?: Prisma.RecipeLikeCreateNestedManyWithoutUserInput
-  cookbooks?: Prisma.CookbookCreateNestedManyWithoutAuthorInput
+export type UserCreateNestedOneWithoutChatInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutChatInput, Prisma.UserUncheckedCreateWithoutChatInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutChatInput
+  connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUncheckedCreateWithoutPostsInput = {
-  id: string
-  name: string
-  email: string
-  emailVerified?: boolean
-  image?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  recipes?: Prisma.RecipeUncheckedCreateNestedManyWithoutAuthorInput
-  recipeLikes?: Prisma.RecipeLikeUncheckedCreateNestedManyWithoutUserInput
-  cookbooks?: Prisma.CookbookUncheckedCreateNestedManyWithoutAuthorInput
-}
-
-export type UserCreateOrConnectWithoutPostsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
-}
-
-export type UserUpsertWithoutPostsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutPostsInput, Prisma.UserUncheckedUpdateWithoutPostsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutPostsInput, Prisma.UserUncheckedCreateWithoutPostsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutPostsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutPostsInput, Prisma.UserUncheckedUpdateWithoutPostsInput>
-}
-
-export type UserUpdateWithoutPostsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  recipes?: Prisma.RecipeUpdateManyWithoutAuthorNestedInput
-  recipeLikes?: Prisma.RecipeLikeUpdateManyWithoutUserNestedInput
-  cookbooks?: Prisma.CookbookUpdateManyWithoutAuthorNestedInput
-}
-
-export type UserUncheckedUpdateWithoutPostsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  recipes?: Prisma.RecipeUncheckedUpdateManyWithoutAuthorNestedInput
-  recipeLikes?: Prisma.RecipeLikeUncheckedUpdateManyWithoutUserNestedInput
-  cookbooks?: Prisma.CookbookUncheckedUpdateManyWithoutAuthorNestedInput
+export type UserUpdateOneRequiredWithoutChatNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutChatInput, Prisma.UserUncheckedCreateWithoutChatInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutChatInput
+  upsert?: Prisma.UserUpsertWithoutChatInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutChatInput, Prisma.UserUpdateWithoutChatInput>, Prisma.UserUncheckedUpdateWithoutChatInput>
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -580,10 +512,10 @@ export type UserCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostCreateNestedManyWithoutCreatedByInput
   recipes?: Prisma.RecipeCreateNestedManyWithoutAuthorInput
   recipeLikes?: Prisma.RecipeLikeCreateNestedManyWithoutUserInput
   cookbooks?: Prisma.CookbookCreateNestedManyWithoutAuthorInput
+  chat?: Prisma.ChatCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -595,10 +527,10 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostUncheckedCreateNestedManyWithoutCreatedByInput
   recipes?: Prisma.RecipeUncheckedCreateNestedManyWithoutAuthorInput
   recipeLikes?: Prisma.RecipeLikeUncheckedCreateNestedManyWithoutUserInput
   cookbooks?: Prisma.CookbookUncheckedCreateNestedManyWithoutAuthorInput
+  chat?: Prisma.ChatUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -626,10 +558,10 @@ export type UserUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUpdateManyWithoutCreatedByNestedInput
   recipes?: Prisma.RecipeUpdateManyWithoutAuthorNestedInput
   recipeLikes?: Prisma.RecipeLikeUpdateManyWithoutUserNestedInput
   cookbooks?: Prisma.CookbookUpdateManyWithoutAuthorNestedInput
+  chat?: Prisma.ChatUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -641,10 +573,10 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUncheckedUpdateManyWithoutCreatedByNestedInput
   recipes?: Prisma.RecipeUncheckedUpdateManyWithoutAuthorNestedInput
   recipeLikes?: Prisma.RecipeLikeUncheckedUpdateManyWithoutUserNestedInput
   cookbooks?: Prisma.CookbookUncheckedUpdateManyWithoutAuthorNestedInput
+  chat?: Prisma.ChatUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -656,10 +588,10 @@ export type UserCreateWithoutAccountsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostCreateNestedManyWithoutCreatedByInput
   recipes?: Prisma.RecipeCreateNestedManyWithoutAuthorInput
   recipeLikes?: Prisma.RecipeLikeCreateNestedManyWithoutUserInput
   cookbooks?: Prisma.CookbookCreateNestedManyWithoutAuthorInput
+  chat?: Prisma.ChatCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -671,10 +603,10 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostUncheckedCreateNestedManyWithoutCreatedByInput
   recipes?: Prisma.RecipeUncheckedCreateNestedManyWithoutAuthorInput
   recipeLikes?: Prisma.RecipeLikeUncheckedCreateNestedManyWithoutUserInput
   cookbooks?: Prisma.CookbookUncheckedCreateNestedManyWithoutAuthorInput
+  chat?: Prisma.ChatUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -702,10 +634,10 @@ export type UserUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUpdateManyWithoutCreatedByNestedInput
   recipes?: Prisma.RecipeUpdateManyWithoutAuthorNestedInput
   recipeLikes?: Prisma.RecipeLikeUpdateManyWithoutUserNestedInput
   cookbooks?: Prisma.CookbookUpdateManyWithoutAuthorNestedInput
+  chat?: Prisma.ChatUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -717,10 +649,10 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUncheckedUpdateManyWithoutCreatedByNestedInput
   recipes?: Prisma.RecipeUncheckedUpdateManyWithoutAuthorNestedInput
   recipeLikes?: Prisma.RecipeLikeUncheckedUpdateManyWithoutUserNestedInput
   cookbooks?: Prisma.CookbookUncheckedUpdateManyWithoutAuthorNestedInput
+  chat?: Prisma.ChatUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecipesInput = {
@@ -733,9 +665,9 @@ export type UserCreateWithoutRecipesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostCreateNestedManyWithoutCreatedByInput
   recipeLikes?: Prisma.RecipeLikeCreateNestedManyWithoutUserInput
   cookbooks?: Prisma.CookbookCreateNestedManyWithoutAuthorInput
+  chat?: Prisma.ChatCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecipesInput = {
@@ -748,9 +680,9 @@ export type UserUncheckedCreateWithoutRecipesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostUncheckedCreateNestedManyWithoutCreatedByInput
   recipeLikes?: Prisma.RecipeLikeUncheckedCreateNestedManyWithoutUserInput
   cookbooks?: Prisma.CookbookUncheckedCreateNestedManyWithoutAuthorInput
+  chat?: Prisma.ChatUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecipesInput = {
@@ -779,9 +711,9 @@ export type UserUpdateWithoutRecipesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUpdateManyWithoutCreatedByNestedInput
   recipeLikes?: Prisma.RecipeLikeUpdateManyWithoutUserNestedInput
   cookbooks?: Prisma.CookbookUpdateManyWithoutAuthorNestedInput
+  chat?: Prisma.ChatUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecipesInput = {
@@ -794,9 +726,9 @@ export type UserUncheckedUpdateWithoutRecipesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUncheckedUpdateManyWithoutCreatedByNestedInput
   recipeLikes?: Prisma.RecipeLikeUncheckedUpdateManyWithoutUserNestedInput
   cookbooks?: Prisma.CookbookUncheckedUpdateManyWithoutAuthorNestedInput
+  chat?: Prisma.ChatUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRecipeLikesInput = {
@@ -809,9 +741,9 @@ export type UserCreateWithoutRecipeLikesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostCreateNestedManyWithoutCreatedByInput
   recipes?: Prisma.RecipeCreateNestedManyWithoutAuthorInput
   cookbooks?: Prisma.CookbookCreateNestedManyWithoutAuthorInput
+  chat?: Prisma.ChatCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRecipeLikesInput = {
@@ -824,9 +756,9 @@ export type UserUncheckedCreateWithoutRecipeLikesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostUncheckedCreateNestedManyWithoutCreatedByInput
   recipes?: Prisma.RecipeUncheckedCreateNestedManyWithoutAuthorInput
   cookbooks?: Prisma.CookbookUncheckedCreateNestedManyWithoutAuthorInput
+  chat?: Prisma.ChatUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRecipeLikesInput = {
@@ -855,9 +787,9 @@ export type UserUpdateWithoutRecipeLikesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUpdateManyWithoutCreatedByNestedInput
   recipes?: Prisma.RecipeUpdateManyWithoutAuthorNestedInput
   cookbooks?: Prisma.CookbookUpdateManyWithoutAuthorNestedInput
+  chat?: Prisma.ChatUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecipeLikesInput = {
@@ -870,9 +802,9 @@ export type UserUncheckedUpdateWithoutRecipeLikesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUncheckedUpdateManyWithoutCreatedByNestedInput
   recipes?: Prisma.RecipeUncheckedUpdateManyWithoutAuthorNestedInput
   cookbooks?: Prisma.CookbookUncheckedUpdateManyWithoutAuthorNestedInput
+  chat?: Prisma.ChatUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCookbooksInput = {
@@ -885,9 +817,9 @@ export type UserCreateWithoutCookbooksInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostCreateNestedManyWithoutCreatedByInput
   recipes?: Prisma.RecipeCreateNestedManyWithoutAuthorInput
   recipeLikes?: Prisma.RecipeLikeCreateNestedManyWithoutUserInput
+  chat?: Prisma.ChatCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCookbooksInput = {
@@ -900,9 +832,9 @@ export type UserUncheckedCreateWithoutCookbooksInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  posts?: Prisma.PostUncheckedCreateNestedManyWithoutCreatedByInput
   recipes?: Prisma.RecipeUncheckedCreateNestedManyWithoutAuthorInput
   recipeLikes?: Prisma.RecipeLikeUncheckedCreateNestedManyWithoutUserInput
+  chat?: Prisma.ChatUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCookbooksInput = {
@@ -931,9 +863,9 @@ export type UserUpdateWithoutCookbooksInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUpdateManyWithoutCreatedByNestedInput
   recipes?: Prisma.RecipeUpdateManyWithoutAuthorNestedInput
   recipeLikes?: Prisma.RecipeLikeUpdateManyWithoutUserNestedInput
+  chat?: Prisma.ChatUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCookbooksInput = {
@@ -946,9 +878,85 @@ export type UserUncheckedUpdateWithoutCookbooksInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  posts?: Prisma.PostUncheckedUpdateManyWithoutCreatedByNestedInput
   recipes?: Prisma.RecipeUncheckedUpdateManyWithoutAuthorNestedInput
   recipeLikes?: Prisma.RecipeLikeUncheckedUpdateManyWithoutUserNestedInput
+  chat?: Prisma.ChatUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutChatInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  recipes?: Prisma.RecipeCreateNestedManyWithoutAuthorInput
+  recipeLikes?: Prisma.RecipeLikeCreateNestedManyWithoutUserInput
+  cookbooks?: Prisma.CookbookCreateNestedManyWithoutAuthorInput
+}
+
+export type UserUncheckedCreateWithoutChatInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  recipes?: Prisma.RecipeUncheckedCreateNestedManyWithoutAuthorInput
+  recipeLikes?: Prisma.RecipeLikeUncheckedCreateNestedManyWithoutUserInput
+  cookbooks?: Prisma.CookbookUncheckedCreateNestedManyWithoutAuthorInput
+}
+
+export type UserCreateOrConnectWithoutChatInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutChatInput, Prisma.UserUncheckedCreateWithoutChatInput>
+}
+
+export type UserUpsertWithoutChatInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutChatInput, Prisma.UserUncheckedUpdateWithoutChatInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutChatInput, Prisma.UserUncheckedCreateWithoutChatInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutChatInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutChatInput, Prisma.UserUncheckedUpdateWithoutChatInput>
+}
+
+export type UserUpdateWithoutChatInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  recipes?: Prisma.RecipeUpdateManyWithoutAuthorNestedInput
+  recipeLikes?: Prisma.RecipeLikeUpdateManyWithoutUserNestedInput
+  cookbooks?: Prisma.CookbookUpdateManyWithoutAuthorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutChatInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  recipes?: Prisma.RecipeUncheckedUpdateManyWithoutAuthorNestedInput
+  recipeLikes?: Prisma.RecipeLikeUncheckedUpdateManyWithoutUserNestedInput
+  cookbooks?: Prisma.CookbookUncheckedUpdateManyWithoutAuthorNestedInput
 }
 
 
@@ -959,19 +967,19 @@ export type UserUncheckedUpdateWithoutCookbooksInput = {
 export type UserCountOutputType = {
   sessions: number
   accounts: number
-  posts: number
   recipes: number
   recipeLikes: number
   cookbooks: number
+  chat: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
-  posts?: boolean | UserCountOutputTypeCountPostsArgs
   recipes?: boolean | UserCountOutputTypeCountRecipesArgs
   recipeLikes?: boolean | UserCountOutputTypeCountRecipeLikesArgs
   cookbooks?: boolean | UserCountOutputTypeCountCookbooksArgs
+  chat?: boolean | UserCountOutputTypeCountChatArgs
 }
 
 /**
@@ -1001,13 +1009,6 @@ export type UserCountOutputTypeCountAccountsArgs<ExtArgs extends runtime.Types.E
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountPostsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.PostWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
 export type UserCountOutputTypeCountRecipesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RecipeWhereInput
 }
@@ -1026,6 +1027,13 @@ export type UserCountOutputTypeCountCookbooksArgs<ExtArgs extends runtime.Types.
   where?: Prisma.CookbookWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountChatArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ChatWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1037,10 +1045,10 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
-  posts?: boolean | Prisma.User$postsArgs<ExtArgs>
   recipes?: boolean | Prisma.User$recipesArgs<ExtArgs>
   recipeLikes?: boolean | Prisma.User$recipeLikesArgs<ExtArgs>
   cookbooks?: boolean | Prisma.User$cookbooksArgs<ExtArgs>
+  chat?: boolean | Prisma.User$chatArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1078,10 +1086,10 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
-  posts?: boolean | Prisma.User$postsArgs<ExtArgs>
   recipes?: boolean | Prisma.User$recipesArgs<ExtArgs>
   recipeLikes?: boolean | Prisma.User$recipeLikesArgs<ExtArgs>
   cookbooks?: boolean | Prisma.User$cookbooksArgs<ExtArgs>
+  chat?: boolean | Prisma.User$chatArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1092,10 +1100,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     accounts: Prisma.$AccountPayload<ExtArgs>[]
-    posts: Prisma.$PostPayload<ExtArgs>[]
     recipes: Prisma.$RecipePayload<ExtArgs>[]
     recipeLikes: Prisma.$RecipeLikePayload<ExtArgs>[]
     cookbooks: Prisma.$CookbookPayload<ExtArgs>[]
+    chat: Prisma.$ChatPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1501,10 +1509,10 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  posts<T extends Prisma.User$postsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$postsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   recipes<T extends Prisma.User$recipesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recipesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecipePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   recipeLikes<T extends Prisma.User$recipeLikesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recipeLikesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecipeLikePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cookbooks<T extends Prisma.User$cookbooksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cookbooksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CookbookPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  chat<T extends Prisma.User$chatArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1982,30 +1990,6 @@ export type User$accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 }
 
 /**
- * User.posts
- */
-export type User$postsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Post
-   */
-  select?: Prisma.PostSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Post
-   */
-  omit?: Prisma.PostOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PostInclude<ExtArgs> | null
-  where?: Prisma.PostWhereInput
-  orderBy?: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[]
-  cursor?: Prisma.PostWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.PostScalarFieldEnum | Prisma.PostScalarFieldEnum[]
-}
-
-/**
  * User.recipes
  */
 export type User$recipesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2075,6 +2059,30 @@ export type User$cookbooksArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.CookbookScalarFieldEnum | Prisma.CookbookScalarFieldEnum[]
+}
+
+/**
+ * User.chat
+ */
+export type User$chatArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Chat
+   */
+  select?: Prisma.ChatSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Chat
+   */
+  omit?: Prisma.ChatOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ChatInclude<ExtArgs> | null
+  where?: Prisma.ChatWhereInput
+  orderBy?: Prisma.ChatOrderByWithRelationInput | Prisma.ChatOrderByWithRelationInput[]
+  cursor?: Prisma.ChatWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ChatScalarFieldEnum | Prisma.ChatScalarFieldEnum[]
 }
 
 /**
