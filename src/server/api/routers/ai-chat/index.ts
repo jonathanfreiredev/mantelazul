@@ -3,38 +3,45 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import z from "zod";
 
 export const aiChatRouter = createTRPCRouter({
-  getMessages: protectedProcedure.query(
-    async ({
-      ctx,
-    }): Promise<{
-      messages: {
-        id: string;
-        role: "system" | "user" | "assistant";
-        parts: ReasoningUIPart[];
-      }[];
-    }> => {
-      const chat = await ctx.db.chat.findFirst({
-        where: { userId: ctx.session?.user.id },
-      });
+  getMessages: protectedProcedure
+    .input(
+      z.object({
+        chatId: z.string(),
+      }),
+    )
+    .query(
+      async ({
+        ctx,
+        input: { chatId },
+      }): Promise<{
+        messages: {
+          id: string;
+          role: "system" | "user" | "assistant";
+          parts: ReasoningUIPart[];
+        }[];
+      }> => {
+        const chat = await ctx.db.chat.findFirst({
+          where: { id: chatId, userId: ctx.session?.user.id },
+        });
 
-      if (!chat) {
-        return { messages: [] };
-      }
+        if (!chat) {
+          return { messages: [] };
+        }
 
-      const messages = await ctx.db.message.findMany({
-        where: { chatId: chat.id },
-        orderBy: { createdAt: "asc" },
-      });
+        const messages = await ctx.db.message.findMany({
+          where: { chatId: chat.id },
+          orderBy: { createdAt: "asc" },
+        });
 
-      const uiMessages = messages.map((msg) => ({
-        id: msg.id,
-        role: msg.role.toLowerCase() as "system" | "user" | "assistant",
-        parts: JSON.parse(msg.content),
-      }));
+        const uiMessages = messages.map((msg) => ({
+          id: msg.id,
+          role: msg.role.toLowerCase() as "system" | "user" | "assistant",
+          parts: JSON.parse(msg.content),
+        }));
 
-      return { messages: uiMessages };
-    },
-  ),
+        return { messages: uiMessages };
+      },
+    ),
 
   delete: protectedProcedure.mutation(async ({ ctx }) => {
     const chat = await ctx.db.chat.findFirst({

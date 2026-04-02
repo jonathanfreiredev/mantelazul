@@ -24,8 +24,8 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerDescription,
 } from "../ui/drawer";
-import { Spinner } from "../ui/spinner";
 import type { MyAgentUIMessage } from "~/lib/agent";
 import { useRouter } from "next/navigation";
 import { createId } from "@paralleldrive/cuid2";
@@ -34,9 +34,14 @@ import { motion } from "motion/react";
 interface AIAgentChatProps {
   userId: string;
   chatId: string | null;
+  messages: MyAgentUIMessage[];
 }
 
-export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
+export default function AIAgentChat({
+  userId,
+  chatId,
+  messages: savedMessages,
+}: AIAgentChatProps) {
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [opened, setOpened] = useState(false);
   const [input, setInput] = useState("");
@@ -49,6 +54,7 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
   const router = useRouter();
 
   const {
+    id,
     messages,
     status,
     sendMessage,
@@ -58,6 +64,7 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
   } = useChat<MyAgentUIMessage>({
     id: chatId || undefined,
     generateId: () => createId(),
+    messages: savedMessages,
     transport: new DefaultChatTransport({
       api: "/api/chat",
       headers: () => ({
@@ -72,15 +79,6 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
       setMessages([]);
     },
   });
-
-  const { data: resMessages, isLoading: messagesLoading } =
-    api.aiChat.getMessages.useQuery();
-
-  useEffect(() => {
-    if (!messagesLoading && resMessages) {
-      setMessages(resMessages.messages);
-    }
-  }, [messagesLoading]);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     messagesEndRef.current?.scrollIntoView({ behavior });
@@ -114,7 +112,6 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
     const timeout = setTimeout(() => {
       const el = containerRef.current;
 
-      console.log("Attaching scroll listener...", el);
       if (!el) return;
 
       const handleScroll = () => {
@@ -136,9 +133,7 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
     return () => clearTimeout(timeout);
   }, [opened]);
 
-  if (messagesLoading || !resMessages) {
-    return <Spinner />;
-  }
+  console.log({ id, messages });
 
   return (
     <>
@@ -156,9 +151,9 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              sendMessage({ text: input });
               setInput("");
               setOpened(true);
+              sendMessage({ text: input });
             }}
           >
             <div className="flex gap-2 rounded-lg border border-zinc-300 bg-white/30 px-4 py-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
@@ -231,6 +226,11 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
                 </div>
               </DrawerTitle>
             </DrawerHeader>
+            <DrawerDescription className="sr-only">
+              The assistant can help you with a variety of tasks, such as
+              answering questions, providing recommendations, and creating
+              recipes.
+            </DrawerDescription>
 
             <div className="relative flex min-h-[30vh] flex-col px-4">
               <div
@@ -270,13 +270,18 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
                                   </div>
                                 );
                               case "tool-createRecipe":
+                              case "tool-updateRecipe": {
                                 switch (part.state) {
                                   case "approval-requested":
                                     return (
                                       <div key={part.toolCallId}>
                                         <p className="mb-2">
-                                          Do you approve creating the following
-                                          recipe: {part.input.title}?
+                                          Do you approve{" "}
+                                          {part.type === "tool-createRecipe"
+                                            ? "creating"
+                                            : "updating"}{" "}
+                                          the following recipe:{" "}
+                                          {part.input.title}?
                                         </p>
 
                                         <div className="flex gap-2">
@@ -314,7 +319,10 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
                                       >
                                         <p>
                                           Recipe "{part.output.recipe.title}"
-                                          created successfully!
+                                          {part.type === "tool-createRecipe"
+                                            ? "created"
+                                            : "updated"}{" "}
+                                          successfully!
                                         </p>
                                         <Button
                                           variant="outline"
@@ -328,7 +336,24 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
                                         </Button>
                                       </div>
                                     );
+                                  case "output-denied":
+                                    return (
+                                      <div
+                                        key={part.toolCallId}
+                                        className="mb-5 flex flex-col gap-4 rounded-lg border border-red-300 bg-red-100 p-4"
+                                      >
+                                        <p>
+                                          Recipe{" "}
+                                          {part.type === "tool-createRecipe"
+                                            ? "creation"
+                                            : "update"}{" "}
+                                          denied. The assistant will try to find
+                                          another solution.
+                                        </p>
+                                      </div>
+                                    );
                                 }
+                              }
                             }
                           })}
                         </div>
@@ -372,8 +397,8 @@ export default function AIAgentChat({ userId, chatId }: AIAgentChatProps) {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    sendMessage({ text: input });
                     setInput("");
+                    sendMessage({ text: input });
                   }}
                 >
                   <input

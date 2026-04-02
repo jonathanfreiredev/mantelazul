@@ -6,6 +6,7 @@ import { SidebarDrawer } from "./sidebar-drawer";
 import { SignInOrSignUpButton } from "./auth/sign-in-or-sign-up-button";
 import AIAgentChat from "./ai-chat/ai-agent-chat";
 import { api } from "~/trpc/server";
+import { createId } from "@paralleldrive/cuid2";
 
 export async function Header() {
   const session = await getSession();
@@ -14,10 +15,18 @@ export async function Header() {
 
   let chatId = null;
 
+  const messages = [];
+
   if (isLoggedIn) {
     const chat = await api.aiChat.getChatId();
 
     chatId = chat.chatId;
+  }
+
+  if (isLoggedIn && chatId) {
+    const { messages: chatMessages } = await api.aiChat.getMessages({ chatId });
+
+    messages.push(...chatMessages);
   }
 
   return (
@@ -43,7 +52,11 @@ export async function Header() {
           </div>
 
           {!!isLoggedIn && (
-            <AIAgentChat userId={session.user.id} chatId={chatId} />
+            <AIAgentChat
+              userId={session.user.id}
+              chatId={chatId || createId()}
+              messages={messages}
+            />
           )}
         </div>
       </div>

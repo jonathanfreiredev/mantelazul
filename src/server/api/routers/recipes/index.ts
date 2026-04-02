@@ -20,7 +20,7 @@ export const recipesRouter = createTRPCRouter({
         .extend({
           imageUrl: z.url().trim().nullable(),
         })
-        .omit({ image: true }),
+        .omit({ image: true, tags: true }),
     )
     .mutation(async ({ ctx, input }) => {
       const slug = slugify(input.title, {
@@ -338,6 +338,39 @@ export const recipesRouter = createTRPCRouter({
       };
     }),
 
+  getOne: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const recipe = await ctx.db.recipe.findUnique({
+        where: { id: input.id },
+        include: {
+          ingredients: {
+            orderBy: { order: "asc" },
+          },
+          steps: {
+            orderBy: { order: "asc" },
+          },
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
+      });
+
+      if (!recipe) {
+        throw new Error("Recipe not found");
+      }
+
+      return {
+        ...recipe,
+        ingredients: recipe.ingredients.map((ingredient) => ({
+          ...ingredient,
+          quantity: ingredient.quantity.toString(),
+        })),
+      };
+    }),
+
   getPublicationStatus: publicProcedure
     .input(z.object({ recipeId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -363,6 +396,7 @@ export const recipesRouter = createTRPCRouter({
         difficulty: z.enum(Difficulty).optional(),
         search: z.string().optional(),
         skip: z.number(),
+        take: z.number().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -374,9 +408,8 @@ export const recipesRouter = createTRPCRouter({
         difficulty,
         search,
         skip,
+        take = 15,
       } = input;
-
-      const take = 15;
 
       const whereClause: Prisma.RecipeWhereInput = {};
 
@@ -455,6 +488,68 @@ export const recipesRouter = createTRPCRouter({
         hasNextPage: skip + take < total,
       };
     }),
+
+  getAllCreatedByUser: protectedProcedure.query(async ({ ctx }) => {
+    const recipes = await ctx.db.recipe.findMany({
+      where: { authorId: ctx.session.user.id },
+      include: {
+        ingredients: {
+          orderBy: { order: "asc" },
+        },
+        steps: {
+          orderBy: { order: "asc" },
+        },
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return recipes.map((recipe) => ({
+      ...recipe,
+      ingredients: recipe.ingredients.map((ingredient) => ({
+        ...ingredient,
+        quantity: ingredient.quantity.toString(),
+      })),
+    }));
+  }),
+
+  getAllFavouritesByUser: protectedProcedure.query(async ({ ctx }) => {
+    const recipes = await ctx.db.recipe.findMany({
+      where: {
+        likes: {
+          some: {
+            userId: ctx.session.user.id,
+          },
+        },
+      },
+      include: {
+        ingredients: {
+          orderBy: { order: "asc" },
+        },
+        steps: {
+          orderBy: { order: "asc" },
+        },
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return recipes.map((recipe) => ({
+      ...recipe,
+      ingredients: recipe.ingredients.map((ingredient) => ({
+        ...ingredient,
+        quantity: ingredient.quantity.toString(),
+      })),
+    }));
+  }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
