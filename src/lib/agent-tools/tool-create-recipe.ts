@@ -90,7 +90,9 @@ IMPORTANT:
 - Only call this tool when the user has clearly confirmed they want to create/save the recipe.
 - Do NOT call this tool during brainstorming or suggestion phases.
 - The recipe must already be fully defined and agreed upon.
-- Generate an image and add the imageUrl in the input.
+- Add an image to the recipe. If the user has provided an image, first ask them to use this image in the recipe. If they confirm,
+  use the URL of that image in the recipe.
+- If the user has not provided an image, you can generate a relevant image using an image generation tool and include it in the recipe.
 
 The recipe should include a clear title, ingredients list, step-by-step instructions, and relevant metadata (e.g., category, difficulty, nutritional info).
   `,

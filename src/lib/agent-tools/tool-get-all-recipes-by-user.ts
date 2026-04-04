@@ -2,7 +2,7 @@ import { tool } from "ai";
 import z from "zod";
 import { api } from "~/trpc/server";
 
-export const toolGetAllRecipesByUser = tool({
+export const toolGetAllCreatedRecipesByUser = tool({
   description: `
 Retrieves all recipes created by the currently authenticated user.
 This tool is useful for allowing users to view and manage their own recipes, such as editing them. It can also be used to display a user's recipe collection in their profile or dashboard.

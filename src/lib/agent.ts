@@ -2,24 +2,49 @@ import { openai } from "@ai-sdk/openai";
 import { stepCountIs, ToolLoopAgent, type InferAgentUIMessage } from "ai";
 import { toolCreateRecipe } from "./agent-tools/tool-create-recipe";
 import { toolGetTags } from "./agent-tools/tool-get-tags";
-import { toolGetAllRecipesByUser } from "./agent-tools/tool-get-all-recipes-by-user";
+import { toolGetAllCreatedRecipesByUser } from "./agent-tools/tool-get-all-recipes-by-user";
 import { toolGetOneRecipe } from "./agent-tools/tool-get-one-recipe";
 import { toolUpdateRecipe } from "./agent-tools/tool-update-recipe";
 import { toolGetAllFavouriteRecipesByUser } from "./agent-tools/tool-get-all-favourite-recipes-by-user";
 import { toolGenerateRecipeImage } from "./agent-tools/tool-generate-recipe-image";
+import { toolGetAllRecipes } from "./agent-tools/tool-get-all-recipes";
+
+const PRICES = {
+  input: 0.15, // $0.15 por 1M tokens
+  output: 0.6, // $0.60 por 1M tokens
+};
 
 export const agent = new ToolLoopAgent({
   model: openai("gpt-4o-mini"),
   tools: {
     getTags: toolGetTags,
-    getAllRecipesByUser: toolGetAllRecipesByUser,
+    getAllRecipesByUser: toolGetAllCreatedRecipesByUser,
     getAllFavouriteRecipesByUser: toolGetAllFavouriteRecipesByUser,
-    generateRecipeImage: toolGenerateRecipeImage,
+    getAllRecipes: toolGetAllRecipes,
     getOneRecipe: toolGetOneRecipe,
     createRecipe: toolCreateRecipe,
     updateRecipe: toolUpdateRecipe,
+    generateRecipeImage: toolGenerateRecipeImage,
   },
   stopWhen: stepCountIs(10),
+  onStepFinish({ usage, stepNumber }) {
+    if (usage) {
+      const inputCost = usage.inputTokens
+        ? (usage.inputTokens / 1000000) * PRICES.input
+        : 0;
+      const outputCost = usage.outputTokens
+        ? (usage.outputTokens / 1000000) * PRICES.output
+        : 0;
+      const totalStepCost = inputCost + outputCost;
+
+      console.log(`--- 💸 Log de Costos (Paso ${stepNumber + 1}) ---`);
+      console.log(
+        `Tokens: ${usage.totalTokens} (In: ${inputCost} USD, Out: ${outputCost} USD)`,
+      );
+      console.log(`Costo de este paso: $${totalStepCost} USD`);
+      console.log(`----------------------------------------`);
+    }
+  },
   instructions: `
     You are "Recipe Assistant", a specialized AI expert for a recipe application.
     
@@ -40,6 +65,10 @@ export const agent = new ToolLoopAgent({
     - Use 'getAllRecipesByUser' to show the user their saved collection.
     - Use 'getOneRecipe' and 'updateRecipe' when the user wants to modify an existing dish.
     - Use 'createRecipe' when the user is ready to save a new culinary idea.
+    - Use 'updateRecipe' to help the user refine and improve their existing recipes based on their feedback.
+    - Use 'getAllFavouriteRecipesByUser' to help the user quickly access their top picks.
+    - Use 'getAllRecipes' to explore the full range of recipes available in the app, especially when the user is looking for inspiration or specific dishes.
+    - Use 'generateRecipeImage' to create appealing visuals for recipes that lack images, especially if the user has requested it or if it would enhance the recipe's presentation.
     
     TONAL GUIDELINES:
     - Be helpful, professional, and inspiring. Act like a knowledgeable sous-chef.

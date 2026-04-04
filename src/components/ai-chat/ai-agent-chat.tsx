@@ -1,6 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import { createId } from "@paralleldrive/cuid2";
 import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithApprovalResponses,
@@ -9,27 +10,48 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   NotepadTextIcon,
-  PaperclipIcon,
   SparklesIcon,
   SquareIcon,
   Trash2Icon,
+  XIcon,
 } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "~/hooks/use-media-query";
+import type { MyAgentUIMessage } from "~/lib/agent";
 import { api } from "~/trpc/react";
+import type { ImageWithPreview } from "../image-uploader/image-upload";
 import { Button } from "../ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription,
 } from "../ui/drawer";
-import type { MyAgentUIMessage } from "~/lib/agent";
-import { useRouter } from "next/navigation";
-import { createId } from "@paralleldrive/cuid2";
-import { motion } from "motion/react";
+import { AttachImageInput } from "./attach-image-input";
+import Image from "next/image";
+
+const ThinkingIndicator = ({ text }: { text: string }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="mb-4 flex justify-start"
+  >
+    <div className="flex items-center gap-2 rounded-lg bg-neutral-200 px-4 py-3 dark:bg-neutral-800">
+      <div className="flex gap-1">
+        <span className="h-1 w-1 animate-bounce rounded-full bg-neutral-500 [animation-delay:-0.3s]"></span>
+        <span className="h-1 w-1 animate-bounce rounded-full bg-neutral-500 [animation-delay:-0.15s]"></span>
+        <span className="h-1 w-1 animate-bounce rounded-full bg-neutral-500"></span>
+      </div>
+      <span className="text-xs font-medium text-neutral-500">{text}</span>
+    </div>
+  </motion.div>
+);
+
+const MAX_MESSAGES = 25;
 
 interface AIAgentChatProps {
   userId: string;
@@ -42,6 +64,10 @@ export default function AIAgentChat({
   chatId,
   messages: savedMessages,
 }: AIAgentChatProps) {
+  const [attachedImage, setAttachedImage] = useState<ImageWithPreview | null>(
+    null,
+  );
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [opened, setOpened] = useState(false);
   const [input, setInput] = useState("");
@@ -54,7 +80,6 @@ export default function AIAgentChat({
   const router = useRouter();
 
   const {
-    id,
     messages,
     status,
     sendMessage,
@@ -104,7 +129,7 @@ export default function AIAgentChat({
     if (opened && shouldAutoScroll()) {
       scrollToBottom(status === "streaming" ? "auto" : "smooth");
     }
-  }, [messages, status, opened]);
+  }, [messages, status, opened, uploadingImage]);
 
   useEffect(() => {
     if (!opened) return;
@@ -133,7 +158,49 @@ export default function AIAgentChat({
     return () => clearTimeout(timeout);
   }, [opened]);
 
-  console.log({ id, messages });
+  const handleSendMessage = async (text: string) => {
+    let imageUrl: string | null = null;
+
+    if (attachedImage && attachedImage.preview.startsWith("blob:")) {
+      setUploadingImage(true);
+      const formData = new FormData();
+      formData.append("file", attachedImage.file);
+
+      const response = await fetch("/api/images/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        console.error("Image upload failed");
+        return;
+      }
+
+      const resImage: { url: string } = await response.json();
+
+      imageUrl = resImage.url;
+      setUploadingImage(false);
+    }
+
+    sendMessage({
+      role: "user",
+      parts: [
+        { type: "text", text },
+        ...(imageUrl
+          ? [
+              {
+                type: "file" as const,
+                mediaType: "image/png",
+                url: imageUrl,
+              },
+            ]
+          : []),
+      ],
+    });
+
+    setInput("");
+    setAttachedImage(null);
+  };
 
   return (
     <>
@@ -150,10 +217,15 @@ export default function AIAgentChat({
         <div className="fixed right-0 bottom-0 left-0 z-50 mx-auto w-full max-w-2xl px-4 py-6">
           <form
             onSubmit={(e) => {
+              if (messages.length > MAX_MESSAGES) {
+                e.preventDefault();
+                setOpened(true);
+                return;
+              }
+
               e.preventDefault();
-              setInput("");
               setOpened(true);
-              sendMessage({ text: input });
+              handleSendMessage(input);
             }}
           >
             <div className="flex gap-2 rounded-lg border border-zinc-300 bg-white/30 px-4 py-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
@@ -161,6 +233,7 @@ export default function AIAgentChat({
                 className="w-full py-2 outline-none"
                 value={input}
                 placeholder="Say something..."
+                disabled={uploadingImage}
                 onFocus={() => {
                   if (messages.length > 0) {
                     setOpened(true);
@@ -184,7 +257,11 @@ export default function AIAgentChat({
                     size="icon"
                     className="rounded-full"
                     type="submit"
-                    disabled={input.trim() === ""}
+                    disabled={
+                      input.trim() === "" ||
+                      uploadingImage ||
+                      messages.length > MAX_MESSAGES
+                    }
                   >
                     <ArrowUpIcon />
                   </Button>
@@ -238,128 +315,180 @@ export default function AIAgentChat({
                 className="no-scrollbar flex h-full flex-col gap-4 overflow-y-auto"
               >
                 {messages.length > 0 ? (
-                  messages.map((message) => (
-                    <motion.div
-                      key={message.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className={`flex ${
-                        message.role === "user"
-                          ? "justify-end"
-                          : "justify-start"
-                      } mb-4`}
-                    >
-                      <div
-                        className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                  <>
+                    {messages.map((message) => (
+                      <motion.div
+                        key={message.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className={`flex ${
                           message.role === "user"
-                            ? "bg-neutral-600 text-white"
-                            : "bg-neutral-200 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100"
-                        }`}
+                            ? "justify-end"
+                            : "justify-start"
+                        } mb-4`}
                       >
-                        <div className="whitespace-pre-wrap">
-                          <p className="mb-1 text-xs font-extralight opacity-70">
-                            {message.role === "user" ? "YOU " : "AI "}
-                          </p>
-                          {message.parts.map((part, i) => {
-                            switch (part.type) {
-                              case "text":
-                                return (
-                                  <div key={`${message.id}-${i}`}>
-                                    {part.text}
-                                  </div>
-                                );
-                              case "tool-createRecipe":
-                              case "tool-updateRecipe": {
-                                switch (part.state) {
-                                  case "approval-requested":
-                                    return (
-                                      <div key={part.toolCallId}>
-                                        <p className="mb-2">
-                                          Do you approve{" "}
-                                          {part.type === "tool-createRecipe"
-                                            ? "creating"
-                                            : "updating"}{" "}
-                                          the following recipe:{" "}
-                                          {part.input.title}?
-                                        </p>
+                        <div
+                          className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                            message.role === "user"
+                              ? "bg-neutral-600 text-white"
+                              : "bg-neutral-200 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100"
+                          }`}
+                        >
+                          <div className="whitespace-pre-wrap">
+                            <p className="mb-1 text-xs font-extralight opacity-70">
+                              {message.role === "user" ? "YOU " : "AI "}
+                            </p>
+                            {(status === "submitted" ||
+                              status === "streaming") &&
+                              message.role === "assistant" &&
+                              message.id ===
+                                messages[messages.length - 1]?.id && (
+                                <ThinkingIndicator
+                                  text={
+                                    status === "submitted"
+                                      ? "Thinking"
+                                      : "Typing"
+                                  }
+                                />
+                              )}
+                            {message.parts.map((part, i) => {
+                              switch (part.type) {
+                                case "text": {
+                                  return (
+                                    <div
+                                      key={`${message.id}-${i}`}
+                                      className="wrap-break-word whitespace-pre-wrap"
+                                    >
+                                      {part.text}
+                                    </div>
+                                  );
+                                }
+                                case "file": {
+                                  return (
+                                    <div
+                                      key={`${message.id}-${i}`}
+                                      className="mt-2"
+                                    >
+                                      {part.mediaType.split("/")[0] && (
+                                        <div
+                                          key={`${message.id}-${i}`}
+                                          className="relative h-32 w-32 overflow-hidden rounded-sm bg-gray-100 shadow-lg shadow-gray-500/50"
+                                        >
+                                          <Image
+                                            key={(part.filename || "image") + i}
+                                            src={part.url}
+                                            alt={part.filename ?? "image"}
+                                            fill
+                                            className="object-cover"
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                }
+                                case "tool-createRecipe":
+                                case "tool-updateRecipe": {
+                                  switch (part.state) {
+                                    case "approval-requested":
+                                      return (
+                                        <div key={part.toolCallId}>
+                                          <p className="mb-2">
+                                            Do you approve{" "}
+                                            {part.type === "tool-createRecipe"
+                                              ? "creating"
+                                              : "updating"}{" "}
+                                            the following recipe:{" "}
+                                            {part.input.title}?
+                                          </p>
 
-                                        <div className="flex gap-2">
+                                          <div className="flex gap-2">
+                                            <Button
+                                              variant="default"
+                                              onClick={async () => {
+                                                addToolApprovalResponse({
+                                                  id: part.approval.id,
+                                                  approved: true,
+                                                });
+                                              }}
+                                            >
+                                              Approve
+                                            </Button>
+                                            <Button
+                                              variant="destructive"
+                                              onClick={() =>
+                                                addToolApprovalResponse({
+                                                  id: part.approval.id,
+                                                  approved: false,
+                                                })
+                                              }
+                                            >
+                                              Deny
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      );
+                                    case "output-available":
+                                      // Show the output of the tool call and a button link to view the recipe
+                                      return (
+                                        <div
+                                          key={part.toolCallId}
+                                          className="mb-5 flex flex-col gap-4 rounded-lg border border-slate-300 bg-slate-100 p-4"
+                                        >
+                                          <p>
+                                            Recipe "{part.output.recipe.title}"
+                                            {part.type === "tool-createRecipe"
+                                              ? "created"
+                                              : "updated"}{" "}
+                                            successfully!
+                                          </p>
                                           <Button
-                                            variant="default"
-                                            onClick={async () => {
-                                              addToolApprovalResponse({
-                                                id: part.approval.id,
-                                                approved: true,
-                                              });
+                                            variant="outline"
+                                            onClick={() => {
+                                              if (
+                                                window.location.pathname ===
+                                                `/recipes/${part.output.recipe.slug}`
+                                              ) {
+                                                // If we're already on the recipe page, just refresh the data
+                                                router.refresh();
+                                              } else {
+                                                router.push(
+                                                  `/recipes/${part.output.recipe.slug}`,
+                                                );
+                                              }
+
+                                              setOpened(false);
                                             }}
                                           >
-                                            Approve
-                                          </Button>
-                                          <Button
-                                            variant="destructive"
-                                            onClick={() =>
-                                              addToolApprovalResponse({
-                                                id: part.approval.id,
-                                                approved: false,
-                                              })
-                                            }
-                                          >
-                                            Deny
+                                            <NotepadTextIcon /> View Recipe
                                           </Button>
                                         </div>
-                                      </div>
-                                    );
-                                  case "output-available":
-                                    // Show the output of the tool call and a button link to view the recipe
-                                    return (
-                                      <div
-                                        key={part.toolCallId}
-                                        className="mb-5 flex flex-col gap-4 rounded-lg border border-slate-300 bg-slate-100 p-4"
-                                      >
-                                        <p>
-                                          Recipe "{part.output.recipe.title}"
-                                          {part.type === "tool-createRecipe"
-                                            ? "created"
-                                            : "updated"}{" "}
-                                          successfully!
-                                        </p>
-                                        <Button
-                                          variant="outline"
-                                          onClick={() =>
-                                            router.push(
-                                              `/recipes/${part.output.recipe.slug}`,
-                                            )
-                                          }
+                                      );
+                                    case "output-denied":
+                                      return (
+                                        <div
+                                          key={part.toolCallId}
+                                          className="mb-5 flex flex-col gap-4 rounded-lg border border-red-300 bg-red-100 p-4"
                                         >
-                                          <NotepadTextIcon /> View Recipe
-                                        </Button>
-                                      </div>
-                                    );
-                                  case "output-denied":
-                                    return (
-                                      <div
-                                        key={part.toolCallId}
-                                        className="mb-5 flex flex-col gap-4 rounded-lg border border-red-300 bg-red-100 p-4"
-                                      >
-                                        <p>
-                                          Recipe{" "}
-                                          {part.type === "tool-createRecipe"
-                                            ? "creation"
-                                            : "update"}{" "}
-                                          denied. The assistant will try to find
-                                          another solution.
-                                        </p>
-                                      </div>
-                                    );
+                                          <p>
+                                            Recipe{" "}
+                                            {part.type === "tool-createRecipe"
+                                              ? "creation"
+                                              : "update"}{" "}
+                                            denied. The assistant will try to
+                                            find another solution.
+                                          </p>
+                                        </div>
+                                      );
+                                  }
                                 }
                               }
-                            }
-                          })}
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))
+                      </motion.div>
+                    ))}
+                  </>
                 ) : (
                   <div className="flex flex-col items-center gap-4 pt-10">
                     <p className="text-center text-sm text-neutral-500">
@@ -390,6 +519,42 @@ export default function AIAgentChat({
                   </Button>
                 </motion.div>
               )}
+
+              {attachedImage && (
+                <div className="absolute bottom-1 z-100 h-32 w-32 overflow-hidden rounded-sm bg-gray-100 shadow-lg shadow-gray-500/50">
+                  <div className="relative h-full w-full">
+                    <Button
+                      variant="default"
+                      size="icon"
+                      className="absolute top-1 right-1 z-10 rounded-full"
+                      onClick={() => setAttachedImage(null)}
+                    >
+                      <XIcon size="16" />
+                    </Button>
+                    <Image
+                      src={attachedImage.preview}
+                      alt="Attached image preview"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {messages.length > MAX_MESSAGES && (
+                <motion.div
+                  key="limit-exceeded"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="absolute bottom-3 z-100 w-[90%] rounded-md border-2 border-red-400/30 bg-red-100 px-4 py-2 shadow-lg shadow-gray-400/50"
+                >
+                  <p className="text-sm text-red-700">
+                    Message limit exceeded. Please delete the chat to start a
+                    new conversation.
+                  </p>
+                </motion.div>
+              )}
             </div>
 
             <DrawerFooter>
@@ -397,24 +562,25 @@ export default function AIAgentChat({
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    setInput("");
-                    sendMessage({ text: input });
+                    handleSendMessage(input);
                   }}
                 >
                   <input
                     className="w-full py-2 outline-none"
                     value={input}
                     placeholder="Say something..."
+                    disabled={uploadingImage || messages.length > MAX_MESSAGES}
                     onChange={(e) => setInput(e.currentTarget.value)}
                   />
                   <div className="flex items-center justify-between">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full"
-                    >
-                      <PaperclipIcon />
-                    </Button>
+                    <AttachImageInput
+                      value={attachedImage}
+                      onChange={setAttachedImage}
+                      disabled={
+                        uploadingImage || messages.length > MAX_MESSAGES
+                      }
+                    />
+
                     {status === "streaming" || status === "submitted" ? (
                       <Button
                         variant="default"
@@ -430,7 +596,11 @@ export default function AIAgentChat({
                         size="icon"
                         className="rounded-full"
                         type="submit"
-                        disabled={input.trim() === ""}
+                        disabled={
+                          input.trim() === "" ||
+                          uploadingImage ||
+                          messages.length > 30
+                        }
                       >
                         <ArrowUpIcon />
                       </Button>
