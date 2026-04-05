@@ -89,7 +89,7 @@ export const ForgotPasswordForm = ({
                           id="email"
                           type="email"
                           autoComplete="off"
-                          placeholder="jonathan@example.com"
+                          placeholder="joe@example.com"
                           required
                         />
 

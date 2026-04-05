@@ -98,7 +98,7 @@ export const LoginForm = ({
                         {...field}
                         id="email"
                         type="email"
-                        placeholder="jonathan@example.com"
+                        placeholder="joe@example.com"
                         required
                       />
                       <FieldDescription>
