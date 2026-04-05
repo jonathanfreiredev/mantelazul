@@ -22,7 +22,10 @@ const recipeInputSchema = z.object({
     .describe(
       "The difficulty level of the recipe. Difficulty in UPPERCASE (e.g., EASY, MEDIUM, HARD). It is required.",
     ),
-  imageUrl: z.url().describe("URL of the recipe image. It is required."),
+  imageUrl: z
+    .url()
+    .nullable()
+    .describe("URL of the recipe image. It is required."),
   defaultServings: intSchema
     .min(1, "It must be at least 1")
     .describe(
