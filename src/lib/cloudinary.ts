@@ -55,6 +55,12 @@ export async function generateAndUpload(
       styleHint ? `, ${styleHint} style` : ""
     }, high resolution, 8k, appetizing lighting, macro lens, elegant plating.`,
     aspectRatio: "1:1",
+    providerOptions: {
+      blackForestLabs: {
+        width: 1024,
+        height: 1024,
+      },
+    },
   });
 
   const buffer = Buffer.from(image.uint8Array);
