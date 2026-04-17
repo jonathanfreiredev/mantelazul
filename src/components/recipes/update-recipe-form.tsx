@@ -33,7 +33,6 @@ export const UpdateRecipeForm = ({
   const updateRecipeMutation = api.recipes.update.useMutation();
 
   const form = useForm<z.infer<typeof recipeSchema>>({
-    resolver: zodResolver(recipeSchema),
     defaultValues: {
       title: recipe.title,
       description: recipe.description,
@@ -52,10 +51,21 @@ export const UpdateRecipeForm = ({
       fat: recipe.fat,
       tags: recipe.tags.map((recipeTag) => recipeTag.tag.name),
     },
+    resolver: async (data, context, options) => {
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "validation result",
+          await zodResolver(recipeSchema)(data, context, options),
+        );
+      }
+      return zodResolver(recipeSchema)(data, context, options);
+    },
   });
 
   async function onSubmit(data: z.infer<typeof recipeSchema>) {
     const { image, ...restData } = data;
+
+    console.log("Submitting form with data:", data);
 
     let imageUrl: string | null = recipe.imageUrl;
 

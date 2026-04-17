@@ -46,7 +46,7 @@ IMPORTANT:
     take: z
       .number()
       .min(1)
-      .max(100)
+      .max(20)
       .optional()
       .default(20)
       .describe(

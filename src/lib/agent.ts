@@ -1,5 +1,10 @@
 import { openai } from "@ai-sdk/openai";
-import { stepCountIs, ToolLoopAgent, type InferAgentUIMessage } from "ai";
+import {
+  stepCountIs,
+  wrapLanguageModel,
+  ToolLoopAgent,
+  type InferAgentUIMessage,
+} from "ai";
 import { toolCreateRecipe } from "./agent-tools/tool-create-recipe";
 import { toolGetTags } from "./agent-tools/tool-get-tags";
 import { toolGetAllCreatedRecipesByUser } from "./agent-tools/tool-get-all-recipes-by-user";
@@ -8,14 +13,20 @@ import { toolUpdateRecipe } from "./agent-tools/tool-update-recipe";
 import { toolGetAllFavouriteRecipesByUser } from "./agent-tools/tool-get-all-favourite-recipes-by-user";
 import { toolGenerateRecipeImage } from "./agent-tools/tool-generate-recipe-image";
 import { toolGetAllRecipes } from "./agent-tools/tool-get-all-recipes";
+import { devToolsMiddleware } from "@ai-sdk/devtools";
 
 const PRICES = {
   input: 0.15, // $0.15 por 1M tokens
   output: 0.6, // $0.60 por 1M tokens
 };
 
-export const agent = new ToolLoopAgent({
+export const model = wrapLanguageModel({
   model: openai("gpt-4o-mini"),
+  middleware: devToolsMiddleware(),
+});
+
+export const agent = new ToolLoopAgent({
+  model,
   tools: {
     getTags: toolGetTags,
     getAllRecipesByUser: toolGetAllCreatedRecipesByUser,
@@ -37,12 +48,12 @@ export const agent = new ToolLoopAgent({
         : 0;
       const totalStepCost = inputCost + outputCost;
 
-      console.log(`--- 💸 Log de Costos (Paso ${stepNumber + 1}) ---`);
-      console.log(
-        `Tokens: ${usage.totalTokens} (In: ${inputCost} USD, Out: ${outputCost} USD)`,
-      );
-      console.log(`Costo de este paso: $${totalStepCost} USD`);
-      console.log(`----------------------------------------`);
+      // console.log(`--- 💸 Log de Costos (Paso ${stepNumber + 1}) ---`);
+      // console.log(
+      //   `Tokens: ${usage.totalTokens} (In: ${inputCost} USD, Out: ${outputCost} USD)`,
+      // );
+      // console.log(`Costo de este paso: $${totalStepCost} USD`);
+      // console.log(`----------------------------------------`);
     }
   },
   instructions: `

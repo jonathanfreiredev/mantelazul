@@ -22,7 +22,7 @@ const recipeInputSchema = z.object({
     .describe(
       "The category of the recipe. Category in UPPERCASE (e.g., MAIN_COURSE, DESSERT). It is required.",
     ),
-  imageUrl: z.url().describe("URL of the recipe image. It is required."),
+  imageUrl: z.url().nullable().describe("URL of the recipe image."),
   difficulty: z
     .enum(Difficulty)
     .describe(
