@@ -10,7 +10,7 @@ export const recipeSchema = z.object({
   difficulty: z.enum(Difficulty),
   image: z
     .object({
-      file: z.instanceof(File),
+      file: z.instanceof(File).or(z.instanceof(Blob)),
       preview: z.url("Preview must be a valid URL").trim(),
     })
     .nullable(),
@@ -49,7 +49,7 @@ export const recipeStepsSchema = z.object({
         imageUrl: z.url("Step image URL must be a valid URL").trim().nullable(),
         image: z
           .object({
-            file: z.instanceof(File),
+            file: z.instanceof(File).or(z.instanceof(Blob)),
             preview: z.url("Preview must be a valid URL").trim(),
           })
           .nullable(),
