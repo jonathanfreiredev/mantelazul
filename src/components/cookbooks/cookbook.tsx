@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { api } from "~/trpc/react";
 import { Recipes } from "../recipes/recipes";
 import { Separator } from "../ui/separator";
@@ -9,6 +10,7 @@ interface CookbookProps {
 }
 
 export function Cookbook({ cookbookId }: CookbookProps) {
+  const t = useTranslations("Cookbook");
   const {
     data: resCookbook,
     isLoading,
@@ -27,7 +29,7 @@ export function Cookbook({ cookbookId }: CookbookProps) {
         {cookbook.images.length === 1 ? (
           <Image
             src={cookbook.images[0]!}
-            alt="Event cover"
+            alt={t("imageAlt")}
             fill
             className="object-cover"
           />
@@ -36,7 +38,7 @@ export function Cookbook({ cookbookId }: CookbookProps) {
             <div className="relative">
               <Image
                 src={cookbook.images[0]!}
-                alt="Event cover"
+                alt={t("imageAlt")}
                 fill
                 className="object-cover"
               />
@@ -44,7 +46,7 @@ export function Cookbook({ cookbookId }: CookbookProps) {
             <div className="relative">
               <Image
                 src={cookbook.images[1]!}
-                alt="Event cover"
+                alt={t("imageAlt")}
                 fill
                 className="object-cover"
               />
@@ -56,7 +58,7 @@ export function Cookbook({ cookbookId }: CookbookProps) {
               <div className="relative row-span-2">
                 <Image
                   src={cookbook.images[0]!}
-                  alt="Event cover"
+                  alt={t("imageAlt")}
                   fill
                   className="object-cover"
                 />
@@ -64,7 +66,7 @@ export function Cookbook({ cookbookId }: CookbookProps) {
               <div className="relative">
                 <Image
                   src={cookbook.images[1]!}
-                  alt="Event cover"
+                  alt={t("imageAlt")}
                   fill
                   className="object-cover"
                 />
@@ -72,7 +74,7 @@ export function Cookbook({ cookbookId }: CookbookProps) {
               <div className="relative">
                 <Image
                   src={cookbook.images[2]!}
-                  alt="Event cover"
+                  alt={t("imageAlt")}
                   fill
                   className="object-cover"
                 />

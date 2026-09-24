@@ -1,4 +1,6 @@
 import type { Category, Difficulty } from "generated/prisma/enums";
+import { useLocale } from "next-intl";
+import { toLocale } from "~/lib/locales";
 import { useEffect, useState } from "react";
 import type { OrderBy } from "~/components/recipes/recipes";
 import { api } from "~/trpc/react";
@@ -25,6 +27,7 @@ export function useGetAllRecipes({
 }: UseGetAllRecipesParams) {
   const [allRecipes, setAllRecipes] = useState<RecipeDto[]>([]);
   const [lastSkip, setLastSkip] = useState(skip);
+  const locale = useLocale();
 
   const { data: resRecipes, ...resQuery } = api.recipes.getAll.useQuery({
     authorId,
@@ -33,6 +36,7 @@ export function useGetAllRecipes({
     category: category || undefined,
     difficulty: difficulty || undefined,
     search: search || undefined,
+    locale: toLocale(locale),
     skip,
   });
 

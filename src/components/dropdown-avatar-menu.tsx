@@ -1,5 +1,6 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "~/i18n/navigation";
 import { useState } from "react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { authClient } from "~/server/better-auth/client";
@@ -10,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import Link from "next/link";
 
 interface DropdownAvatarMenuProps {
   user: {
@@ -18,6 +18,7 @@ interface DropdownAvatarMenuProps {
   };
 }
 export const DropdownAvatarMenu = ({ user }: DropdownAvatarMenuProps) => {
+  const t = useTranslations("Menu");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -40,15 +41,15 @@ export const DropdownAvatarMenu = ({ user }: DropdownAvatarMenuProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem asChild>
-          <Link href="/profile">Profile</Link>
+          <Link href="/profile">{t("profile")}</Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/recipes">My Recipes</Link>
+          <Link href="/recipes">{t("myRecipes")}</Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/cookbooks">My Cookbooks</Link>
+          <Link href="/cookbooks">{t("myCookbooks")}</Link>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
@@ -63,7 +64,7 @@ export const DropdownAvatarMenu = ({ user }: DropdownAvatarMenuProps) => {
           }}
           disabled={isSubmitting}
         >
-          Sign out
+          {t("signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpIcon, SquareIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { AttachImageInput } from "./attach-image-input";
 import type { ImageWithPreview } from "../image-uploader/image-upload";
 import { Button } from "../ui/button";
@@ -33,6 +34,8 @@ export function ChatInput({
   onAttachedImageChange,
   showAttachButton,
 }: ChatInputProps) {
+  const t = useTranslations("Chat");
+
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-zinc-300 bg-white/40 px-4 py-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
       <form
@@ -45,7 +48,7 @@ export function ChatInput({
           className="w-full resize-none border-none py-2 focus-visible:ring-0"
           value={value}
           rows={1}
-          placeholder="Say something..."
+          placeholder={t("placeholder")}
           disabled={disabled}
           onChange={(event) => onChange(event.currentTarget.value)}
           onKeyDown={(event) => {

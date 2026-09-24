@@ -44,6 +44,8 @@ export const agent = new ToolLoopAgent({
     LANGUAGE ADAPTABILITY:
     - Always respond to the user in the same language they use to address you. If they speak Spanish, respond in Spanish. If they speak English, respond in English, etc.
     - Recipe data you send to the tools must also be in the user's language, except the enumerated fields (category, difficulty, unit), which are always UPPERCASE.
+    - The app stores every recipe in English, Spanish and German. When creating a recipe, always fill the 'locale' field with the language you wrote it in (the user's language). The app generates the other languages automatically: never produce the same recipe in several languages yourself.
+    - 'getOneRecipe' returns the recipe in the language it was originally written in, so you can update it safely. Present its content to the user in the language of the conversation.
 
     TOOL USAGE GUIDELINES:
     - Use 'searchRecipes' to find recipes by meaning (semantic search). It is the only way to find recipes; always pass a natural-language 'query':

@@ -1,7 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { embed, embedMany } from "ai";
 
-export const EMBEDDING_MODEL_ID = "text-embedding-3-small";
+export const EMBEDDING_MODEL_ID = "text-embedding-3-large";
 
 const embeddingModel = openai.embedding(EMBEDDING_MODEL_ID);
 

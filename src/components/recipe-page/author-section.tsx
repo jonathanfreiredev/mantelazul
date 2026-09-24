@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { api } from "~/trpc/react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Skeleton } from "../ui/skeleton";
@@ -9,6 +10,7 @@ interface AuthorSectionProps {
 }
 
 export function AuthorSection({ authorId }: AuthorSectionProps) {
+  const t = useTranslations("Recipe");
   const {
     data: resAuthor,
     isLoading,
@@ -38,7 +40,7 @@ export function AuthorSection({ authorId }: AuthorSectionProps) {
                 {resAuthor.name}
               </span>
               <span className="text-sm text-gray-500">
-                Food Editor at Mantel Azul
+                {t("authorRole")}
               </span>{" "}
             </>
           ) : (

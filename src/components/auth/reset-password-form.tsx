@@ -1,5 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -22,27 +24,34 @@ import {
   FieldSet,
 } from "../ui/field";
 import { Input } from "../ui/input";
-import { useRouter } from "next/navigation";
-
-const formSchema = z
-  .object({
-    password: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters" }),
-    confirmPassword: z
-      .string()
-      .min(8, { message: "Confirm Password must be at least 8 characters" }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-  });
+import { useRouter } from "~/i18n/navigation";
 
 export const ResetPasswordForm = ({
   token,
   className,
   ...props
 }: React.ComponentProps<"div"> & { token: string }) => {
+  const t = useTranslations("ResetPasswordForm");
+  const tValidation = useTranslations("Validation");
   const router = useRouter();
+
+  const formSchema = useMemo(
+    () =>
+      z
+        .object({
+          password: z
+            .string()
+            .min(8, { message: tValidation("passwordMin") }),
+          confirmPassword: z
+            .string()
+            .min(8, { message: tValidation("confirmPasswordMin") }),
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+          message: tValidation("passwordsDoNotMatch"),
+        }),
+    [tValidation],
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,8 +64,8 @@ export const ResetPasswordForm = ({
     const { confirmPassword, password } = data;
 
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match!", {
-        description: "Please make sure your passwords match.",
+      toast.error(t("mismatchTitle"), {
+        description: t("mismatchDescription"),
         position: "bottom-right",
       });
       return;
@@ -67,7 +76,7 @@ export const ResetPasswordForm = ({
       token,
       fetchOptions: {
         async onSuccess() {
-          toast.success("Password reset successfully!", {
+          toast.success(t("successTitle"), {
             position: "bottom-right",
           });
           form.reset();
@@ -75,7 +84,7 @@ export const ResetPasswordForm = ({
           router.refresh();
         },
         onError(error) {
-          toast.error("Failed to reset password!", {
+          toast.error(t("errorTitle"), {
             description: error.error.message,
             position: "bottom-right",
           });
@@ -91,10 +100,8 @@ export const ResetPasswordForm = ({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Reset password</CardTitle>
-          <CardDescription>
-            Enter your new password below to reset your password.
-          </CardDescription>
+          <CardTitle className="text-xl">{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="form-reset-password" onSubmit={form.handleSubmit(onSubmit)}>
@@ -107,7 +114,9 @@ export const ResetPasswordForm = ({
                       control={form.control}
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor="password">Password</FieldLabel>
+                          <FieldLabel htmlFor="password">
+                            {t("password")}
+                          </FieldLabel>
                           <Input
                             {...field}
                             id="password"
@@ -129,7 +138,7 @@ export const ResetPasswordForm = ({
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                           <FieldLabel htmlFor="confirmPassword">
-                            Confirm Password
+                            {t("confirmPassword")}
                           </FieldLabel>
                           <Input
                             {...field}
@@ -147,9 +156,7 @@ export const ResetPasswordForm = ({
                       )}
                     />
                   </Field>
-                  <FieldDescription>
-                    Must be at least 8 characters long.
-                  </FieldDescription>
+                  <FieldDescription>{t("passwordHint")}</FieldDescription>
                 </Field>
               </FieldGroup>
             </FieldSet>
@@ -160,7 +167,7 @@ export const ResetPasswordForm = ({
                 form="form-reset-password"
                 disabled={form.formState.isSubmitting}
               >
-                Reset Password
+                {t("submit")}
               </Button>
             </Field>
           </form>

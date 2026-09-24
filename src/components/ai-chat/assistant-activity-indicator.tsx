@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { Loader2Icon, SparklesIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export type AssistantActivity =
   { kind: "thinking" } | { kind: "typing" } | { kind: "working" };
@@ -16,12 +17,13 @@ export function AssistantActivityIndicator({
 }: {
   activity: AssistantActivity;
 }) {
+  const t = useTranslations("Chat");
   const label =
     activity.kind === "thinking"
-      ? "Thinking"
+      ? t("thinking")
       : activity.kind === "typing"
-        ? "Typing"
-        : "Working";
+        ? t("typing")
+        : t("working");
 
   return (
     <motion.div

@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
@@ -20,6 +21,7 @@ import {
 import { CookbookForm } from "./cookbook-form";
 
 export const CreateCookbookForm = () => {
+  const t = useTranslations("Cookbook");
   const router = useRouter();
 
   const createCookbookMutation = api.cookbooks.create.useMutation();
@@ -34,13 +36,13 @@ export const CreateCookbookForm = () => {
   async function onSubmit(data: z.infer<typeof cookbookSchema>) {
     await createCookbookMutation.mutateAsync(data, {
       onSuccess: () => {
-        toast.success("Cookbook created successfully", {
+        toast.success(t("created"), {
           position: "bottom-right",
         });
         router.refresh();
       },
       onError: (error) => {
-        toast.error("Failed to create cookbook", {
+        toast.error(t("createFailed"), {
           description: error.message,
           position: "bottom-right",
         });
@@ -51,16 +53,13 @@ export const CreateCookbookForm = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="default">Create a cookbook</Button>
+        <Button variant="default">{t("create")}</Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Cookbook</DialogTitle>
-          <DialogDescription>
-            {" "}
-            Create a new cookbook to organize your recipes.
-          </DialogDescription>
+          <DialogTitle>{t("newTitle")}</DialogTitle>
+          <DialogDescription>{t("newDescription")}</DialogDescription>
         </DialogHeader>
 
         <form id="form-create-cookbook" onSubmit={form.handleSubmit(onSubmit)}>
@@ -72,7 +71,7 @@ export const CreateCookbookForm = () => {
               form="form-create-cookbook"
               disabled={form.formState.isSubmitting}
             >
-              Create Cookbook
+              {t("createSubmit")}
             </Button>
           </DialogClose>
         </form>

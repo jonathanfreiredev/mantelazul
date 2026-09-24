@@ -22,6 +22,7 @@ export default async function UpdateRecipeLayout({
 
   const recipe = await api.recipes.getBySlug({
     slug: recipeSlug,
+    locale: "source",
   });
 
   if (!recipe) {

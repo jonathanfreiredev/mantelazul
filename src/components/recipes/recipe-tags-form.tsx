@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { Fragment, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { type z } from "zod";
@@ -46,6 +47,7 @@ export const RecipeTagsForm = ({
   className,
   ...props
 }: React.ComponentProps<"div"> & RecipeTagsFormProps) => {
+  const t = useTranslations("RecipeForm");
   const [newTagValue, setNewTagValue] = useState("");
   const [newTags, setNewTags] = useState<string[]>([]);
   const [tags] = api.tags.getAll.useSuspenseQuery();
@@ -64,8 +66,6 @@ export const RecipeTagsForm = ({
   });
 
   async function onSubmit(data: z.infer<typeof recipeTagsSchema>) {
-    console.log("Submitting tags:", data);
-
     await updateTagsMutation.mutateAsync({
       recipeId: recipe.id,
       tags: data.tags,
@@ -83,10 +83,8 @@ export const RecipeTagsForm = ({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Tags (optional)</CardTitle>
-          <CardDescription>
-            Add tags to your recipe to make it easier to find and categorize.
-          </CardDescription>
+          <CardTitle className="text-xl">{t("tagsTitle")}</CardTitle>
+          <CardDescription>{t("tagsDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="form-tags" onSubmit={form.handleSubmit(onSubmit)}>
@@ -97,7 +95,7 @@ export const RecipeTagsForm = ({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="tags">Tags </FieldLabel>
+                      <FieldLabel htmlFor="tags">{t("tagsLabel")}</FieldLabel>
 
                       <Combobox
                         items={dataTags}
@@ -119,7 +117,9 @@ export const RecipeTagsForm = ({
                                 <ComboboxChip key={item}>#{item}</ComboboxChip>
                               ))}
 
-                              <ComboboxChipsInput placeholder="Select tags..." />
+                              <ComboboxChipsInput
+                                placeholder={t("selectTags")}
+                              />
                             </Fragment>
                           </ComboboxValue>
                         </ComboboxChips>
@@ -144,11 +144,11 @@ export const RecipeTagsForm = ({
                                 }}
                               >
                                 <p className="flex w-full items-center justify-end gap-2">
-                                  <PlusIcon /> Add Tag: "{newTagValue}"
+                                  <PlusIcon /> {t("addTag", { tag: newTagValue })}
                                 </p>
                               </Button>
                             )}
-                          <ComboboxEmpty>No items found.</ComboboxEmpty>
+                          <ComboboxEmpty>{t("noItems")}</ComboboxEmpty>
                           <ComboboxList>
                             {(item) => (
                               <ComboboxItem key={item} value={item}>
@@ -174,7 +174,7 @@ export const RecipeTagsForm = ({
                 form="form-tags"
                 disabled={form.formState.isSubmitting}
               >
-                Save Tags
+                {t("saveTags")}
               </Button>
             </Field>
           </form>

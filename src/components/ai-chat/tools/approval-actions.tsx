@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "../../ui/button";
 
 interface ApprovalRequestProps {
@@ -14,15 +15,17 @@ export function ApprovalActions({
   onApprove,
   onDeny,
 }: ApprovalRequestProps) {
+  const t = useTranslations("Chat");
+
   return (
     <div>
       <p className="mb-2">{question}</p>
       <div className="flex gap-2">
         <Button variant="default" onClick={onApprove}>
-          Approve
+          {t("approve")}
         </Button>
         <Button variant="destructive" onClick={onDeny}>
-          Deny
+          {t("deny")}
         </Button>
       </div>
     </div>

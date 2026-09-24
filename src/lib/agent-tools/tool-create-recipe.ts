@@ -1,6 +1,7 @@
 import { tool, zodSchema } from "ai";
 import { Category, Difficulty, Unit } from "generated/prisma/enums";
 import z from "zod";
+import { LOCALES } from "~/lib/locales";
 import { intSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/server";
 import { generateAndUpload } from "../cloudinary";
@@ -91,6 +92,11 @@ const recipeInputSchema = z.object({
     .describe(
       "Tags for the recipe, e.g. 'vegan', 'gluten-free'. Do not prefix them with '#'. Tags must be in the same language as the recipe.",
     ),
+  locale: z
+    .enum(LOCALES)
+    .describe(
+      "Language the recipe is written in, as an ISO 639-1 code: 'en' (English), 'es' (Spanish) or 'de' (German). Use the language the user is speaking. The app translates the recipe into the other languages automatically. It is required.",
+    ),
 });
 
 export const toolCreateRecipe = tool({
@@ -138,6 +144,7 @@ IMPORTANT:
       protein: recipe.protein,
       fat: recipe.fat,
       imageUrl: image || null,
+      locale: recipe.locale,
     });
 
     await api.recipes.updateIngredients({

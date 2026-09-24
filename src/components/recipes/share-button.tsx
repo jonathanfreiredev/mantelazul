@@ -1,6 +1,7 @@
 "use client";
 import { CopyIcon, Share2Icon } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { cn } from "~/lib/utils";
 import {
   DropdownMenu,
@@ -19,11 +20,12 @@ interface ShareButtonProps {
 }
 
 export function ShareButton({
-  recipeSlug,
   className,
   positionIcon = "right",
   size = "base",
 }: ShareButtonProps) {
+  const t = useTranslations("RecipeActions");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -50,7 +52,7 @@ export function ShareButton({
                 : "",
             )}
           >
-            share
+            {t("share")}
           </span>
           <Share2Icon
             fill="none"
@@ -72,14 +74,13 @@ export function ShareButton({
         <DropdownMenuGroup>
           <DropdownMenuItem
             onClick={() => {
-              const url = `${window.location.origin}/recipes/${recipeSlug}`;
-              navigator.clipboard.writeText(url);
+              navigator.clipboard.writeText(window.location.href);
 
-              toast.success("Recipe URL copied to clipboard");
+              toast.success(t("urlCopied"));
             }}
           >
             <CopyIcon className="size-4" />
-            Copy
+            {t("copy")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

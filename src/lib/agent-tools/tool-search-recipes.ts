@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import z from "zod";
 import { getRecipeHitsByIds } from "~/server/rag/hydrate";
+import { getRequestLocale } from "~/server/translations/request-locale";
 import { api } from "~/trpc/server";
 import { formatRecipeListForModel } from "./format-recipe-for-model";
 
@@ -64,7 +65,8 @@ IMPORTANT:
   execute: async (input) => {
     const { matches, hasMore } = await api.recipes.semanticSearch(input);
 
-    const recipes = await getRecipeHitsByIds(matches);
+    const locale = await getRequestLocale();
+    const recipes = await getRecipeHitsByIds(matches, locale);
 
     return {
       success: true,

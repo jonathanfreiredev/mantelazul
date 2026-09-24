@@ -1,7 +1,8 @@
 "use client";
 import { SquarePenIcon } from "lucide-react";
 import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 
 interface EditRecipeButtonProps {
@@ -17,6 +18,7 @@ export function EditRecipeButton({
   positionIcon = "right",
   size = "base",
 }: EditRecipeButtonProps) {
+  const t = useTranslations("RecipeActions");
   const router = useRouter();
 
   return (
@@ -44,7 +46,7 @@ export function EditRecipeButton({
           positionIcon === "top" || positionIcon === "left" ? "order-2" : "",
         )}
       >
-        edit
+        {t("edit")}
       </span>
       <SquarePenIcon
         fill="none"

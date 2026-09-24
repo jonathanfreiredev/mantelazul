@@ -1,5 +1,7 @@
-import Link from "next/link";
+import { Link } from "~/i18n/navigation";
 import { redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { toLocale } from "~/lib/locales";
 import { Recipes } from "~/components/recipes/recipes";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -8,6 +10,7 @@ import { api, HydrateClient } from "~/trpc/server";
 
 export default async function RecipesPage() {
   const session = await getSession();
+  const t = await getTranslations("Pages");
 
   const isLoggedIn = !!session?.session;
 
@@ -15,10 +18,13 @@ export default async function RecipesPage() {
     redirect("/");
   }
 
+  const locale = await getLocale();
+
   void api.recipes.getAll.prefetch({
     authorId: session.user.id,
     orderBy: "createdAt",
     skip: 0,
+    locale: toLocale(locale),
   });
 
   return (
@@ -27,16 +33,16 @@ export default async function RecipesPage() {
         <Tabs value="recipes">
           <TabsList className="py-4" variant="line">
             <TabsTrigger value="recipes" asChild className="p-3 text-xl">
-              <Link href="/recipes">My recipes</Link>
+              <Link href="/recipes">{t("myRecipes")}</Link>
             </TabsTrigger>
             <TabsTrigger value="cookbooks" asChild>
-              <Link href="/cookbooks">My cookbooks</Link>
+              <Link href="/cookbooks">{t("myCookbooks")}</Link>
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
         <Button variant="default" className="mt-6">
-          <Link href="/recipes/new">Create new recipe</Link>
+          <Link href="/recipes/new">{t("createRecipe")}</Link>
         </Button>
         <div className="flex w-full px-5 sm:px-10">
           <Recipes authorId={session.user.id} isEditable />

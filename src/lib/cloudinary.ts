@@ -55,7 +55,7 @@ export async function generateAndUpload(
     model: openai.image("gpt-image-2.5-sunburst"),
     prompt: `Professional gourmet food photography of ${title}${
       styleHint ? `, ${styleHint} style` : ""
-    }, high resolution, 8k, appetizing lighting, macro lens plating.`,
+    }, high resolution, 8K, appetizing lighting, beautifully plated, macro photography.`,
     size: "1024x1024",
     providerOptions: {
       openai: {

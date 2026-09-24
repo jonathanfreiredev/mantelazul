@@ -1,6 +1,8 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+import { useRouter } from "~/i18n/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -24,22 +26,26 @@ import {
 } from "../ui/field";
 import { Input } from "../ui/input";
 
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.email({ message: "Please enter a valid email address" }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters long" }),
-  confirmPassword: z.string().min(8, {
-    message: "Confirm Password must be at least 8 characters long",
-  }),
-});
-
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const t = useTranslations("SignupForm");
+  const tValidation = useTranslations("Validation");
   const router = useRouter();
+
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(2, { message: tValidation("nameMin") }),
+        email: z.email({ message: tValidation("invalidEmail") }),
+        password: z.string().min(8, { message: tValidation("passwordMin") }),
+        confirmPassword: z
+          .string()
+          .min(8, { message: tValidation("confirmPasswordMin") }),
+      }),
+    [tValidation],
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,8 +61,8 @@ export function SignupForm({
     const { confirmPassword, ...signupData } = data;
 
     if (data.password !== data.confirmPassword) {
-      toast.error("Passwords do not match!", {
-        description: "Please make sure your passwords match.",
+      toast.error(t("mismatchTitle"), {
+        description: t("mismatchDescription"),
         position: "bottom-right",
       });
       return;
@@ -66,8 +72,8 @@ export function SignupForm({
       ...signupData,
       fetchOptions: {
         onSuccess() {
-          toast.success("Account created successfully!", {
-            description: "Welcome to Mantel Azul.",
+          toast.success(t("successTitle"), {
+            description: t("successDescription"),
             position: "bottom-right",
           });
           form.reset();
@@ -76,7 +82,7 @@ export function SignupForm({
           router.refresh();
         },
         onError(error) {
-          toast.error("Failed to log in!", {
+          toast.error(t("errorTitle"), {
             description: error.error.message,
             position: "bottom-right",
           });
@@ -92,10 +98,8 @@ export function SignupForm({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create your account</CardTitle>
-          <CardDescription>
-            Enter your email below to create your account
-          </CardDescription>
+          <CardTitle className="text-xl">{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="form-signup" onSubmit={form.handleSubmit(onSubmit)}>
@@ -106,7 +110,7 @@ export function SignupForm({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="name">Name</FieldLabel>
+                      <FieldLabel htmlFor="name">{t("name")}</FieldLabel>
                       <Input
                         {...field}
                         id="name"
@@ -127,7 +131,7 @@ export function SignupForm({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="email">Email</FieldLabel>
+                      <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
                       <Input
                         {...field}
                         id="email"
@@ -136,9 +140,7 @@ export function SignupForm({
                         placeholder="joe@example.com"
                         required
                       />
-                      <FieldDescription>
-                        Choose a unique email for your account.
-                      </FieldDescription>
+                      <FieldDescription>{t("emailHint")}</FieldDescription>
 
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -153,7 +155,9 @@ export function SignupForm({
                       control={form.control}
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor="password">Password</FieldLabel>
+                          <FieldLabel htmlFor="password">
+                            {t("password")}
+                          </FieldLabel>
                           <Input
                             {...field}
                             id="password"
@@ -175,7 +179,7 @@ export function SignupForm({
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
                           <FieldLabel htmlFor="confirmPassword">
-                            Confirm Password
+                            {t("confirmPassword")}
                           </FieldLabel>
                           <Input
                             {...field}
@@ -193,9 +197,7 @@ export function SignupForm({
                       )}
                     />
                   </Field>
-                  <FieldDescription>
-                    Must be at least 8 characters long.
-                  </FieldDescription>
+                  <FieldDescription>{t("passwordHint")}</FieldDescription>
                 </Field>
                 <Field>
                   <Button
@@ -203,7 +205,7 @@ export function SignupForm({
                     form="form-signup"
                     disabled={form.formState.isSubmitting}
                   >
-                    Create Account
+                    {t("submit")}
                   </Button>
                 </Field>
               </FieldGroup>

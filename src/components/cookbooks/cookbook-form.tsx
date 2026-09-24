@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { Controller } from "react-hook-form";
 import {
   Field,
@@ -15,6 +16,8 @@ interface CookbookFormProps {
 }
 
 export function CookbookForm({ control }: CookbookFormProps) {
+  const t = useTranslations("Cookbook");
+
   return (
     <FieldSet className="mb-5 w-full">
       <FieldGroup className="w-full">
@@ -23,12 +26,12 @@ export function CookbookForm({ control }: CookbookFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="name">Name</FieldLabel>
+              <FieldLabel htmlFor="name">{t("name")}</FieldLabel>
               <Input
                 {...field}
                 id="name"
                 type="text"
-                placeholder="My Cookbook"
+                placeholder={t("namePlaceholder")}
                 required
               />
 

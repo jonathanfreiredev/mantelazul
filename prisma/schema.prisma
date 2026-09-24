@@ -95,8 +95,6 @@ enum Category {
 
 model Recipe {
   id              String     @id @default(cuid())
-  title           String
-  description     String
   published       Boolean    @default(true)
   slug            String     @unique
   imageUrl        String?
@@ -104,6 +102,9 @@ model Recipe {
   likesCount      Int        @default(0)
   difficulty      Difficulty @default(EASY)
   category        Category   @default(MAIN_COURSE)
+
+  // Language the author wrote the recipe in. Its translation row is the authoritative text.
+  sourceLocale String @default("en")
 
   // Time in minutes
   preparationTime Int
@@ -119,17 +120,40 @@ model Recipe {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ingredients Ingredient[]
-  steps       Step[]
-  tags        RecipeTag[]
-  likes       RecipeLike[]
-  cookbooks   CookbookRecipe[]
+  ingredients  Ingredient[]
+  steps        Step[]
+  tags         RecipeTag[]
+  likes        RecipeLike[]
+  cookbooks    CookbookRecipe[]
+  translations RecipeTranslation[]
 
   author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId String?
 
-  @@index([title])
   @@map("recipe")
+}
+
+/**
+ * Localized text of a recipe. Every locale holds the title, description, ingredient names and
+ * step descriptions for that language; quantities, units, times and metadata stay on the
+ * locale-independent models. Ingredient/step text is keyed by `order` because the structural
+ * rows are deleted and recreated on every save, so their ids do not survive an edit.
+ */
+model RecipeTranslation {
+  id          String   @id @default(cuid())
+  recipeId    String
+  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  locale      String
+  title       String
+  description String
+  ingredients Json // [{ order: number, name: string }]
+  steps       Json // [{ order: number, description: string }]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([recipeId, locale])
+  @@index([locale, title])
+  @@map("recipe_translation")
 }
 
 enum Unit {
@@ -145,7 +169,6 @@ enum Unit {
 
 model Ingredient {
   id        String   @id @default(cuid())
-  name      String
   quantity  Decimal  @db.Decimal(10, 3)
   unit      Unit
   order     Int
@@ -155,17 +178,15 @@ model Ingredient {
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId String
 
-  @@index([name])
   @@map("ingredient")
 }
 
 model Step {
-  id          String   @id @default(cuid())
-  description String
-  order       Int
-  imageUrl    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  order     Int
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId String

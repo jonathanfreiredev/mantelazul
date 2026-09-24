@@ -11,6 +11,7 @@ export default async function UpdateRecipePage({
 
   const recipe = await api.recipes.getBySlug({
     slug: recipeSlug,
+    locale: "source",
   });
 
   return (

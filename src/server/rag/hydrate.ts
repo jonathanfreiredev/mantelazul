@@ -1,14 +1,11 @@
-import type { Prisma } from "generated/prisma/client";
+import { DEFAULT_LOCALE, type Locale } from "~/lib/locales";
 import { db } from "~/server/db";
+import {
+  recipeWithTranslationsInclude,
+  toRecipeDto,
+} from "~/server/translations/resolve";
+import type { RecipeDto } from "~/types/recipe";
 import type { RecipeMatch, RecipeSearchHit } from "./types";
-
-const hydrateInclude = {
-  tags: { include: { tag: true } },
-} satisfies Prisma.RecipeInclude;
-
-type HydratedRecipe = Prisma.RecipeGetPayload<{
-  include: typeof hydrateInclude;
-}>;
 
 /**
  * Hydrates retrieval matches (record ids) into full recipes using Postgres as the source
@@ -19,15 +16,18 @@ type HydratedRecipe = Prisma.RecipeGetPayload<{
  */
 export async function getRecipeHitsByIds(
   matches: RecipeMatch[],
+  locale: Locale = DEFAULT_LOCALE,
 ): Promise<RecipeSearchHit[]> {
   if (matches.length === 0) return [];
 
   const recipes = await db.recipe.findMany({
     where: { id: { in: matches.map((match) => match.id) } },
-    include: hydrateInclude,
+    include: recipeWithTranslationsInclude,
   });
 
-  const byId = new Map(recipes.map((recipe) => [recipe.id, recipe]));
+  const byId = new Map(
+    recipes.map((recipe) => [recipe.id, toRecipeDto(recipe, locale)]),
+  );
 
   return matches
     .map((match) => {
@@ -38,7 +38,7 @@ export async function getRecipeHitsByIds(
 }
 
 function toRecipeSearchHit(
-  recipe: HydratedRecipe,
+  recipe: RecipeDto,
   similarity?: number,
 ): RecipeSearchHit {
   const hit: RecipeSearchHit = {

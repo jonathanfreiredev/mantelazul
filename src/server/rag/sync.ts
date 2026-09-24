@@ -1,54 +1,54 @@
-import type { Prisma } from "generated/prisma/client";
+import { DEFAULT_LOCALE } from "~/lib/locales";
 import { db } from "~/server/db";
+import {
+  recipeWithTranslationsInclude,
+  toRecipeDto,
+  type RecipeWithTranslations,
+} from "~/server/translations/resolve";
 import { getRecipeCollection } from "./client";
 import { buildRecipeDocument, buildRecipeMetadata } from "./document";
 import { embedText, embedTexts } from "./embedder";
 import type { RecipeIndexSource, RecipeMetadata } from "./types";
 
-const recipeIndexInclude = {
-  ingredients: { orderBy: { order: "asc" } },
-  steps: { orderBy: { order: "asc" } },
-  tags: { include: { tag: true } },
-} satisfies Prisma.RecipeInclude;
-
-type RecipeWithRelations = Prisma.RecipeGetPayload<{
-  include: typeof recipeIndexInclude;
-}>;
-
 /**
  * Maps a Prisma recipe (with relations) to the pure source used by the document builder.
+ *
+ * The document is always built from the canonical locale, regardless of who is searching: the
+ * multilingual embedding model is what lets a query in any language match it.
  */
 export function toRecipeIndexSource(
-  recipe: RecipeWithRelations,
+  recipe: RecipeWithTranslations,
 ): RecipeIndexSource {
+  const dto = toRecipeDto(recipe, DEFAULT_LOCALE);
+
   return {
-    id: recipe.id,
-    authorId: recipe.authorId,
-    slug: recipe.slug,
-    title: recipe.title,
-    description: recipe.description,
-    imageUrl: recipe.imageUrl,
-    category: recipe.category,
-    difficulty: recipe.difficulty,
-    published: recipe.published,
-    defaultServings: recipe.defaultServings,
-    preparationTime: recipe.preparationTime,
-    cookingTime: recipe.cookingTime,
-    restingTime: recipe.restingTime,
-    calories: recipe.calories,
-    carbohydrates: recipe.carbohydrates,
-    protein: recipe.protein,
-    fat: recipe.fat,
-    createdAt: recipe.createdAt,
-    ingredients: recipe.ingredients.map((ingredient) => ({
+    id: dto.id,
+    authorId: dto.authorId,
+    slug: dto.slug,
+    title: dto.title,
+    description: dto.description,
+    imageUrl: dto.imageUrl,
+    category: dto.category,
+    difficulty: dto.difficulty,
+    published: dto.published,
+    defaultServings: dto.defaultServings,
+    preparationTime: dto.preparationTime,
+    cookingTime: dto.cookingTime,
+    restingTime: dto.restingTime,
+    calories: dto.calories,
+    carbohydrates: dto.carbohydrates,
+    protein: dto.protein,
+    fat: dto.fat,
+    createdAt: dto.createdAt,
+    ingredients: dto.ingredients.map((ingredient) => ({
       name: ingredient.name,
-      quantity: ingredient.quantity.toString(),
+      quantity: ingredient.quantity,
       unit: ingredient.unit,
     })),
-    steps: recipe.steps.map((step) => ({
+    steps: dto.steps.map((step) => ({
       description: step.description,
     })),
-    tags: recipe.tags.map((recipeTag) => recipeTag.tag.name),
+    tags: dto.tags.map((recipeTag) => recipeTag.tag.name),
   };
 }
 
@@ -59,7 +59,7 @@ async function loadRecipeIndexSources(
 
   const recipes = await db.recipe.findMany({
     where: { id: { in: ids } },
-    include: recipeIndexInclude,
+    include: recipeWithTranslationsInclude,
   });
 
   return recipes.map(toRecipeIndexSource);
@@ -88,7 +88,9 @@ export async function indexRecipe(id: string): Promise<void> {
     include: ["metadatas"],
   });
   const existingMetadata = existing.metadatas[0] as
-    RecipeMetadata | null | undefined;
+    | RecipeMetadata
+    | null
+    | undefined;
 
   // Content unchanged: refresh metadata only (e.g. publish state) without re-embedding.
   if (existingMetadata?.contentHash === metadata.contentHash) {
@@ -138,7 +140,9 @@ export async function removeRecipeIndex(id: string): Promise<void> {
  * changes. Throws on failure so the caller can report it.
  */
 export async function reindexAllRecipes(batchSize = 50): Promise<number> {
-  const recipes = await db.recipe.findMany({ include: recipeIndexInclude });
+  const recipes = await db.recipe.findMany({
+    include: recipeWithTranslationsInclude,
+  });
   const collection = await getRecipeCollection();
 
   let indexed = 0;

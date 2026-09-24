@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { type z } from "zod";
@@ -30,6 +31,7 @@ export const UpdateCookbookForm = ({
   open,
   onOpenChange,
 }: UpdateCookbookFormProps) => {
+  const t = useTranslations("Cookbook");
   const router = useRouter();
 
   const createCookbookMutation = api.cookbooks.update.useMutation();
@@ -49,13 +51,13 @@ export const UpdateCookbookForm = ({
       },
       {
         onSuccess: () => {
-          toast.success("Cookbook updated successfully", {
+          toast.success(t("updated"), {
             position: "bottom-right",
           });
           router.refresh();
         },
         onError: (error) => {
-          toast.error("Failed to update cookbook", {
+          toast.error(t("updateFailed"), {
             description: error.message,
             position: "bottom-right",
           });
@@ -68,10 +70,8 @@ export const UpdateCookbookForm = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Update cookbook</DialogTitle>
-          <DialogDescription>
-            Update the name of your cookbook to keep it organized.
-          </DialogDescription>
+          <DialogTitle>{t("updateTitle")}</DialogTitle>
+          <DialogDescription>{t("updateDescription")}</DialogDescription>
         </DialogHeader>
 
         <form id="form-update-cookbook" onSubmit={form.handleSubmit(onSubmit)}>
@@ -83,7 +83,7 @@ export const UpdateCookbookForm = ({
               form="form-update-cookbook"
               disabled={form.formState.isSubmitting}
             >
-              Update Cookbook
+              {t("updateSubmit")}
             </Button>
           </DialogClose>
         </form>

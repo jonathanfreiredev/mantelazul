@@ -9,6 +9,7 @@ import {
 import { ArrowDownIcon, SparklesIcon, Trash2Icon, XIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "~/hooks/use-media-query";
 import type { MyAgentUIMessage } from "~/lib/agent";
@@ -56,6 +57,7 @@ export default function AIAgentChat({
   chatId,
   messages: savedMessages,
 }: AIAgentChatProps) {
+  const t = useTranslations("Chat");
   const [attachedImage, setAttachedImage] = useState<ImageWithPreview | null>(
     null,
   );
@@ -285,7 +287,7 @@ export default function AIAgentChat({
           <DrawerTitle>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-lg font-normal">
-                <SparklesIcon size="20" strokeWidth={1.5} /> Assistant
+                <SparklesIcon size="20" strokeWidth={1.5} /> {t("title")}
               </div>
 
               {messages.length > 0 && (
@@ -302,8 +304,7 @@ export default function AIAgentChat({
           </DrawerTitle>
         </DrawerHeader>
         <DrawerDescription className="sr-only">
-          The assistant can help you with a variety of tasks, such as answering
-          questions, providing recommendations, and creating recipes.
+          {t("description")}
         </DrawerDescription>
 
         <div className="relative flex min-h-40 flex-col px-4">
@@ -325,9 +326,7 @@ export default function AIAgentChat({
             ) : (
               <div className="flex flex-col items-center gap-4 pt-10">
                 <p className="text-center text-sm text-neutral-500">
-                  The assistant can help you with a variety of tasks, such as
-                  answering questions, providing recommendations, and creating
-                  recipes.
+                  {t("description")}
                 </p>
               </div>
             )}
@@ -370,7 +369,7 @@ export default function AIAgentChat({
                 </Button>
                 <Image
                   src={attachedImage.preview}
-                  alt="Attached image preview"
+                  alt={t("attachedImageAlt")}
                   fill
                   className="object-cover"
                 />
@@ -386,10 +385,7 @@ export default function AIAgentChat({
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="absolute bottom-3 z-100 w-[90%] rounded-md border-2 border-red-400/30 bg-red-100 px-4 py-2 shadow-lg shadow-gray-400/50"
             >
-              <p className="text-sm text-red-700">
-                Message limit exceeded. Please delete the chat to start a new
-                conversation.
-              </p>
+              <p className="text-sm text-red-700">{t("limitExceeded")}</p>
             </motion.div>
           )}
         </div>

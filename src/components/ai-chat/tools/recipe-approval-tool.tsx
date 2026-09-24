@@ -1,7 +1,8 @@
 "use client";
 
 import { NotepadTextIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { Button } from "../../ui/button";
 import { ApprovalActions } from "./approval-actions";
 import { RecipeResultHeader } from "./recipe-result-header";
@@ -26,6 +27,7 @@ export function RecipeApprovalTool({
   onDeny,
   onNavigate,
 }: RecipeApprovalToolProps) {
+  const t = useTranslations("Chat");
   const router = useRouter();
   const isCreate = part.type === "tool-createRecipe";
 
@@ -33,7 +35,9 @@ export function RecipeApprovalTool({
     case "approval-requested":
       return (
         <ApprovalActions
-          question={`Do you approve ${isCreate ? "creating" : "updating"} the following recipe: ${part.input.title}?`}
+          question={t(isCreate ? "approveCreateRecipe" : "approveUpdateRecipe", {
+            title: part.input.title,
+          })}
           onApprove={() => onApprove(part.approval.id)}
           onDeny={() => onDeny(part.approval.id)}
         />
@@ -47,12 +51,12 @@ export function RecipeApprovalTool({
           <RecipeResultHeader
             title={recipe.title}
             imageUrl={recipe.imageUrl}
-            caption={isCreate ? "Created successfully" : "Updated successfully"}
+            caption={isCreate ? t("created") : t("updated")}
           />
           <Button
             variant="outline"
             onClick={() => {
-              if (window.location.pathname === `/recipes/${recipe.slug}`) {
+              if (window.location.pathname.endsWith(`/recipes/${recipe.slug}`)) {
                 // Already on the recipe page: refresh the data instead of pushing.
                 router.refresh();
               } else {
@@ -62,7 +66,7 @@ export function RecipeApprovalTool({
               onNavigate();
             }}
           >
-            <NotepadTextIcon /> View Recipe
+            <NotepadTextIcon /> {t("viewRecipe")}
           </Button>
         </ToolResultCard>
       );
@@ -71,10 +75,7 @@ export function RecipeApprovalTool({
     case "output-denied":
       return (
         <ToolResultCard tone="denied">
-          <p>
-            Recipe {isCreate ? "creation" : "update"} denied. The assistant will
-            try to find another solution.
-          </p>
+          <p>{t(isCreate ? "creationDenied" : "updateDenied")}</p>
         </ToolResultCard>
       );
 

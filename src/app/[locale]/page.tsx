@@ -1,12 +1,15 @@
 import Image from "next/image";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "~/i18n/navigation";
 import { CarouselMainCategory } from "~/components/home/carousel-main-category";
 import { CategoriesNavbar } from "~/components/home/categories-navbar";
 import { Button } from "~/components/ui/button";
 import { categories } from "~/lib/categories-list";
-import { capitalize } from "~/lib/utils";
 
 export default async function Home() {
+  const t = await getTranslations("Pages");
+  const tCategories = await getTranslations("CategoryPages");
+
   const [
     explore,
     mains,
@@ -25,7 +28,7 @@ export default async function Home() {
         <div className="relative flex h-[calc(100vh-12rem)] max-h-250 w-full items-center justify-center gap-4 px-10 py-16">
           <Image
             src="/images/lime-and-green-leaves.webp"
-            alt="Lime and green leaves"
+            alt={t("limeAndGreenLeaves")}
             fill
             className="absolute -z-10 object-cover"
           />
@@ -33,10 +36,10 @@ export default async function Home() {
           <div className="flex h-full w-full flex-col text-gray-800 lg:flex-row">
             <div className="flex flex-1 flex-col items-center gap-4 px-2 lg:items-start">
               <h2 className="text-center text-5xl sm:text-7xl lg:text-left">
-                {capitalize(mains?.name || "mains")}
+                {tCategories("mains.name")}
               </h2>
               <p className="max-w-125 text-center lg:text-left">
-                {mains?.description}
+                {tCategories("mains.description")}
               </p>
 
               <div className="flex justify-center lg:justify-start">
@@ -46,7 +49,7 @@ export default async function Home() {
                     size="lg"
                     className="hover:opacity-80"
                   >
-                    View recipes
+                    {t("viewRecipes")}
                   </Button>
                 </Link>
               </div>
@@ -62,23 +65,23 @@ export default async function Home() {
           <div className="relative flex-1">
             <Image
               src="/images/aperol-drink.webp"
-              alt="Aperol drink"
+              alt={t("aperolDrink")}
               fill
               className="absolute -z-10 object-cover"
             />
 
             <div className="flex flex-col items-center gap-5 p-5 text-white sm:p-15 lg:items-start">
               <h2 className="text-center text-5xl sm:text-7xl lg:text-left">
-                {capitalize(drinks?.name || "drinks")}
+                {tCategories("drinks.name")}
               </h2>
               <p className="max-w-125 text-center lg:text-left">
-                {drinks?.description}
+                {tCategories("drinks.description")}
               </p>
 
               <div className="flex justify-center lg:justify-start">
                 <Link href={drinks?.href || "/drinks"}>
                   <Button variant="secondary" size="lg">
-                    View recipes
+                    {t("viewRecipes")}
                   </Button>
                 </Link>
               </div>
@@ -87,23 +90,23 @@ export default async function Home() {
           <div className="relative flex flex-1">
             <Image
               src="/images/macarons.webp"
-              alt="Macarons"
+              alt={t("macarons")}
               fill
               className="absolute -z-10 object-cover"
             />
 
             <div className="flex w-full flex-col items-center gap-5 p-5 text-white sm:p-15 lg:items-start">
               <h2 className="text-center text-5xl sm:text-7xl lg:text-left">
-                {capitalize(desserts?.name || "desserts")}
+                {tCategories("desserts.name")}
               </h2>
               <p className="max-w-125 text-center lg:text-left">
-                {desserts?.description}
+                {tCategories("desserts.description")}
               </p>
 
               <div className="flex justify-center lg:justify-start">
                 <Link href={desserts?.href || "/desserts"}>
                   <Button variant="secondary" size="lg">
-                    View recipes
+                    {t("viewRecipes")}
                   </Button>
                 </Link>
               </div>
@@ -114,23 +117,23 @@ export default async function Home() {
         <div className="relative h-[calc(100vh-12rem)] max-h-220 w-full">
           <Image
             src={breakfast?.imageUrl || ""}
-            alt="Picnic"
+            alt={t("picnic")}
             fill
             className="absolute -z-10 object-cover"
           />
 
           <div className="flex flex-col items-center gap-5 p-5 text-white sm:p-15 lg:items-start">
             <h2 className="text-center text-5xl sm:text-7xl lg:text-left">
-              {capitalize(breakfast?.name || "breakfast")}
+              {tCategories("breakfast.name")}
             </h2>
             <p className="max-w-125 text-center lg:text-left">
-              {breakfast?.description}
+              {tCategories("breakfast.description")}
             </p>
 
             <div className="flex justify-center lg:justify-start">
               <Link href={breakfast?.href || "/breakfast"}>
                 <Button variant="secondary" size="lg">
-                  View recipes
+                  {t("viewRecipes")}
                 </Button>
               </Link>
             </div>

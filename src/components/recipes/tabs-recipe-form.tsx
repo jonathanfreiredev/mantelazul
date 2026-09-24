@@ -1,5 +1,6 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
@@ -17,6 +18,7 @@ export function TabsRecipeForm({
   step,
   children,
 }: BreadcrumbRecipeFormProps) {
+  const t = useTranslations("RecipeForm");
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const router = useRouter();
 
@@ -44,7 +46,7 @@ export function TabsRecipeForm({
               router.push(`/recipes/${recipeSlug}/update`);
             }}
           >
-            Details
+            {t("tabDetails")}
           </TabsTrigger>
 
           <TabsTrigger
@@ -54,7 +56,7 @@ export function TabsRecipeForm({
               router.push(`/recipes/${recipeSlug}/update/ingredients`);
             }}
           >
-            Ingredients
+            {t("tabIngredients")}
           </TabsTrigger>
 
           <TabsTrigger
@@ -64,7 +66,7 @@ export function TabsRecipeForm({
               router.push(`/recipes/${recipeSlug}/update/steps`);
             }}
           >
-            Steps
+            {t("tabSteps")}
           </TabsTrigger>
 
           <TabsTrigger
@@ -74,7 +76,7 @@ export function TabsRecipeForm({
               router.push(`/recipes/${recipeSlug}/update/tags`);
             }}
           >
-            Tags
+            {t("tabTags")}
           </TabsTrigger>
         </TabsList>
       </Tabs>

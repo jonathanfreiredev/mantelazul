@@ -1,13 +1,14 @@
 "use client";
 import { LogInIcon, LogOutIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { authClient } from "~/server/better-auth/client";
 import { Item, ItemContent, ItemMedia, ItemTitle } from "./ui/item";
-import Link from "next/link";
+import { Link, useRouter } from "~/i18n/navigation";
 import { DrawerClose } from "./ui/drawer";
 
 export function SidebarDrawerAuth() {
+  const t = useTranslations("Menu");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const { data, isPending } = authClient.useSession();
@@ -26,7 +27,7 @@ export function SidebarDrawerAuth() {
                 <LogInIcon className="size-5" />
               </ItemMedia>
               <ItemContent>
-                <ItemTitle>Log in</ItemTitle>
+                <ItemTitle>{t("logIn")}</ItemTitle>
               </ItemContent>
             </Link>
           </Item>
@@ -50,7 +51,7 @@ export function SidebarDrawerAuth() {
               <LogOutIcon className="size-5" />
             </ItemMedia>
             <ItemContent>
-              <ItemTitle>Sign out</ItemTitle>
+              <ItemTitle>{t("signOut")}</ItemTitle>
             </ItemContent>
           </Item>
         </DrawerClose>

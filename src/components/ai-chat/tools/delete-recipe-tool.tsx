@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ApprovalActions } from "./approval-actions";
 import { ToolResultCard } from "./tool-result-card";
 import { type ToolPart } from "./tool-part";
@@ -16,11 +17,13 @@ export function DeleteRecipeTool({
   onApprove,
   onDeny,
 }: DeleteRecipeToolProps) {
+  const t = useTranslations("Chat");
+
   switch (part.state) {
     case "approval-requested":
       return (
         <ApprovalActions
-          question="Do you approve deleting this recipe? This cannot be undone."
+          question={t("approveDeleteRecipe")}
           onApprove={() => onApprove(part.approval.id)}
           onDeny={() => onDeny(part.approval.id)}
         />
@@ -29,14 +32,14 @@ export function DeleteRecipeTool({
     case "output-available":
       return (
         <ToolResultCard>
-          <p>Recipe deleted successfully.</p>
+          <p>{t("deleted")}</p>
         </ToolResultCard>
       );
 
     case "output-denied":
       return (
         <ToolResultCard tone="denied">
-          <p>Deletion denied. The recipe was not deleted.</p>
+          <p>{t("deletionDenied")}</p>
         </ToolResultCard>
       );
 

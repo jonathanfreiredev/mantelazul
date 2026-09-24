@@ -1,13 +1,15 @@
-import type { Ingredient } from "generated/prisma/client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import type { DecimalToString } from "~/types/decimal-to-string";
+import type { LocalizedIngredient } from "~/types/recipe";
 import { Button } from "../ui/button";
 import { formatQuantity } from "~/lib/utils";
 import { formatUnit } from "~/lib/units";
+import { useLocale } from "next-intl";
+import { type Locale } from "~/lib/locales";
 
 interface IngredientsSectionProps {
   defaultServings: number;
-  ingredients: DecimalToString<Ingredient>[];
+  ingredients: LocalizedIngredient[];
 }
 
 export function IngredientsSection({
@@ -15,10 +17,12 @@ export function IngredientsSection({
   ingredients,
 }: IngredientsSectionProps) {
   const [servings, setServings] = useState(defaultServings);
+  const t = useTranslations("Recipe");
+  const locale = useLocale() as Locale;
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <h3 className="text-2xl font-semibold">Ingredients</h3>
+      <h3 className="text-2xl font-semibold">{t("ingredients")}</h3>
 
       <div className="flex items-center gap-4">
         <Button
@@ -36,7 +40,7 @@ export function IngredientsSection({
         >
           +
         </Button>
-        <span className="text-md text-gray-500">Servings</span>
+        <span className="text-md text-gray-500">{t("servings")}</span>
       </div>
 
       <ul className="list-none space-y-1">
@@ -46,7 +50,7 @@ export function IngredientsSection({
               {formatQuantity(
                 parseFloat(ingredient.quantity) * (servings / defaultServings),
               )}{" "}
-              {formatUnit(ingredient.unit)}
+              {formatUnit(ingredient.unit, locale)}
             </span>
 
             <span className="flex-1">{ingredient.name}</span>

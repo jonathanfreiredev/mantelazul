@@ -1,0 +1,373 @@
+{
+  "Metadata": {
+    "title": "Mantel Azul",
+    "description": "Aplicación full-stack de recetas con Next.js, tRPC, Prisma y Tailwind."
+  },
+  "Header": {
+    "language": "Idioma"
+  },
+  "Footer": {
+    "rights": "© {year} Mantel Azul. Todos los derechos reservados."
+  },
+  "Nav": {
+    "newRecipe": "Nueva receta"
+  },
+  "Recipe": {
+    "ingredients": "Ingredientes",
+    "steps": "Pasos",
+    "stepCounter": "Paso {current}/{total}",
+    "tags": "Etiquetas",
+    "servings": "Raciones",
+    "nutritionalInfo": "Información nutricional por ración",
+    "difficulty": "Dificultad",
+    "preparation": "Preparación",
+    "cooking": "Cocción",
+    "resting": "Reposo",
+    "minutes": "{count} min",
+    "kcal": "Kcal",
+    "carbs": "Carbohidratos",
+    "protein": "Proteínas",
+    "fat": "Grasas",
+    "authorRole": "Editor gastronómico en Mantel Azul",
+    "imageAlt": "Imagen de la receta",
+    "stepImageAlt": "Imagen del paso {number}"
+  },
+  "RecipeForm": {
+    "imagePlaceholder": "Haz clic para subir una imagen",
+    "imageAlt": "Imagen de la receta",
+    "uploadTitle": "Subir imagen de la receta",
+    "uploadDescription": "Elige una imagen para representar tu receta. Puedes subir un archivo desde tu dispositivo.",
+    "title": "Título",
+    "titlePlaceholder": "Tortitas deliciosas",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Tortitas esponjosas hechas con cariño",
+    "defaultServings": "Raciones por defecto",
+    "category": "Categoría",
+    "difficulty": "Dificultad",
+    "select": "Selecciona",
+    "timeLegend": "Tiempos",
+    "timeDescription": "Introduce los tiempos de preparación, cocción y reposo de la receta. Ayudará a los usuarios a planificar su cocina.",
+    "preparation": "Preparación",
+    "cooking": "Cocción",
+    "resting": "Reposo",
+    "min": "min",
+    "nutritionLegend": "Información nutricional por ración",
+    "nutritionDescription": "Introduce la información nutricional de la receta. Ayudará a los usuarios a conocer el valor nutricional del plato.",
+    "calories": "Calorías",
+    "carbohydrates": "Carbohidratos",
+    "protein": "Proteínas",
+    "fat": "Grasas",
+    "kcal": "kcal",
+    "grams": "gramos",
+    "createButton": "Crear receta",
+    "createTitle": "Nueva receta",
+    "createDescription": "Rellena el formulario para crear una nueva receta.",
+    "createFailed": "No se pudo crear la receta",
+    "updateTitle": "Editar receta",
+    "updateDescription": "Rellena el formulario para actualizar los datos de tu receta.",
+    "updateButton": "Guardar cambios",
+    "updateFailed": "No se pudo actualizar la receta",
+    "tabDetails": "Detalles",
+    "tabIngredients": "Ingredientes",
+    "tabSteps": "Pasos",
+    "tabTags": "Etiquetas",
+    "ingredientsTitle": "Ingredientes",
+    "ingredientsDescription": "Añade los ingredientes de tu receta. Puedes indicar la cantidad y la unidad de cada uno para que sea precisa y fácil de seguir.",
+    "editIngredient": "Editar ingrediente",
+    "editIngredientDescription": "Actualiza los datos de tu ingrediente.",
+    "addIngredient": "Añadir ingrediente",
+    "saveIngredients": "Guardar ingredientes",
+    "ingredientName": "Nombre",
+    "ingredientNamePlaceholder": "Nombre del ingrediente",
+    "ingredientQuantity": "Cantidad",
+    "ingredientUnit": "Unidad",
+    "removeIngredient": "Eliminar el ingrediente {name}",
+    "newIngredient": "Nuevo ingrediente",
+    "stepsTitle": "Pasos",
+    "stepsDescription": "Actualiza los pasos de tu receta. Puedes añadir, editar, reordenar o eliminar pasos para que quede clara y fácil de seguir.",
+    "editStep": "Editar paso",
+    "editStepDescription": "Haz los cambios en tu paso y guarda cuando termines.",
+    "addStep": "Añadir paso",
+    "saveSteps": "Guardar pasos",
+    "stepDescriptionLabel": "Descripción",
+    "stepDescriptionPlaceholder": "Descripción del paso",
+    "stepImage": "Imagen del paso",
+    "uploadStepImage": "Subir imagen del paso",
+    "uploadStepImageDescription": "Elige una imagen para representar este paso. Puedes subir una nueva o elegir una de tu biblioteca.",
+    "removeStep": "Eliminar el paso {name}",
+    "newStep": "Nuevo paso",
+    "submit": "Enviar",
+    "tagsTitle": "Etiquetas (opcional)",
+    "tagsDescription": "Añade etiquetas a tu receta para encontrarla y clasificarla más fácilmente.",
+    "tagsLabel": "Etiquetas",
+    "selectTags": "Selecciona etiquetas...",
+    "noItems": "No se encontraron resultados.",
+    "addTag": "Añadir etiqueta: \"{tag}\"",
+    "saveTags": "Guardar etiquetas"
+  },
+  "UnitsFull": {
+    "GRAM": "Gramo",
+    "KILOGRAM": "Kilogramo",
+    "LITER": "Litro",
+    "MILLILITER": "Mililitro",
+    "CUP": "Taza",
+    "TABLESPOON": "Cucharada",
+    "TEASPOON": "Cucharadita",
+    "UNIT": "Unidad"
+  },
+  "Categories": {
+    "MAIN_COURSE": "Plato principal",
+    "DESSERT": "Postre",
+    "DRINK": "Bebida",
+    "STARTER": "Entrante",
+    "SNACK": "Aperitivo",
+    "BREAKFAST": "Desayuno"
+  },
+  "Difficulty": {
+    "EASY": "Fácil",
+    "MEDIUM": "Media",
+    "HARD": "Difícil"
+  },
+  "CategoryPages": {
+    "explore": {
+      "name": "Explorar",
+      "description": ""
+    },
+    "mains": {
+      "name": "Principales",
+      "description": "Descubre nuestra colección de platos principales con una gran variedad de sabores e ingredientes para todos los paladares."
+    },
+    "starters": {
+      "name": "Entrantes",
+      "description": "Empieza tu comida con nuestras deliciosas recetas de entrantes, con sabores e ingredientes que despertarán tu apetito."
+    },
+    "desserts": {
+      "name": "Postres",
+      "description": "Déjate llevar por nuestros deliciosos postres, desde intensos chocolates hasta opciones ligeras y afrutadas."
+    },
+    "drinks": {
+      "name": "Bebidas",
+      "description": "Refresca tu sed con nuestras recetas de bebidas, desde cócteles vibrantes hasta mocktails suaves."
+    },
+    "snacks": {
+      "name": "Aperitivos",
+      "description": "Calma tu apetito con nuestras deliciosas recetas de aperitivos, perfectas para cualquier momento del día."
+    },
+    "breakfast": {
+      "name": "Desayuno",
+      "description": "Empieza el día con nuestras deliciosas recetas de desayuno, con opciones para llenar tus mañanas de energía."
+    },
+    "everything": {
+      "name": "Todo",
+      "description": "Explora nuestra variada colección de recetas, con principales, postres, bebidas y acompañamientos para inspirar tus aventuras culinarias."
+    }
+  },
+  "RecipeCard": {
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirmTitle": "¿Seguro que quieres continuar?",
+    "confirmDescription": "Esta acción no se puede deshacer.",
+    "deleted": "Receta eliminada correctamente",
+    "deleteFailed": "No se pudo eliminar la receta",
+    "imageAlt": "Portada de la receta"
+  },
+  "RecipesList": {
+    "loading": "Cargando...",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "orderBy": "Ordenar por",
+    "creationDate": "Fecha de creación",
+    "likes": "Me gusta",
+    "category": "Categoría",
+    "difficulty": "Dificultad",
+    "clearFilters": "Limpiar filtros",
+    "apply": "Aplicar",
+    "recipeCount": "{count, plural, =0 {Sin recetas} one {# receta} other {# recetas}}",
+    "noRecipes": "No se encontraron recetas.",
+    "loadMore": "Cargar más"
+  },
+  "Validation": {
+    "invalidEmail": "Introduce una dirección de correo válida",
+    "nameMin": "El nombre debe tener al menos 2 caracteres",
+    "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+    "confirmPasswordMin": "La confirmación de contraseña debe tener al menos 8 caracteres",
+    "passwordsDoNotMatch": "Las contraseñas no coinciden"
+  },
+  "AuthButton": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Crear cuenta"
+  },
+  "LoginForm": {
+    "title": "Iniciar sesión",
+    "description": "Introduce tu correo y contraseña para acceder a tu cuenta.",
+    "email": "Correo electrónico",
+    "emailHint": "Elige un correo único para tu cuenta.",
+    "password": "Contraseña",
+    "passwordHint": "Debe tener al menos 8 caracteres.",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "submit": "Iniciar sesión",
+    "noAccount": "¿No tienes cuenta?",
+    "signUp": "Crear cuenta",
+    "successTitle": "¡Sesión iniciada!",
+    "successDescription": "Bienvenido de nuevo a Mantel Azul.",
+    "errorTitle": "No se pudo iniciar sesión"
+  },
+  "SignupForm": {
+    "title": "Crea tu cuenta",
+    "description": "Introduce tu correo para crear tu cuenta",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "emailHint": "Elige un correo único para tu cuenta.",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "passwordHint": "Debe tener al menos 8 caracteres.",
+    "submit": "Crear cuenta",
+    "successTitle": "¡Cuenta creada!",
+    "successDescription": "Bienvenido a Mantel Azul.",
+    "errorTitle": "No se pudo crear la cuenta",
+    "mismatchTitle": "¡Las contraseñas no coinciden!",
+    "mismatchDescription": "Asegúrate de que las contraseñas coinciden."
+  },
+  "ForgotPasswordForm": {
+    "title": "Recuperar contraseña",
+    "description": "Introduce tu correo para recibir un enlace de restablecimiento.",
+    "email": "Correo electrónico",
+    "submit": "Enviar enlace",
+    "successTitle": "¡Correo de restablecimiento enviado!",
+    "errorTitle": "No se pudo enviar el correo de restablecimiento"
+  },
+  "ResetPasswordForm": {
+    "title": "Restablecer contraseña",
+    "description": "Introduce tu nueva contraseña para restablecerla.",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "passwordHint": "Debe tener al menos 8 caracteres.",
+    "submit": "Restablecer contraseña",
+    "successTitle": "¡Contraseña restablecida!",
+    "errorTitle": "No se pudo restablecer la contraseña",
+    "mismatchTitle": "¡Las contraseñas no coinciden!",
+    "mismatchDescription": "Asegúrate de que las contraseñas coinciden."
+  },
+  "ChangePasswordForm": {
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "passwordHint": "Debe tener al menos 8 caracteres.",
+    "submit": "Cambiar contraseña",
+    "successTitle": "¡Contraseña cambiada!",
+    "errorTitle": "No se pudo cambiar la contraseña",
+    "mismatchTitle": "¡Las contraseñas no coinciden!",
+    "mismatchDescription": "Asegúrate de que las contraseñas coinciden."
+  },
+  "ProfileForm": {
+    "title": "Mi perfil",
+    "description": "Actualiza tu información de perfil, como tu nombre y correo.",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "emailHint": "Elige un correo único para tu cuenta.",
+    "submit": "Actualizar perfil",
+    "changePassword": "Cambiar contraseña",
+    "changePasswordDescription": "Introduce tu nueva contraseña para cambiarla.",
+    "successTitle": "¡Perfil actualizado!",
+    "successDescription": "Tu información de perfil se ha actualizado.",
+    "errorTitle": "No se pudo actualizar el perfil",
+    "emailErrorTitle": "No se pudo actualizar el correo"
+  },
+  "Pages": {
+    "myRecipes": "Mis recetas",
+    "myCookbooks": "Mis recetarios",
+    "createRecipe": "Crear receta",
+    "viewRecipes": "Ver recetas",
+    "welcome": "¡Bienvenido a Mantel Azul!",
+    "limeAndGreenLeaves": "Lima y hojas verdes",
+    "aperolDrink": "Bebida Aperol",
+    "macarons": "Macarons",
+    "picnic": "Pícnic"
+  },
+  "Common": {
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirmTitle": "¿Seguro que quieres continuar?",
+    "confirmDescription": "Esta acción no se puede deshacer."
+  },
+  "RecipeActions": {
+    "edit": "editar",
+    "save": "guardar",
+    "share": "compartir",
+    "copy": "Copiar",
+    "urlCopied": "URL de la receta copiada",
+    "published": "Publicada",
+    "selectCookbook": "Elige un recetario para guardar esta receta",
+    "noCookbooks": "Todavía no tienes recetarios."
+  },
+  "Cookbook": {
+    "count": "{count, plural, =0 {Sin recetarios} one {# recetario} other {# recetarios}}",
+    "create": "Crear recetario",
+    "newTitle": "Nuevo recetario",
+    "newDescription": "Crea un recetario nuevo para organizar tus recetas.",
+    "createSubmit": "Crear recetario",
+    "updateTitle": "Editar recetario",
+    "updateDescription": "Actualiza el nombre de tu recetario para mantenerlo organizado.",
+    "updateSubmit": "Guardar cambios",
+    "name": "Nombre",
+    "namePlaceholder": "Mi recetario",
+    "created": "Recetario creado",
+    "createFailed": "No se pudo crear el recetario",
+    "updated": "Recetario actualizado",
+    "updateFailed": "No se pudo actualizar el recetario",
+    "deleted": "Recetario eliminado",
+    "deleteFailed": "No se pudo eliminar el recetario",
+    "noCookbooks": "No se encontraron recetarios.",
+    "imageAlt": "Portada del recetario"
+  },
+  "Chat": {
+    "title": "Asistente",
+    "description": "El asistente puede ayudarte con diversas tareas, como responder preguntas, darte recomendaciones y crear recetas.",
+    "placeholder": "Escribe algo...",
+    "limitExceeded": "Se superó el límite de mensajes. Elimina el chat para empezar una conversación nueva.",
+    "attachedImageAlt": "Vista previa de la imagen adjunta",
+    "you": "TÚ",
+    "ai": "IA",
+    "thinking": "Pensando",
+    "typing": "Escribiendo",
+    "working": "Trabajando",
+    "approve": "Aprobar",
+    "deny": "Rechazar",
+    "approveCreateRecipe": "¿Apruebas crear la siguiente receta: {title}?",
+    "approveUpdateRecipe": "¿Apruebas actualizar la siguiente receta: {title}?",
+    "approveDeleteRecipe": "¿Apruebas eliminar esta receta? No se puede deshacer.",
+    "created": "Creada correctamente",
+    "updated": "Actualizada correctamente",
+    "viewRecipe": "Ver receta",
+    "creationDenied": "Creación de la receta rechazada. El asistente buscará otra solución.",
+    "updateDenied": "Actualización de la receta rechazada. El asistente buscará otra solución.",
+    "deleted": "Receta eliminada correctamente.",
+    "deletionDenied": "Eliminación rechazada. La receta no se eliminó.",
+    "attachTitle": "Adjuntar una imagen al chat",
+    "attachDescription": "La imagen se enviará al asistente y podrá usarse en la conversación."
+  },
+  "Menu": {
+    "menu": "Menú",
+    "cookbooks": "Recetarios",
+    "myRecipes": "Mis recetas",
+    "myCookbooks": "Mis recetarios",
+    "newRecipe": "Nueva receta",
+    "profile": "Perfil",
+    "logIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "toggleTheme": "Cambiar tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "ImageUpload": {
+    "dropzone": "Arrastra una imagen aquí o haz clic para seleccionarla"
+  },
+  "Ui": {
+    "previousSlide": "Diapositiva anterior",
+    "nextSlide": "Diapositiva siguiente",
+    "close": "Cerrar",
+    "loading": "Cargando",
+    "logoAlt": "Logotipo de Mantel Azul"
+  }
+}

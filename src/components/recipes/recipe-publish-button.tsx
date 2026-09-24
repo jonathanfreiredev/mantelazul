@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Field, FieldLabel } from "../ui/field";
@@ -13,6 +14,7 @@ export function RecipePublishButton({
   recipeId,
   className,
 }: RecipePublishButtonProps) {
+  const t = useTranslations("RecipeActions");
   const utils = api.useUtils();
 
   const togglePublicationStatus =
@@ -50,7 +52,7 @@ export function RecipePublishButton({
 
   return (
     <Field orientation="horizontal" className={cn("w-fit", className)}>
-      <FieldLabel htmlFor="2fa">Published</FieldLabel>
+      <FieldLabel htmlFor="2fa">{t("published")}</FieldLabel>
       <Switch
         id="2fa"
         checked={published}

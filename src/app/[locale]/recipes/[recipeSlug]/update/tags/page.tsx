@@ -11,6 +11,7 @@ export default async function UpdateRecipeTagsPage({
 
   const recipe = await api.recipes.getBySlug({
     slug: recipeSlug,
+    locale: "source",
   });
 
   void api.tags.getAll.prefetch();

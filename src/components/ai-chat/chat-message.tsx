@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import type { MyAgentUIMessage } from "~/lib/agent";
 import {
   AssistantActivityIndicator,
@@ -29,6 +30,7 @@ export function ChatMessage({
   onDeny,
   onNavigate,
 }: ChatMessageProps) {
+  const t = useTranslations("Chat");
   const isUser = message.role === "user";
 
   return (
@@ -47,7 +49,7 @@ export function ChatMessage({
       >
         <div>
           <p className="mb-1 text-xs font-extralight opacity-70">
-            {isUser ? "YOU " : "AI "}
+            {isUser ? t("you") : t("ai")}
           </p>
 
           {activity && <AssistantActivityIndicator activity={activity} />}

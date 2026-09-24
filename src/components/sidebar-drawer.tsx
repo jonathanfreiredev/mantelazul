@@ -7,9 +7,9 @@ import {
   UserIcon,
   XIcon,
 } from "lucide-react";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "~/i18n/navigation";
 import { categories } from "~/lib/categories-list";
-import { capitalize } from "~/lib/utils";
 import { SidebarDrawerAuth } from "./sidebar-drawer-auth";
 import { Button } from "./ui/button";
 import {
@@ -27,6 +27,9 @@ interface SidebarDrawerProps {
 }
 
 export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
+  const t = await getTranslations("Menu");
+  const tCategories = await getTranslations("CategoryPages");
+
   return (
     <Drawer direction="right">
       <DrawerTrigger asChild>
@@ -36,7 +39,7 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
       </DrawerTrigger>
       <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-[50vh] data-[vaul-drawer-direction=top]:max-h-[50vh]">
         <DrawerHeader className="flex flex-row justify-end">
-          <DrawerTitle className="sr-only">Menu</DrawerTitle>
+          <DrawerTitle className="sr-only">{t("menu")}</DrawerTitle>
           <DrawerClose asChild>
             <Button variant="outline" size="icon-sm" className="rounded-full">
               <XIcon />
@@ -57,7 +60,7 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
                     <SquareDotIcon className="size-5" />
                   </ItemMedia>
                   <ItemContent>
-                    <ItemTitle>{capitalize(category.name)}</ItemTitle>
+                    <ItemTitle>{tCategories(`${category.name}.name`)}</ItemTitle>
                   </ItemContent>
                 </Link>
               </Item>
@@ -76,7 +79,7 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
                   <BookIcon className="size-5" />
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle>Cookbooks</ItemTitle>
+                  <ItemTitle>{t("cookbooks")}</ItemTitle>
                 </ItemContent>
               </Link>
             </Item>
@@ -94,7 +97,7 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
                   <NotepadTextIcon className="size-5" />
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle>My recipes</ItemTitle>
+                  <ItemTitle>{t("myRecipes")}</ItemTitle>
                 </ItemContent>
               </Link>
             </Item>
@@ -112,7 +115,7 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
                   <NotepadTextIcon className="size-5" />
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle>My cookbooks</ItemTitle>
+                  <ItemTitle>{t("myCookbooks")}</ItemTitle>
                 </ItemContent>
               </Link>
             </Item>
@@ -130,7 +133,7 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
                   <PlusIcon className="size-5" />
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle>New recipe</ItemTitle>
+                  <ItemTitle>{t("newRecipe")}</ItemTitle>
                 </ItemContent>
               </Link>
             </Item>
@@ -148,7 +151,7 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
                   <UserIcon className="size-5" />
                 </ItemMedia>
                 <ItemContent>
-                  <ItemTitle>Profile</ItemTitle>
+                  <ItemTitle>{t("profile")}</ItemTitle>
                 </ItemContent>
               </Link>
             </Item>

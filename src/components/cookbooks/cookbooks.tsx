@@ -1,16 +1,18 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { api } from "~/trpc/react";
 import { CreateCookbookForm } from "./create-cookbook-form";
 import { CookbookCard } from "./cookbook-card";
 
 export function Cookbooks() {
+  const t = useTranslations("Cookbook");
   const [cookbooks] = api.cookbooks.getAll.useSuspenseQuery();
 
   return (
     <div className="flex w-full flex-col items-center px-5 sm:px-10">
       <div className="flex w-full items-center justify-between">
         <div className="text-muted-foreground my-4 mt-7 self-start text-sm">
-          {cookbooks.length} {cookbooks.length === 1 ? "cookbook" : "cookbooks"}
+          {t("count", { count: cookbooks.length })}
         </div>
 
         <CreateCookbookForm />
@@ -24,9 +26,7 @@ export function Cookbooks() {
 
       {cookbooks.length === 0 && (
         <div className="mb-10 flex h-full w-full items-center justify-center">
-          <p className="text-muted-foreground text-center">
-            No cookbooks found.
-          </p>
+          <p className="text-muted-foreground text-center">{t("noCookbooks")}</p>
         </div>
       )}
     </div>

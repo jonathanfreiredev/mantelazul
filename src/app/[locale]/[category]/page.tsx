@@ -1,4 +1,6 @@
 import { Category } from "generated/prisma/enums";
+import { getLocale } from "next-intl/server";
+import { toLocale } from "~/lib/locales";
 import { CategoryHero } from "~/components/category-hero";
 import { CategoriesNavbar } from "~/components/home/categories-navbar";
 import { Recipes } from "~/components/recipes/recipes";
@@ -20,11 +22,13 @@ export const categoryMapping = {
 
 export default async function CategoryPage({ params }: MainsPageProps) {
   const { category } = await params;
+  const locale = await getLocale();
 
   void api.recipes.getAll.prefetch({
     category: categoryMapping[category as keyof typeof categoryMapping],
     orderBy: "createdAt",
     skip: 0,
+    locale: toLocale(locale),
   });
 
   return (

@@ -1,9 +1,11 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import { cn } from "~/lib/utils";
+import { toLocale } from "~/lib/locales";
 import { recipeSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/react";
 import { RecipeForm } from "./recipe-form";
@@ -24,6 +26,8 @@ export const CreateRecipeForm = ({
   ...props
 }: React.ComponentProps<"div">) => {
   const router = useRouter();
+  const t = useTranslations("RecipeForm");
+  const locale = toLocale(useLocale());
 
   const createRecipeMutation = api.recipes.create.useMutation();
 
@@ -75,10 +79,11 @@ export const CreateRecipeForm = ({
       {
         ...restData,
         imageUrl,
+        locale,
       },
       {
         onError: (error) => {
-          toast.error("Failed to create recipe", {
+          toast.error(t("createFailed"), {
             description: error.message,
             position: "bottom-right",
           });
@@ -98,10 +103,8 @@ export const CreateRecipeForm = ({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">New Recipe</CardTitle>
-          <CardDescription>
-            Fill out the form below to create a new recipe.
-          </CardDescription>
+          <CardTitle className="text-xl">{t("createTitle")}</CardTitle>
+          <CardDescription>{t("createDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="form-create-recipe" onSubmit={form.handleSubmit(onSubmit)}>
@@ -113,7 +116,7 @@ export const CreateRecipeForm = ({
                 form="form-create-recipe"
                 disabled={form.formState.isSubmitting}
               >
-                Create Recipe
+                {t("createButton")}
               </Button>
             </Field>
           </form>

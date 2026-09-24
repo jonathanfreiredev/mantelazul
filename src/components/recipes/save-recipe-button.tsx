@@ -1,7 +1,8 @@
 "use client";
 import { BookmarkIcon } from "lucide-react";
 import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { useState } from "react";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -30,6 +31,7 @@ export function SaveRecipeButton({
   size = "base",
   isLoggedIn,
 }: SaveRecipeButtonProps) {
+  const t = useTranslations("RecipeActions");
   const [openCookbooksModal, setOpenCookbooksModal] = useState(false);
 
   const router = useRouter();
@@ -82,7 +84,7 @@ export function SaveRecipeButton({
             positionIcon === "top" || positionIcon === "left" ? "order-2" : "",
           )}
         >
-          save
+          {t("save")}
         </span>
         <BookmarkIcon
           fill="none"
@@ -108,7 +110,7 @@ export function SaveRecipeButton({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Select a cookbook to save this recipe</DialogTitle>
+            <DialogTitle>{t("selectCookbook")}</DialogTitle>
           </DialogHeader>
 
           {!cookbooksLoading && cookbooks && (
@@ -145,7 +147,7 @@ export function SaveRecipeButton({
                   ))}
                 </ItemGroup>
               ) : (
-                <p>You don't have any cookbooks yet.</p>
+                <p>{t("noCookbooks")}</p>
               )}
             </>
           )}

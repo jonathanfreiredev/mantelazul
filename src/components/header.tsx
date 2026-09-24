@@ -1,9 +1,10 @@
-import Link from "next/link";
 import { getSession } from "~/server/better-auth/server";
+import { Link } from "~/i18n/navigation";
 import { DropdownAvatarMenu } from "./dropdown-avatar-menu";
 import { Logo } from "./logo";
 import { SidebarDrawer } from "./sidebar-drawer";
 import { SignInOrSignUpButton } from "./auth/sign-in-or-sign-up-button";
+import { LocaleSwitcher } from "./locale-switcher";
 import AIAgentChat from "./ai-chat/ai-agent-chat";
 import { api } from "~/trpc/server";
 import { createId } from "@paralleldrive/cuid2";
@@ -40,6 +41,8 @@ export async function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
+          <LocaleSwitcher />
+
           <div className="hidden sm:flex">
             {isLoggedIn ? (
               <DropdownAvatarMenu user={{ name: session.user.name }} />

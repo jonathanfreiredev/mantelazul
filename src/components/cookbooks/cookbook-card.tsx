@@ -1,7 +1,7 @@
 "use client";
 import { EllipsisVerticalIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "~/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { api } from "~/trpc/react";
@@ -34,6 +34,8 @@ interface CookbookCardProps {
 }
 
 export function CookbookCard({ cookbook }: CookbookCardProps) {
+  const t = useTranslations("Cookbook");
+  const tCommon = useTranslations("Common");
   const [openUpdate, setOpenUpdate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -48,9 +50,9 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
 
     if (res.success) {
       router.refresh();
-      toast.success("Cookbook deleted successfully");
+      toast.success(t("deleted"));
     } else {
-      toast.error("Failed to delete cookbook");
+      toast.error(t("deleteFailed"));
     }
     setIsDeleting(false);
   };
@@ -61,7 +63,7 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
         {cookbook.images.length === 1 ? (
           <Image
             src={cookbook.images[0]!}
-            alt="Event cover"
+            alt={t("imageAlt")}
             fill
             className="object-cover"
           />
@@ -70,7 +72,7 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
             <div className="relative">
               <Image
                 src={cookbook.images[0]!}
-                alt="Event cover"
+                alt={t("imageAlt")}
                 fill
                 className="object-cover"
               />
@@ -78,7 +80,7 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
             <div className="relative">
               <Image
                 src={cookbook.images[1]!}
-                alt="Event cover"
+                alt={t("imageAlt")}
                 fill
                 className="object-cover"
               />
@@ -90,7 +92,7 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
               <div className="relative row-span-2">
                 <Image
                   src={cookbook.images[0]!}
-                  alt="Event cover"
+                  alt={t("imageAlt")}
                   fill
                   className="object-cover"
                 />
@@ -98,7 +100,7 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
               <div className="relative">
                 <Image
                   src={cookbook.images[1]!}
-                  alt="Event cover"
+                  alt={t("imageAlt")}
                   fill
                   className="object-cover"
                 />
@@ -106,7 +108,7 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
               <div className="relative">
                 <Image
                   src={cookbook.images[2]!}
-                  alt="Event cover"
+                  alt={t("imageAlt")}
                   fill
                   className="object-cover"
                 />
@@ -127,7 +129,7 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
                 disabled={isDeleting}
                 onClick={() => setOpenUpdate(true)}
               >
-                Edit
+                {tCommon("edit")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -135,7 +137,7 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
                 disabled={isDeleting}
                 onClick={() => setOpenDelete(true)}
               >
-                Delete
+                {tCommon("delete")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
@@ -152,8 +154,10 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
-            <DialogDescription>This action cannot be undone.</DialogDescription>
+            <DialogTitle>{tCommon("confirmTitle")}</DialogTitle>
+            <DialogDescription>
+              {tCommon("confirmDescription")}
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter className="justify-end">
             <DialogClose asChild>
@@ -162,7 +166,7 @@ export function CookbookCard({ cookbook }: CookbookCardProps) {
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                Delete
+                {tCommon("delete")}
               </Button>
             </DialogClose>
           </DialogFooter>

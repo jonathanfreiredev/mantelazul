@@ -1,5 +1,5 @@
 import type { Difficulty } from "generated/prisma/enums";
-import { Separator } from "../ui/separator";
+import { useTranslations } from "next-intl";
 
 interface TimesSectionProps {
   difficulty: Difficulty;
@@ -14,34 +14,39 @@ export function TimesSection({
   cookingTime,
   restingTime,
 }: TimesSectionProps) {
+  const t = useTranslations("Recipe");
+  const difficultyLabels = useTranslations("Difficulty");
+
   return (
     <div className="flex w-full flex-wrap items-center justify-center gap-4 rounded-lg bg-slate-100 p-5 text-gray-800 sm:gap-8 sm:p-10">
       <div className="flex gap-4 sm:gap-8">
         <div className="flex flex-col gap-1">
-          <span className="font-medium">Difficulty</span>
-          <span className="text-muted-foreground text-xs">{difficulty}</span>
+          <span className="font-medium">{t("difficulty")}</span>
+          <span className="text-muted-foreground text-xs">
+            {difficultyLabels(difficulty)}
+          </span>
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="font-medium">Preparation</span>
+          <span className="font-medium">{t("preparation")}</span>
           <span className="text-muted-foreground text-xs">
-            {preparationTime} Min.
+            {t("minutes", { count: preparationTime })}
           </span>
         </div>
       </div>
 
       <div className="flex gap-4 sm:gap-8">
         <div className="flex flex-col gap-1">
-          <span className="font-medium">Cooking</span>
+          <span className="font-medium">{t("cooking")}</span>
           <span className="text-muted-foreground text-xs">
-            {cookingTime} Min.
+            {t("minutes", { count: cookingTime })}
           </span>
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="font-medium">Resting</span>
+          <span className="font-medium">{t("resting")}</span>
           <span className="text-muted-foreground text-xs">
-            {restingTime} Min.
+            {t("minutes", { count: restingTime })}
           </span>
         </div>
       </div>

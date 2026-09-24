@@ -402,6 +402,7 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   Recipe: 'Recipe',
+  RecipeTranslation: 'RecipeTranslation',
   Ingredient: 'Ingredient',
   Step: 'Step',
   Tag: 'Tag',
@@ -426,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "recipe" | "ingredient" | "step" | "tag" | "recipeTag" | "recipeLike" | "cookbook" | "cookbookRecipe" | "chat" | "message"
+    modelProps: "user" | "session" | "account" | "verification" | "recipe" | "recipeTranslation" | "ingredient" | "step" | "tag" | "recipeTag" | "recipeLike" | "cookbook" | "cookbookRecipe" | "chat" | "message"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -797,6 +798,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.RecipeCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.RecipeCountAggregateOutputType> | number
+        }
+      }
+    }
+    RecipeTranslation: {
+      payload: Prisma.$RecipeTranslationPayload<ExtArgs>
+      fields: Prisma.RecipeTranslationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RecipeTranslationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RecipeTranslationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload>
+        }
+        findFirst: {
+          args: Prisma.RecipeTranslationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RecipeTranslationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload>
+        }
+        findMany: {
+          args: Prisma.RecipeTranslationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload>[]
+        }
+        create: {
+          args: Prisma.RecipeTranslationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload>
+        }
+        createMany: {
+          args: Prisma.RecipeTranslationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RecipeTranslationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload>[]
+        }
+        delete: {
+          args: Prisma.RecipeTranslationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload>
+        }
+        update: {
+          args: Prisma.RecipeTranslationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload>
+        }
+        deleteMany: {
+          args: Prisma.RecipeTranslationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RecipeTranslationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RecipeTranslationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload>[]
+        }
+        upsert: {
+          args: Prisma.RecipeTranslationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecipeTranslationPayload>
+        }
+        aggregate: {
+          args: Prisma.RecipeTranslationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRecipeTranslation>
+        }
+        groupBy: {
+          args: Prisma.RecipeTranslationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecipeTranslationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RecipeTranslationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecipeTranslationCountAggregateOutputType> | number
         }
       }
     }
@@ -1565,8 +1640,6 @@ export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[k
 
 export const RecipeScalarFieldEnum = {
   id: 'id',
-  title: 'title',
-  description: 'description',
   published: 'published',
   slug: 'slug',
   imageUrl: 'imageUrl',
@@ -1574,6 +1647,7 @@ export const RecipeScalarFieldEnum = {
   likesCount: 'likesCount',
   difficulty: 'difficulty',
   category: 'category',
+  sourceLocale: 'sourceLocale',
   preparationTime: 'preparationTime',
   cookingTime: 'cookingTime',
   restingTime: 'restingTime',
@@ -1589,9 +1663,23 @@ export const RecipeScalarFieldEnum = {
 export type RecipeScalarFieldEnum = (typeof RecipeScalarFieldEnum)[keyof typeof RecipeScalarFieldEnum]
 
 
+export const RecipeTranslationScalarFieldEnum = {
+  id: 'id',
+  recipeId: 'recipeId',
+  locale: 'locale',
+  title: 'title',
+  description: 'description',
+  ingredients: 'ingredients',
+  steps: 'steps',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RecipeTranslationScalarFieldEnum = (typeof RecipeTranslationScalarFieldEnum)[keyof typeof RecipeTranslationScalarFieldEnum]
+
+
 export const IngredientScalarFieldEnum = {
   id: 'id',
-  name: 'name',
   quantity: 'quantity',
   unit: 'unit',
   order: 'order',
@@ -1605,7 +1693,6 @@ export type IngredientScalarFieldEnum = (typeof IngredientScalarFieldEnum)[keyof
 
 export const StepScalarFieldEnum = {
   id: 'id',
-  description: 'description',
   order: 'order',
   imageUrl: 'imageUrl',
   createdAt: 'createdAt',
@@ -1698,6 +1785,13 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -1712,6 +1806,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -1794,6 +1897,20 @@ export type EnumCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'Category[]'
  */
 export type ListEnumCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Category[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -2008,6 +2125,7 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
   recipe?: Prisma.RecipeOmit
+  recipeTranslation?: Prisma.RecipeTranslationOmit
   ingredient?: Prisma.IngredientOmit
   step?: Prisma.StepOmit
   tag?: Prisma.TagOmit

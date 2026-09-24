@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import z from "zod";
+import { getRequestLocale } from "~/server/translations/request-locale";
 import { api } from "~/trpc/server";
 import { formatRecipeListForModel } from "./format-recipe-for-model";
 
@@ -52,7 +53,8 @@ PAGINATION:
       .describe("Number of favourites to return. Defaults to 5."),
   }),
   execute: async ({ skip, take }) => {
-    const favourites = await api.recipes.getFavourites();
+    const locale = await getRequestLocale();
+    const favourites = await api.recipes.getFavourites({ locale });
 
     const page = favourites.slice(skip, skip + take);
     const hasMore = skip + page.length < favourites.length;

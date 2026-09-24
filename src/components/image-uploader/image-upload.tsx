@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useDropzone } from "react-dropzone";
 import { Input } from "../ui/input";
 import { processImage } from "~/lib/process-image";
@@ -21,6 +22,7 @@ export function ImageUpload({
   maxImages = 1,
   ...props
 }: React.ComponentProps<"input"> & ImageUploadProps) {
+  const t = useTranslations("ImageUpload");
   const [isLoading, setIsLoading] = useState(false);
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -90,7 +92,7 @@ export function ImageUpload({
         multiple={maxImages > 1}
         size={10 * 1024 * 1024}
       />
-      <p>Drag 'n' drop an image here, or click to select an image</p>
+      <p>{t("dropzone")}</p>
       <Spinner
         className={`absolute ${isLoading ? "block" : "hidden"} size-10`}
       />
