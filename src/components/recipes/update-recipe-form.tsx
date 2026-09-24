@@ -1,9 +1,10 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import { type z } from "zod";
 import { cn } from "~/lib/utils";
 import { recipeSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/react";
@@ -28,6 +29,7 @@ export const UpdateRecipeForm = ({
   className,
   ...props
 }: React.ComponentProps<"div"> & UpdateRecipeFormProps) => {
+  const t = useTranslations("RecipeForm");
   const router = useRouter();
 
   const updateRecipeMutation = api.recipes.update.useMutation();
@@ -99,8 +101,8 @@ export const UpdateRecipeForm = ({
         },
       },
       {
-        onError: (error) => {
-          toast.error("Failed to create recipe", {
+        onError: () => {
+          toast.error(t("updateFailed"), {
             position: "bottom-right",
           });
         },
@@ -119,10 +121,8 @@ export const UpdateRecipeForm = ({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Update Recipe</CardTitle>
-          <CardDescription>
-            Fill out the form below to update your recipe details.
-          </CardDescription>
+          <CardTitle className="text-xl">{t("updateTitle")}</CardTitle>
+          <CardDescription>{t("updateDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="form-create-recipe" onSubmit={form.handleSubmit(onSubmit)}>
@@ -134,7 +134,7 @@ export const UpdateRecipeForm = ({
                 form="form-create-recipe"
                 disabled={form.formState.isSubmitting}
               >
-                Update Recipe
+                {t("updateButton")}
               </Button>
             </Field>
           </form>

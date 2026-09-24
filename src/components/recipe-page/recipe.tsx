@@ -1,4 +1,6 @@
 "use client";
+import { useLocale } from "next-intl";
+import { toLocale } from "~/lib/locales";
 import { api } from "~/trpc/react";
 import Image from "next/image";
 import { RecipeLikeButton } from "../recipes/recipe-like-button";
@@ -19,8 +21,10 @@ interface RecipeProps {
 }
 
 export function Recipe({ slug }: RecipeProps) {
+  const locale = useLocale();
   const [recipe] = api.recipes.getBySlug.useSuspenseQuery({
     slug,
+    locale: toLocale(locale),
   });
 
   const { data, isPending } = authClient.useSession();

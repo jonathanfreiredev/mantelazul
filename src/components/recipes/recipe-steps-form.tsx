@@ -1,9 +1,10 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { XIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { breakpoints, useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
 import { recipeStepsSchema } from "~/server/api/routers/recipes/validation";
@@ -41,6 +42,7 @@ export const RecipeStepsForm = ({
   className,
   ...props
 }: React.ComponentProps<"div"> & RecipeStepsFormProps) => {
+  const t = useTranslations("RecipeForm");
   const isDesktop = useMediaQuery(breakpoints.md);
   const router = useRouter();
 
@@ -117,8 +119,6 @@ export const RecipeStepsForm = ({
       steps,
     };
 
-    console.log("Submitting steps:", input);
-
     await updateStepsMutation.mutateAsync(input);
 
     router.push(`/recipes/${recipe.slug}/update/tags`);
@@ -131,12 +131,8 @@ export const RecipeStepsForm = ({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Steps</CardTitle>
-          <CardDescription>
-            Update the steps for your recipe. You can add, edit, reorder, or
-            remove steps as needed to ensure your recipe is clear and easy to
-            follow.
-          </CardDescription>
+          <CardTitle className="text-xl">{t("stepsTitle")}</CardTitle>
+          <CardDescription>{t("stepsDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="form-steps" onSubmit={form.handleSubmit(onSubmit)}>
@@ -164,7 +160,7 @@ export const RecipeStepsForm = ({
                               <div className="relative flex h-15 w-20 items-center justify-center rounded-md">
                                 <Image
                                   src={field.image.preview}
-                                  alt={`Step ${index + 1} image`}
+                                  alt={t("stepImage")}
                                   fill
                                   className="rounded-lg object-cover"
                                 />
@@ -175,10 +171,9 @@ export const RecipeStepsForm = ({
                         </DrawerTrigger>
                         <DrawerContent>
                           <DrawerHeader>
-                            <DrawerTitle>Edit Step</DrawerTitle>
+                            <DrawerTitle>{t("editStep")}</DrawerTitle>
                             <DrawerDescription>
-                              Make changes to your step here. Click save when
-                              you're done.
+                              {t("editStepDescription")}
                             </DrawerDescription>
                           </DrawerHeader>
 
@@ -190,7 +185,7 @@ export const RecipeStepsForm = ({
 
                           <DrawerFooter className="mt-4">
                             <DrawerClose asChild>
-                              <Button className="w-full">Submit</Button>
+                              <Button className="w-full">{t("submit")}</Button>
                             </DrawerClose>
                           </DrawerFooter>
                         </DrawerContent>
@@ -202,7 +197,9 @@ export const RecipeStepsForm = ({
                           variant="outline"
                           size="icon-sm"
                           onClick={() => remove(index)}
-                          aria-label={`Remove ingredient ${field.description}`}
+                          aria-label={t("removeStep", {
+                            name: field.description,
+                          })}
                         >
                           <XIcon />
                         </Button>
@@ -217,14 +214,14 @@ export const RecipeStepsForm = ({
                   size="sm"
                   onClick={() =>
                     append({
-                      description: "New Step",
+                      description: t("newStep"),
                       imageUrl: null,
                       order: fields.length,
                       image: null,
                     })
                   }
                 >
-                  Add Step
+                  {t("addStep")}
                 </Button>
               </FieldGroup>
             </FieldSet>
@@ -235,7 +232,7 @@ export const RecipeStepsForm = ({
                 form="form-steps"
                 disabled={form.formState.isSubmitting}
               >
-                Save Steps
+                {t("saveSteps")}
               </Button>
             </Field>
           </form>

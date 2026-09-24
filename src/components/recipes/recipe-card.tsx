@@ -1,12 +1,12 @@
 "use client";
-import type { Recipe } from "generated/prisma/client";
 import { EllipsisVerticalIcon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "~/i18n/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "~/server/better-auth/client";
+import type { RecipeDto } from "~/types/recipe";
 import { api } from "~/trpc/react";
 import { RecipeLikeButton } from "./recipe-like-button";
 import { RecipePublishButton } from "./recipe-publish-button";
@@ -31,11 +31,12 @@ import {
 import { Separator } from "../ui/separator";
 
 interface RecipeCardProps {
-  recipe: Recipe;
+  recipe: RecipeDto;
   isEditable?: boolean;
 }
 
 export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
+  const t = useTranslations("RecipeCard");
   const [openDelete, setOpenDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteRecipe = api.recipes.delete.useMutation();
@@ -50,9 +51,9 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
 
     if (res.success) {
       router.refresh();
-      toast.success("Recipe deleted successfully");
+      toast.success(t("deleted"));
     } else {
-      toast.error("Failed to delete recipe");
+      toast.error(t("deleteFailed"));
     }
     setIsDeleting(false);
   };
@@ -67,7 +68,7 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
         {recipe.imageUrl && (
           <Image
             src={recipe.imageUrl}
-            alt="Event cover"
+            alt={t("imageAlt")}
             fill
             className="object-cover"
           />
@@ -82,14 +83,16 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
             <DropdownMenuContent>
               <DropdownMenuGroup>
                 <DropdownMenuItem asChild disabled={isDeleting}>
-                  <Link href={`/recipes/${recipe.slug}/update`}>Edit</Link>
+                  <Link href={`/recipes/${recipe.slug}/update`}>
+                    {t("edit")}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
                   disabled={isDeleting}
                   onClick={() => setOpenDelete(true)}
                 >
-                  Delete
+                  {t("delete")}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -118,8 +121,8 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
-            <DialogDescription>This action cannot be undone.</DialogDescription>
+            <DialogTitle>{t("confirmTitle")}</DialogTitle>
+            <DialogDescription>{t("confirmDescription")}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="justify-end">
             <DialogClose asChild>
@@ -128,7 +131,7 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                Delete
+                {t("delete")}
               </Button>
             </DialogClose>
           </DialogFooter>

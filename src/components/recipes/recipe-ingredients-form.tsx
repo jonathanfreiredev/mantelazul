@@ -2,11 +2,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Unit } from "generated/prisma/enums";
 import { XIcon } from "lucide-react";
-import { redirect, useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "~/i18n/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { breakpoints, useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
+import { toLocale } from "~/lib/locales";
+import { formatUnit } from "~/lib/units";
 import { recipeIngredientsSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/react";
 import type { RecipeDto } from "~/types/recipe";
@@ -41,8 +44,10 @@ export const RecipeIngredientsForm = ({
   className,
   ...props
 }: React.ComponentProps<"div"> & RecipeIngredientsFormProps) => {
+  const t = useTranslations("RecipeForm");
   const isDesktop = useMediaQuery(breakpoints.md);
   const router = useRouter();
+  const locale = toLocale(useLocale());
 
   const updateIngredientsMutation = api.recipes.updateIngredients.useMutation();
 
@@ -89,12 +94,8 @@ export const RecipeIngredientsForm = ({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Ingredients</CardTitle>
-          <CardDescription>
-            Add the ingredients for your recipe. You can specify the quantity
-            and unit for each ingredient to ensure your recipe is accurate and
-            easy to follow.
-          </CardDescription>
+          <CardTitle className="text-xl">{t("ingredientsTitle")}</CardTitle>
+          <CardDescription>{t("ingredientsDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="form-ingredients" onSubmit={form.handleSubmit(onSubmit)}>
@@ -120,14 +121,14 @@ export const RecipeIngredientsForm = ({
                           <p>{field.name}</p>
                           <div className="flex flex-row items-center gap-1 text-gray-700">
                             <p>{field.quantity}</p>
-                            <p>{field.unit.toLowerCase()}</p>
+                            <p>{formatUnit(field.unit, locale)}</p>
                           </div>
                         </DrawerTrigger>
                         <DrawerContent>
                           <DrawerHeader>
-                            <DrawerTitle>Edit Ingredient</DrawerTitle>
+                            <DrawerTitle>{t("editIngredient")}</DrawerTitle>
                             <DrawerDescription>
-                              Update the details of your ingredient below.
+                              {t("editIngredientDescription")}
                             </DrawerDescription>
                           </DrawerHeader>
 
@@ -139,7 +140,7 @@ export const RecipeIngredientsForm = ({
 
                           <DrawerFooter className="mt-4">
                             <DrawerClose asChild>
-                              <Button className="w-full">Submit</Button>
+                              <Button className="w-full">{t("submit")}</Button>
                             </DrawerClose>
                           </DrawerFooter>
                         </DrawerContent>
@@ -151,7 +152,9 @@ export const RecipeIngredientsForm = ({
                           variant="outline"
                           size="icon-sm"
                           onClick={() => remove(index)}
-                          aria-label={`Remove ingredient ${field.name}`}
+                          aria-label={t("removeIngredient", {
+                            name: field.name,
+                          })}
                         >
                           <XIcon />
                         </Button>
@@ -166,14 +169,14 @@ export const RecipeIngredientsForm = ({
                   size="sm"
                   onClick={() =>
                     append({
-                      name: "New ingredient",
+                      name: t("newIngredient"),
                       quantity: "0",
                       unit: Unit.GRAM,
                       order: fields.length,
                     })
                   }
                 >
-                  Add Ingredient
+                  {t("addIngredient")}
                 </Button>
               </FieldGroup>
             </FieldSet>
@@ -184,7 +187,7 @@ export const RecipeIngredientsForm = ({
                 form="form-ingredients"
                 disabled={form.formState.isSubmitting}
               >
-                Save Ingredients
+                {t("saveIngredients")}
               </Button>
             </Field>
           </form>

@@ -6,17 +6,10 @@ import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithApprovalResponses,
 } from "ai";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  NotepadTextIcon,
-  SparklesIcon,
-  SquareIcon,
-  Trash2Icon,
-  XIcon,
-} from "lucide-react";
+import { ArrowDownIcon, SparklesIcon, Trash2Icon, XIcon } from "lucide-react";
 import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "~/hooks/use-media-query";
 import type { MyAgentUIMessage } from "~/lib/agent";
@@ -31,28 +24,27 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "../ui/drawer";
-import { AttachImageInput } from "./attach-image-input";
-import Image from "next/image";
-import { Textarea } from "../ui/textarea";
+import { ChatInput } from "./chat-input";
+import { ChatMessage } from "./chat-message";
+import { type AssistantActivity } from "./assistant-activity-indicator";
 
-const ThinkingIndicator = ({ text }: { text: string }) => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="mb-4 flex justify-start"
-  >
-    <div className="flex items-center gap-2 rounded-lg bg-neutral-200 px-4 py-3 dark:bg-neutral-800">
-      <div className="flex gap-1">
-        <span className="h-1 w-1 animate-bounce rounded-full bg-neutral-500 [animation-delay:-0.3s]"></span>
-        <span className="h-1 w-1 animate-bounce rounded-full bg-neutral-500 [animation-delay:-0.15s]"></span>
-        <span className="h-1 w-1 animate-bounce rounded-full bg-neutral-500"></span>
-      </div>
-      <span className="text-xs font-medium text-neutral-500">{text}</span>
-    </div>
-  </motion.div>
-);
+const MAX_MESSAGES = 50;
+/** Distance from the bottom within which the user is considered "at the bottom". */
+const BOTTOM_THRESHOLD_PX = 80;
+const MAX_ATTACHED_IMAGE_BYTES = 10 * 1024 * 1024;
 
-const MAX_MESSAGES = 25;
+/**
+ * A text part is still being appended while it is the last part of the message; once the
+ * agent moves on (another part follows, or the step ends) it is no longer "typing".
+ */
+function hasActivelyStreamingText(
+  message: MyAgentUIMessage | undefined,
+): boolean {
+  if (!message) return false;
+
+  const lastPart = message.parts[message.parts.length - 1];
+  return lastPart?.type === "text";
+}
 
 interface AIAgentChatProps {
   userId: string;
@@ -65,6 +57,7 @@ export default function AIAgentChat({
   chatId,
   messages: savedMessages,
 }: AIAgentChatProps) {
+  const t = useTranslations("Chat");
   const [attachedImage, setAttachedImage] = useState<ImageWithPreview | null>(
     null,
   );
@@ -75,10 +68,10 @@ export default function AIAgentChat({
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  /** Mirrors `isAtBottom` for the scroll effect, which must not re-run on every scroll. */
+  const isPinnedToBottomRef = useRef(true);
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
-
-  const router = useRouter();
 
   const {
     messages,
@@ -106,81 +99,112 @@ export default function AIAgentChat({
     },
   });
 
+  const isBusy = status === "streaming" || status === "submitted";
+  const isAtMessageLimit = messages.length > MAX_MESSAGES;
+  const lastMessage = messages[messages.length - 1];
+
+  /**
+   * What the assistant is doing right now, so the last message can show a status chip.
+   * The last message is always an assistant message while the agent is busy, including
+   * every intermediate step of a tool loop, so the chip stays visible across steps.
+   */
+  let activity: AssistantActivity | null = null;
+  if (isBusy) {
+    if (status === "submitted") {
+      activity = { kind: "thinking" };
+    } else if (hasActivelyStreamingText(lastMessage)) {
+      activity = { kind: "typing" };
+    } else {
+      activity = { kind: "working" };
+    }
+  }
+
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
-  const shouldAutoScroll = () => {
-    const el = containerRef.current;
-    if (!el) return true;
+  const isNearBottom = () => {
+    const element = containerRef.current;
+    if (!element) return true;
 
-    const threshold = 100; // px desde abajo
-    return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    return (
+      element.scrollHeight - element.scrollTop - element.clientHeight <
+      BOTTOM_THRESHOLD_PX
+    );
   };
 
-  // Scroll to bottom when opening the chat
-  useEffect(() => {
-    if (opened) {
-      setTimeout(() => scrollToBottom("auto"), 50);
-    }
-  }, [opened]);
-
-  // Auto-scroll when new messages arrive, but only if the user is already near the bottom
-  useEffect(() => {
-    if (opened && shouldAutoScroll()) {
-      scrollToBottom(status === "streaming" ? "auto" : "smooth");
-    }
-  }, [messages, status, opened, uploadingImage]);
-
+  // Track whether the user is at the bottom, both in state (for the button) and in a ref
+  // (for the scroll effect, so it does not re-run on every scroll event).
   useEffect(() => {
     if (!opened) return;
 
-    const timeout = setTimeout(() => {
-      const el = containerRef.current;
+    const element = containerRef.current;
+    if (!element) return;
 
-      if (!el) return;
+    const handleScroll = () => {
+      const nearBottom = isNearBottom();
+      isPinnedToBottomRef.current = nearBottom;
+      setIsAtBottom(nearBottom);
+    };
 
-      const handleScroll = () => {
-        console.log("scrolling...");
-        const threshold = 100;
-        const atBottom =
-          el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
-
-        setIsAtBottom(atBottom);
-      };
-
-      el.addEventListener("scroll", handleScroll);
-
-      return () => {
-        el.removeEventListener("scroll", handleScroll);
-      };
-    }, 100);
-
-    return () => clearTimeout(timeout);
+    element.addEventListener("scroll", handleScroll, { passive: true });
+    return () => element.removeEventListener("scroll", handleScroll);
   }, [opened]);
 
+  // Keep the latest message in view while the assistant streams. The container grows on every
+  // chunk (and tool step), which fires no scroll event, so we observe its height instead.
+  useEffect(() => {
+    if (!opened) return;
+
+    const element = containerRef.current;
+    if (!element) return;
+
+    const followIfPinned = () => {
+      if (isPinnedToBottomRef.current) scrollToBottom("auto");
+    };
+
+    const observer = new ResizeObserver(followIfPinned);
+    observer.observe(element);
+
+    // Pin to the bottom on open, and whenever a new message is sent.
+    isPinnedToBottomRef.current = true;
+    followIfPinned();
+
+    return () => observer.disconnect();
+  }, [opened, messages.length]);
+
   const handleSendMessage = async (text: string) => {
+    if (text.trim() === "" || isBusy || isAtMessageLimit) return;
+
     let imageUrl: string | null = null;
 
-    if (attachedImage && attachedImage.preview.startsWith("blob:")) {
+    if (attachedImage && attachedImage.file.size > MAX_ATTACHED_IMAGE_BYTES) {
+      console.error("Attached image exceeds the 10MB limit");
+      return;
+    }
+
+    if (attachedImage) {
       setUploadingImage(true);
-      const formData = new FormData();
-      formData.append("file", attachedImage.file);
 
-      const response = await fetch("/api/images/upload", {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        const formData = new FormData();
+        formData.append("file", attachedImage.file);
 
-      if (!response.ok) {
-        console.error("Image upload failed");
-        return;
+        const response = await fetch("/api/images/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          console.error("Image upload failed");
+          return;
+        }
+
+        const resImage: { url: string } = await response.json();
+        imageUrl = resImage.url;
+      } finally {
+        setUploadingImage(false);
       }
-
-      const resImage: { url: string } = await response.json();
-
-      imageUrl = resImage.url;
-      setUploadingImage(false);
     }
 
     sendMessage({
@@ -203,436 +227,183 @@ export default function AIAgentChat({
     setAttachedImage(null);
   };
 
-  return (
-    <>
-      <Button
-        variant="outline"
-        size="icon-lg"
-        className="rounded-sm border-slate-400"
-        onClick={() => setOpened(true)}
-      >
-        <SparklesIcon className="text-2xl text-slate-500" />
-      </Button>
+  const handleApprove = (approvalId: string) => {
+    addToolApprovalResponse({ id: approvalId, approved: true });
+  };
 
-      {!opened ? (
+  const handleDeny = (approvalId: string) => {
+    addToolApprovalResponse({ id: approvalId, approved: false });
+  };
+
+  const activityFor = (messageId: string): AssistantActivity | null =>
+    messageId === lastMessage?.id ? activity : null;
+
+  if (!opened) {
+    return (
+      <>
+        <Button
+          variant="outline"
+          size="icon-lg"
+          className="rounded-sm border-slate-400"
+          onClick={() => setOpened(true)}
+        >
+          <SparklesIcon className="text-2xl text-slate-500" />
+        </Button>
+
         <div className="fixed right-0 bottom-0 left-0 z-50 mx-auto w-full max-w-2xl px-4 py-6">
-          <form
-            onSubmit={(e) => {
-              if (messages.length > MAX_MESSAGES) {
-                e.preventDefault();
-                setOpened(true);
-                return;
-              }
-
-              e.preventDefault();
-              setOpened(true);
-              handleSendMessage(input);
+          <div
+            onFocus={() => {
+              if (messages.length > 0) setOpened(true);
             }}
           >
-            <div className="flex gap-2 rounded-lg border border-zinc-300 bg-white/40 px-4 py-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
-              <Textarea
-                className="w-full resize-none border-none py-2 focus-visible:ring-0"
-                value={input}
-                rows={1}
-                placeholder="Say something..."
-                disabled={uploadingImage}
-                onFocus={() => {
-                  if (messages.length > 0) {
-                    setOpened(true);
-                  }
-                }}
-                onChange={(e) => setInput(e.currentTarget.value)}
-              />
-              <div className="flex items-center justify-between">
-                {status === "streaming" || status === "submitted" ? (
-                  <Button
-                    variant="default"
-                    size="icon"
-                    className="rounded-full"
-                    onClick={stop}
-                  >
-                    <SquareIcon fill="white" />
-                  </Button>
-                ) : (
-                  <Button
-                    variant="default"
-                    size="icon"
-                    className="rounded-full"
-                    type="submit"
-                    disabled={
-                      input.trim() === "" ||
-                      uploadingImage ||
-                      messages.length > MAX_MESSAGES
-                    }
-                  >
-                    <ArrowUpIcon />
-                  </Button>
-                )}
-              </div>
-            </div>
-          </form>
+            <ChatInput
+              value={input}
+              onChange={setInput}
+              onSubmit={() => {
+                setOpened(true);
+                if (!isAtMessageLimit) void handleSendMessage(input);
+              }}
+              onStop={stop}
+              isBusy={isBusy}
+              disabled={uploadingImage || isAtMessageLimit}
+              attachedImage={attachedImage}
+              onAttachedImageChange={setAttachedImage}
+              showAttachButton={false}
+            />
+          </div>
         </div>
-      ) : (
-        <Drawer
-          direction={isDesktop ? "right" : "bottom"}
-          open={opened}
-          onOpenChange={(open) => setOpened(open)}
-        >
-          <DrawerContent className="w-full">
-            <DrawerHeader>
-              <DrawerTitle>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-lg font-normal">
-                    <SparklesIcon size="20" strokeWidth={1.5} /> Assistant
-                  </div>
+      </>
+    );
+  }
 
-                  {messages.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon-lg"
-                        disabled={
-                          deleteChat.isPending ||
-                          status === "streaming" ||
-                          status === "submitted"
-                        }
-                        onClick={() => deleteChat.mutate()}
-                      >
-                        <Trash2Icon size="20" strokeWidth={1.5} />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </DrawerTitle>
-            </DrawerHeader>
-            <DrawerDescription className="sr-only">
-              The assistant can help you with a variety of tasks, such as
-              answering questions, providing recommendations, and creating
-              recipes.
-            </DrawerDescription>
-
-            <div className="relative flex min-h-40 flex-col px-4">
-              <div
-                ref={containerRef}
-                className="no-scrollbar flex h-full flex-col gap-4 overflow-y-auto"
-              >
-                {messages.length > 0 ? (
-                  <>
-                    {messages.map((message) => (
-                      <motion.div
-                        key={message.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className={`flex ${
-                          message.role === "user"
-                            ? "justify-end"
-                            : "justify-start"
-                        } mb-4`}
-                      >
-                        <div
-                          className={`max-w-[80%] rounded-lg px-4 py-3 ${
-                            message.role === "user"
-                              ? "bg-neutral-600 text-white"
-                              : "bg-neutral-200 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100"
-                          }`}
-                        >
-                          <div className="whitespace-pre-wrap">
-                            <p className="mb-1 text-xs font-extralight opacity-70">
-                              {message.role === "user" ? "YOU " : "AI "}
-                            </p>
-                            {(status === "submitted" ||
-                              status === "streaming") &&
-                              message.role === "assistant" &&
-                              message.id ===
-                                messages[messages.length - 1]?.id && (
-                                <ThinkingIndicator
-                                  text={
-                                    status === "submitted"
-                                      ? "Thinking"
-                                      : "Typing"
-                                  }
-                                />
-                              )}
-                            {message.parts.map((part, i) => {
-                              switch (part.type) {
-                                case "text": {
-                                  return (
-                                    <div
-                                      key={`${message.id}-${i}`}
-                                      className="wrap-break-word whitespace-pre-wrap"
-                                    >
-                                      {part.text}
-                                    </div>
-                                  );
-                                }
-                                case "file": {
-                                  return (
-                                    <div
-                                      key={`${message.id}-${i}`}
-                                      className="mt-2"
-                                    >
-                                      {part.mediaType.split("/")[0] && (
-                                        <div
-                                          key={`${message.id}-${i}`}
-                                          className="relative h-32 w-32 overflow-hidden rounded-sm bg-gray-100 shadow-lg shadow-gray-500/50"
-                                        >
-                                          <Image
-                                            key={(part.filename || "image") + i}
-                                            src={part.url}
-                                            alt={part.filename ?? "image"}
-                                            fill
-                                            className="object-cover"
-                                          />
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                }
-                                case "tool-createRecipe":
-                                case "tool-updateRecipe": {
-                                  switch (part.state) {
-                                    case "approval-requested":
-                                      return (
-                                        <div key={part.toolCallId}>
-                                          <p className="mb-2">
-                                            Do you approve{" "}
-                                            {part.type === "tool-createRecipe"
-                                              ? "creating"
-                                              : "updating"}{" "}
-                                            the following recipe:{" "}
-                                            {part.input.title}?
-                                          </p>
-
-                                          <div className="flex gap-2">
-                                            <Button
-                                              variant="default"
-                                              onClick={async () => {
-                                                addToolApprovalResponse({
-                                                  id: part.approval.id,
-                                                  approved: true,
-                                                });
-                                              }}
-                                            >
-                                              Approve
-                                            </Button>
-                                            <Button
-                                              variant="destructive"
-                                              onClick={() =>
-                                                addToolApprovalResponse({
-                                                  id: part.approval.id,
-                                                  approved: false,
-                                                })
-                                              }
-                                            >
-                                              Deny
-                                            </Button>
-                                          </div>
-                                        </div>
-                                      );
-                                    case "output-available":
-                                      // Show the output of the tool call and a button link to view the recipe
-                                      return (
-                                        <div
-                                          key={part.toolCallId}
-                                          className="mb-5 flex flex-col gap-4 rounded-lg border border-slate-300 bg-slate-100 p-4"
-                                        >
-                                          <p>
-                                            Recipe "{part.output.recipe.title}"
-                                            {part.type === "tool-createRecipe"
-                                              ? "created"
-                                              : "updated"}{" "}
-                                            successfully!
-                                          </p>
-                                          <Button
-                                            variant="outline"
-                                            onClick={() => {
-                                              if (
-                                                window.location.pathname ===
-                                                `/recipes/${part.output.recipe.slug}`
-                                              ) {
-                                                // If we're already on the recipe page, just refresh the data
-                                                router.refresh();
-                                              } else {
-                                                router.push(
-                                                  `/recipes/${part.output.recipe.slug}`,
-                                                );
-                                              }
-
-                                              setOpened(false);
-                                            }}
-                                          >
-                                            <NotepadTextIcon /> View Recipe
-                                          </Button>
-                                        </div>
-                                      );
-                                    case "output-denied":
-                                      return (
-                                        <div
-                                          key={part.toolCallId}
-                                          className="mb-5 flex flex-col gap-4 rounded-lg border border-red-300 bg-red-100 p-4"
-                                        >
-                                          <p>
-                                            Recipe{" "}
-                                            {part.type === "tool-createRecipe"
-                                              ? "creation"
-                                              : "update"}{" "}
-                                            denied. The assistant will try to
-                                            find another solution.
-                                          </p>
-                                        </div>
-                                      );
-                                  }
-                                }
-                                case "tool-generateRecipeImage": {
-                                  if (part.state === "output-available") {
-                                    return (
-                                      <div key={part.toolCallId}>
-                                        {part.output.imageUrl && (
-                                          <div className="relative mb-5 h-32 w-full overflow-hidden rounded-sm bg-gray-100 shadow-lg shadow-gray-500/50">
-                                            <Image
-                                              src={part.output.imageUrl}
-                                              alt={part.input.recipeTitle}
-                                              fill
-                                              className="object-cover"
-                                            />
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  }
-                                }
-                              }
-                            })}
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center gap-4 pt-10">
-                    <p className="text-center text-sm text-neutral-500">
-                      The assistant can help you with a variety of tasks, such
-                      as answering questions, providing recommendations, and
-                      creating recipes.
-                    </p>
-                  </div>
-                )}
-
-                <div ref={messagesEndRef} />
+  return (
+    <Drawer
+      direction={isDesktop ? "right" : "bottom"}
+      open={opened}
+      onOpenChange={setOpened}
+    >
+      <DrawerContent className="w-full">
+        <DrawerHeader>
+          <DrawerTitle>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-lg font-normal">
+                <SparklesIcon size="20" strokeWidth={1.5} /> {t("title")}
               </div>
 
-              {!isAtBottom && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="absolute bottom-5 z-50 flex w-full"
+              {messages.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  disabled={deleteChat.isPending || isBusy}
+                  onClick={() => deleteChat.mutate()}
                 >
-                  <Button
-                    className="pointer-events-auto mx-auto rounded-full shadow-lg shadow-gray-500/50"
-                    size="icon-lg"
-                    variant="outline"
-                    onClick={() => scrollToBottom("smooth")}
-                  >
-                    <ArrowDownIcon />
-                  </Button>
-                </motion.div>
-              )}
-
-              {attachedImage && (
-                <div className="absolute bottom-1 z-100 h-32 w-32 overflow-hidden rounded-sm bg-gray-100 shadow-lg shadow-gray-500/50">
-                  <div className="relative h-full w-full">
-                    <Button
-                      variant="default"
-                      size="icon"
-                      className="absolute top-1 right-1 z-10 rounded-full"
-                      onClick={() => setAttachedImage(null)}
-                    >
-                      <XIcon size="16" />
-                    </Button>
-                    <Image
-                      src={attachedImage.preview}
-                      alt="Attached image preview"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {messages.length > MAX_MESSAGES && (
-                <motion.div
-                  key="limit-exceeded"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="absolute bottom-3 z-100 w-[90%] rounded-md border-2 border-red-400/30 bg-red-100 px-4 py-2 shadow-lg shadow-gray-400/50"
-                >
-                  <p className="text-sm text-red-700">
-                    Message limit exceeded. Please delete the chat to start a
-                    new conversation.
-                  </p>
-                </motion.div>
+                  <Trash2Icon size="20" strokeWidth={1.5} />
+                </Button>
               )}
             </div>
+          </DrawerTitle>
+        </DrawerHeader>
+        <DrawerDescription className="sr-only">
+          {t("description")}
+        </DrawerDescription>
 
-            <DrawerFooter>
-              <div className="flex flex-col gap-2 rounded-lg border border-zinc-300 px-4 py-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSendMessage(input);
-                  }}
-                >
-                  <Textarea
-                    className="w-full resize-none border-none py-2 focus-visible:ring-0"
-                    value={input}
-                    rows={1}
-                    placeholder="Say something..."
-                    disabled={uploadingImage || messages.length > MAX_MESSAGES}
-                    onChange={(e) => setInput(e.currentTarget.value)}
-                  />
-                  <div className="mt-1 flex items-center justify-between">
-                    <AttachImageInput
-                      value={attachedImage}
-                      onChange={setAttachedImage}
-                      disabled={
-                        uploadingImage || messages.length > MAX_MESSAGES
-                      }
-                    />
-
-                    {status === "streaming" || status === "submitted" ? (
-                      <Button
-                        variant="default"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={stop}
-                      >
-                        <SquareIcon fill="white" />
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="default"
-                        size="icon"
-                        className="rounded-full"
-                        type="submit"
-                        disabled={
-                          input.trim() === "" ||
-                          uploadingImage ||
-                          messages.length > 30
-                        }
-                      >
-                        <ArrowUpIcon />
-                      </Button>
-                    )}
-                  </div>
-                </form>{" "}
+        <div className="relative flex min-h-40 flex-col px-4">
+          <div
+            ref={containerRef}
+            className="no-scrollbar flex h-full flex-col gap-4 overflow-y-auto"
+          >
+            {messages.length > 0 ? (
+              messages.map((message) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  activity={activityFor(message.id)}
+                  onApprove={handleApprove}
+                  onDeny={handleDeny}
+                  onNavigate={() => setOpened(false)}
+                />
+              ))
+            ) : (
+              <div className="flex flex-col items-center gap-4 pt-10">
+                <p className="text-center text-sm text-neutral-500">
+                  {t("description")}
+                </p>
               </div>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
-      )}
-    </>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {!isAtBottom && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="absolute bottom-5 z-50 flex w-full"
+            >
+              <Button
+                className="pointer-events-auto mx-auto rounded-full shadow-lg shadow-gray-500/50"
+                size="icon-lg"
+                variant="outline"
+                onClick={() => {
+                  isPinnedToBottomRef.current = true;
+                  setIsAtBottom(true);
+                  scrollToBottom("smooth");
+                }}
+              >
+                <ArrowDownIcon />
+              </Button>
+            </motion.div>
+          )}
+
+          {attachedImage && (
+            <div className="absolute bottom-1 z-100 h-32 w-32 overflow-hidden rounded-sm bg-gray-100 shadow-lg shadow-gray-500/50">
+              <div className="relative h-full w-full">
+                <Button
+                  variant="default"
+                  size="icon"
+                  className="absolute top-1 right-1 z-10 rounded-full"
+                  onClick={() => setAttachedImage(null)}
+                >
+                  <XIcon size="16" />
+                </Button>
+                <Image
+                  src={attachedImage.preview}
+                  alt={t("attachedImageAlt")}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </div>
+          )}
+
+          {isAtMessageLimit && (
+            <motion.div
+              key="limit-exceeded"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="absolute bottom-3 z-100 w-[90%] rounded-md border-2 border-red-400/30 bg-red-100 px-4 py-2 shadow-lg shadow-gray-400/50"
+            >
+              <p className="text-sm text-red-700">{t("limitExceeded")}</p>
+            </motion.div>
+          )}
+        </div>
+
+        <DrawerFooter>
+          <ChatInput
+            value={input}
+            onChange={setInput}
+            onSubmit={() => void handleSendMessage(input)}
+            onStop={stop}
+            isBusy={isBusy}
+            disabled={uploadingImage || isAtMessageLimit}
+            attachedImage={attachedImage}
+            onAttachedImageChange={setAttachedImage}
+            showAttachButton
+          />
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   );
 }

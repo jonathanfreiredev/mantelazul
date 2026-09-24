@@ -1,5 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -15,6 +17,14 @@ import {
   CardTitle,
 } from "../ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import {
   Field,
   FieldDescription,
   FieldError,
@@ -23,30 +33,25 @@ import {
   FieldSet,
 } from "../ui/field";
 import { Input } from "../ui/input";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
-import type { Label } from "radix-ui";
 import { ChangePasswordForm } from "./change-password-form";
-import { useState } from "react";
-
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.email({ message: "Please enter a valid email address" }),
-});
 
 export const ProfileForm = ({
   user,
   className,
   ...props
 }: React.ComponentProps<"div"> & { user: { name: string; email: string } }) => {
+  const t = useTranslations("ProfileForm");
+  const tValidation = useTranslations("Validation");
+
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(2, { message: tValidation("nameMin") }),
+        email: z.email({ message: tValidation("invalidEmail") }),
+      }),
+    [tValidation],
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,7 +61,6 @@ export const ProfileForm = ({
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    // Do something with the form values.
     await authClient.updateUser({
       name: data.name,
       fetchOptions: {
@@ -66,7 +70,7 @@ export const ProfileForm = ({
             fetchOptions: {
               onError(error) {
                 if (error.error.message !== "Email is the same") {
-                  toast.error("Failed to update email!", {
+                  toast.error(t("emailErrorTitle"), {
                     description: error.error.message,
                     position: "bottom-right",
                   });
@@ -75,13 +79,13 @@ export const ProfileForm = ({
             },
           });
 
-          toast.success("Profile updated successfully!", {
-            description: "Your profile information has been updated.",
+          toast.success(t("successTitle"), {
+            description: t("successDescription"),
             position: "bottom-right",
           });
         },
         onError(error) {
-          toast.error("Failed to update profile!", {
+          toast.error(t("errorTitle"), {
             description: error.error.message,
             position: "bottom-right",
           });
@@ -97,10 +101,8 @@ export const ProfileForm = ({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">My Profile</CardTitle>
-          <CardDescription>
-            Update your profile information, such as your name and email.
-          </CardDescription>
+          <CardTitle className="text-xl">{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="form-profile" onSubmit={form.handleSubmit(onSubmit)}>
@@ -111,7 +113,7 @@ export const ProfileForm = ({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="name">Name</FieldLabel>
+                      <FieldLabel htmlFor="name">{t("name")}</FieldLabel>
                       <Input
                         {...field}
                         id="name"
@@ -132,7 +134,7 @@ export const ProfileForm = ({
                   control={form.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="email">Email</FieldLabel>
+                      <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
                       <Input
                         {...field}
                         id="email"
@@ -140,9 +142,7 @@ export const ProfileForm = ({
                         placeholder="joe@example.com"
                         required
                       />
-                      <FieldDescription>
-                        Choose a unique email for your account.
-                      </FieldDescription>
+                      <FieldDescription>{t("emailHint")}</FieldDescription>
 
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -159,7 +159,7 @@ export const ProfileForm = ({
                 form="form-profile"
                 disabled={form.formState.isSubmitting}
               >
-                Update Profile
+                {t("submit")}
               </Button>
             </Field>
           </form>
@@ -169,14 +169,14 @@ export const ProfileForm = ({
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="link" disabled={form.formState.isSubmitting}>
-                Change password
+                {t("changePassword")}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Change password</DialogTitle>
+                <DialogTitle>{t("changePassword")}</DialogTitle>
                 <DialogDescription>
-                  Enter your new password below to change your password.
+                  {t("changePasswordDescription")}
                 </DialogDescription>
               </DialogHeader>
 

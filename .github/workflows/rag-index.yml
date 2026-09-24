@@ -1,0 +1,52 @@
+name: RAG Index (manual)
+
+# Manual only: rebuilds the Chroma recipe index from Postgres. It deliberately has no `push` or
+# `schedule` trigger, so the index is never rebuilt on its own; you run it from the Actions tab
+# when you need to.
+#
+# Required repository secrets:
+#   DATABASE_URL     - production Postgres connection string
+#   CHROMA_HOST      - region endpoint, e.g. "europe-west1.gcp.trychroma.com"
+#   CHROMA_API_KEY   - Chroma Cloud API key
+#   CHROMA_TENANT    - Chroma Cloud tenant id
+#   CHROMA_DATABASE  - Chroma Cloud database name
+#   OPENAI_API_KEY   - used to compute the embeddings
+on:
+  workflow_dispatch:
+    inputs:
+      reset:
+        description: "Drop the collection first (needed after changing the embedding model or its dimension)"
+        type: boolean
+        default: false
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Index recipes into Chroma
+        run: pnpm rag:index ${{ inputs.reset && '-- --reset' || '' }}
+        env:
+          # The indexing script only needs a subset of the app's env, so validation is skipped
+          # instead of wiring every secret (Resend, Cloudinary, ...) into this job.
+          SKIP_ENV_VALIDATION: "1"
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CHROMA_HOST: ${{ secrets.CHROMA_HOST }}
+          CHROMA_API_KEY: ${{ secrets.CHROMA_API_KEY }}
+          CHROMA_TENANT: ${{ secrets.CHROMA_TENANT }}
+          CHROMA_DATABASE: ${{ secrets.CHROMA_DATABASE }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

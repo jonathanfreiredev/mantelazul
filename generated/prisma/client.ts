@@ -67,6 +67,15 @@ export type Verification = Prisma.VerificationModel
  */
 export type Recipe = Prisma.RecipeModel
 /**
+ * Model RecipeTranslation
+ * *
+ *  * Localized text of a recipe. Every locale holds the title, description, ingredient names and
+ *  * step descriptions for that language; quantities, units, times and metadata stay on the
+ *  * locale-independent models. Ingredient/step text is keyed by `order` because the structural
+ *  * rows are deleted and recreated on every save, so their ids do not survive an edit.
+ */
+export type RecipeTranslation = Prisma.RecipeTranslationModel
+/**
  * Model Ingredient
  * 
  */

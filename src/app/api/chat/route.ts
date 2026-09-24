@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     agent,
     uiMessages: messages,
     generateMessageId: () => createId(),
-    onFinish: async ({ messages }) => {
+    onEnd: async ({ messages }) => {
       await saveChat(messages, id, userId);
     },
   });

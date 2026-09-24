@@ -1,22 +1,24 @@
-import { FlatCompat } from "@eslint/eslintrc";
+import nextPlugin from "@next/eslint-plugin-next";
+import nextTypescript from "eslint-config-next/typescript";
 import tseslint from "typescript-eslint";
-
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-});
 
 export default tseslint.config(
   {
-    ignores: [".next"],
+    ignores: [".next", "generated"],
   },
-  ...compat.extends("next/core-web-vitals"),
+  // Next's core-web-vitals rules, wired directly instead of through eslint-config-next.
+  // eslint-config-next pulls in eslint-plugin-react, whose peer range stops at ESLint 9
+  // and breaks on ESLint 10. Next's own rules and the TypeScript rules cover the rest.
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    plugins: { "@next/next": nextPlugin },
+    rules: {
+      ...nextPlugin.configs["core-web-vitals"].rules,
+    },
+  },
+  ...nextTypescript,
   {
     files: ["**/*.ts", "**/*.tsx"],
-    extends: [
-      ...tseslint.configs.recommended,
-      ...tseslint.configs.recommendedTypeChecked,
-      ...tseslint.configs.stylisticTypeChecked,
-    ],
     rules: {
       "@typescript-eslint/array-type": "off",
       "@typescript-eslint/consistent-type-definitions": "off",

@@ -1,7 +1,7 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { categories } from "~/lib/categories-list";
-import { capitalize } from "~/lib/utils";
 import { Button } from "../ui/button";
+import { Link } from "~/i18n/navigation";
 import { getSession } from "~/server/better-auth/server";
 
 interface CategoriesNavbarProps {
@@ -12,6 +12,8 @@ export async function CategoriesNavbar({
   currentCategory,
 }: CategoriesNavbarProps) {
   const session = await getSession();
+  const t = await getTranslations("Nav");
+  const tCategories = await getTranslations("CategoryPages");
 
   const isLoggedIn = !!session?.session;
 
@@ -31,13 +33,15 @@ export async function CategoriesNavbar({
                   : "text-gray-500 hover:text-black"
               }`}
             >
-              <p className="text-center">{capitalize(cat.name)}</p>
+              <p className="text-center">{tCategories(`${cat.name}.name`)}</p>
             </Link>
           );
         })}
 
         <Button variant="default" className="ml-auto hidden sm:flex">
-          <Link href={isLoggedIn ? "/recipes/new" : "/login"}>New Recipe</Link>
+          <Link href={isLoggedIn ? "/recipes/new" : "/login"}>
+            {t("newRecipe")}
+          </Link>
         </Button>
       </div>
     </div>

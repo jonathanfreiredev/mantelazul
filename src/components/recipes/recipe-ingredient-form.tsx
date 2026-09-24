@@ -1,4 +1,5 @@
 import { Unit } from "generated/prisma/enums";
+import { useTranslations } from "next-intl";
 import { Controller } from "react-hook-form";
 import {
   Field,
@@ -19,6 +20,7 @@ import {
 interface RecipeIngredientFormProps {
   index: number;
   fieldId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the form values type lives with the caller; this component only wires fields through to react-hook-form.
   control: any;
 }
 
@@ -27,6 +29,9 @@ export function RecipeIngredientForm({
   fieldId,
   control,
 }: RecipeIngredientFormProps) {
+  const t = useTranslations("RecipeForm");
+  const tUnits = useTranslations("UnitsFull");
+
   return (
     <FieldGroup key={fieldId} className="flex w-full flex-col gap-4 px-6 py-2">
       <FieldGroup className="flex w-full flex-row items-center">
@@ -36,13 +41,13 @@ export function RecipeIngredientForm({
           render={({ field: controllerField, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={`ingredients.${index}.name`}>
-                Name
+                {t("ingredientName")}
               </FieldLabel>
               <Input
                 {...controllerField}
                 id={`ingredients.${index}.name`}
                 aria-invalid={fieldState.invalid}
-                placeholder="Ingredient Name"
+                placeholder={t("ingredientNamePlaceholder")}
                 type="text"
                 required
               />
@@ -59,7 +64,7 @@ export function RecipeIngredientForm({
           render={({ field: controllerField, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={`ingredients.${index}.quantity`}>
-                Quantity
+                {t("ingredientQuantity")}
               </FieldLabel>
               <Input
                 {...controllerField}
@@ -92,7 +97,7 @@ export function RecipeIngredientForm({
             <Field orientation="responsive" data-invalid={fieldState.invalid}>
               <FieldContent>
                 <FieldLabel htmlFor={`ingredients.${index}.unit`}>
-                  Unit
+                  {t("ingredientUnit")}
                 </FieldLabel>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -108,12 +113,12 @@ export function RecipeIngredientForm({
                   aria-invalid={fieldState.invalid}
                   className="min-w-30"
                 >
-                  <SelectValue placeholder="Select" />
+                  <SelectValue placeholder={t("select")} />
                 </SelectTrigger>
                 <SelectContent position="item-aligned">
                   {Object.entries(Unit).map(([key, value]) => (
                     <SelectItem key={key} value={value}>
-                      {key.charAt(0) + key.slice(1).toLowerCase()}
+                      {tUnits(value)}
                     </SelectItem>
                   ))}
                 </SelectContent>

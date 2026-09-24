@@ -1,5 +1,6 @@
 "use client";
 import { PaperclipIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   ImageUpload,
@@ -27,6 +28,7 @@ export function AttachImageInput({
   onChange,
   disabled,
 }: AttachImageInputProps) {
+  const t = useTranslations("Chat");
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
 
   return (
@@ -44,11 +46,8 @@ export function AttachImageInput({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Attach an image to the chat</DialogTitle>
-          <DialogDescription>
-            The image will be sent to the AI assistant and can be used in the
-            conversation.
-          </DialogDescription>
+          <DialogTitle>{t("attachTitle")}</DialogTitle>
+          <DialogDescription>{t("attachDescription")}</DialogDescription>
         </DialogHeader>
 
         <ImageUpload

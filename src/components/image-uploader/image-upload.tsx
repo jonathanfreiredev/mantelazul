@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useDropzone } from "react-dropzone";
 import { Input } from "../ui/input";
 import { processImage } from "~/lib/process-image";
@@ -21,36 +22,49 @@ export function ImageUpload({
   maxImages = 1,
   ...props
 }: React.ComponentProps<"input"> & ImageUploadProps) {
+  const t = useTranslations("ImageUpload");
   const [isLoading, setIsLoading] = useState(false);
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      setIsLoading(true);
       if (acceptedFiles.length === 0) return;
 
-      const processedFiles = await Promise.all(
-        acceptedFiles.map(async (file) => {
-          try {
-            return await processImage(file);
-          } catch (e) {
-            console.error("Error redimensionando:", e);
-            return file;
-          }
-        }),
-      );
+      setIsLoading(true);
+      try {
+        const processedFiles = await Promise.all(
+          acceptedFiles.map(async (file) => {
+            try {
+              return await processImage(file);
+            } catch (e) {
+              console.error("Error redimensionando:", e);
+              return file;
+            }
+          }),
+        );
 
-      const newImages: ImageWithPreview[] = processedFiles.map((file) => ({
-        file,
-        preview: URL.createObjectURL(file),
-      }));
+        const newImages: ImageWithPreview[] = processedFiles.map((file) => ({
+          file,
+          preview: URL.createObjectURL(file),
+        }));
 
-      handleImages(newImages);
-      setIsLoading(false);
+        handleImages(newImages);
+      } finally {
+        setIsLoading(false);
+      }
     },
     [handleImages],
   );
 
+  // react-dropzone expects a void handler; wrap the async work so the promise
+  // is not passed through to a property that requires a void return.
+  const handleDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      void onDrop(acceptedFiles);
+    },
+    [onDrop],
+  );
+
   const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
+    onDrop: handleDrop,
     accept: {
       "image/jpeg": [],
       "image/png": [],
@@ -78,7 +92,7 @@ export function ImageUpload({
         multiple={maxImages > 1}
         size={10 * 1024 * 1024}
       />
-      <p>Drag 'n' drop an image here, or click to select an image</p>
+      <p>{t("dropzone")}</p>
       <Spinner
         className={`absolute ${isLoading ? "block" : "hidden"} size-10`}
       />

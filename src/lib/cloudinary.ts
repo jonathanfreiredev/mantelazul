@@ -1,6 +1,10 @@
+import { openai, type OpenAIImageModelGenerationOptions } from "@ai-sdk/openai";
 import { generateImage } from "ai";
-import { createBlackForestLabs } from "@ai-sdk/black-forest-labs";
-import { v2 as cloudinary } from "cloudinary";
+import {
+  v2 as cloudinary,
+  type DeleteApiResponse,
+  type UploadApiResponse,
+} from "cloudinary";
 import { env } from "~/env";
 
 cloudinary.config({
@@ -9,9 +13,7 @@ cloudinary.config({
   api_secret: env.CLOUDINARY_API_SECRET,
 });
 
-const blackForestLabs = createBlackForestLabs();
-
-export function uploadToCloudinary(buffer: Buffer): Promise<any> {
+export function uploadToCloudinary(buffer: Buffer): Promise<UploadApiResponse> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
@@ -19,7 +21,7 @@ export function uploadToCloudinary(buffer: Buffer): Promise<any> {
           upload_preset: "mantelazul",
         },
         (error, result) => {
-          if (error) reject(error);
+          if (error || !result) reject(error ?? new Error("Upload failed"));
           else resolve(result);
         },
       )
@@ -27,7 +29,9 @@ export function uploadToCloudinary(buffer: Buffer): Promise<any> {
   });
 }
 
-export function deleteFromCloudinary(publicId: string): Promise<any> {
+export function deleteFromCloudinary(
+  publicId: string,
+): Promise<DeleteApiResponse> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.destroy(
       `mantelazul/${publicId}`,
@@ -36,7 +40,7 @@ export function deleteFromCloudinary(publicId: string): Promise<any> {
       },
       (error, result) => {
         console.log("Cloudinary delete result:", result);
-        if (error) reject(error);
+        if (error || !result) reject(error ?? new Error("Delete failed"));
         else resolve(result);
       },
     );
@@ -47,19 +51,16 @@ export async function generateAndUpload(
   title: string,
   styleHint?: string,
 ): Promise<string> {
-  const model =
-    process.env.NODE_ENV === "production" ? "flux-2-pro" : "flux-2-klein-9b";
   const { image } = await generateImage({
-    model: blackForestLabs.image(model),
+    model: openai.image("gpt-image-2.5-sunburst"),
     prompt: `Professional gourmet food photography of ${title}${
       styleHint ? `, ${styleHint} style` : ""
-    }, high resolution, 8k, appetizing lighting, macro lens, elegant plating.`,
-    aspectRatio: "1:1",
+    }, high resolution, 8K, appetizing lighting, beautifully plated, macro photography.`,
+    size: "1024x1024",
     providerOptions: {
-      blackForestLabs: {
-        width: 1024,
-        height: 1024,
-      },
+      openai: {
+        quality: "medium",
+      } satisfies OpenAIImageModelGenerationOptions,
     },
   });
 

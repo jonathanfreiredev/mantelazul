@@ -56,6 +56,7 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   Recipe: 'Recipe',
+  RecipeTranslation: 'RecipeTranslation',
   Ingredient: 'Ingredient',
   Step: 'Step',
   Tag: 'Tag',
@@ -143,8 +144,6 @@ export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[k
 
 export const RecipeScalarFieldEnum = {
   id: 'id',
-  title: 'title',
-  description: 'description',
   published: 'published',
   slug: 'slug',
   imageUrl: 'imageUrl',
@@ -152,6 +151,7 @@ export const RecipeScalarFieldEnum = {
   likesCount: 'likesCount',
   difficulty: 'difficulty',
   category: 'category',
+  sourceLocale: 'sourceLocale',
   preparationTime: 'preparationTime',
   cookingTime: 'cookingTime',
   restingTime: 'restingTime',
@@ -167,9 +167,23 @@ export const RecipeScalarFieldEnum = {
 export type RecipeScalarFieldEnum = (typeof RecipeScalarFieldEnum)[keyof typeof RecipeScalarFieldEnum]
 
 
+export const RecipeTranslationScalarFieldEnum = {
+  id: 'id',
+  recipeId: 'recipeId',
+  locale: 'locale',
+  title: 'title',
+  description: 'description',
+  ingredients: 'ingredients',
+  steps: 'steps',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RecipeTranslationScalarFieldEnum = (typeof RecipeTranslationScalarFieldEnum)[keyof typeof RecipeTranslationScalarFieldEnum]
+
+
 export const IngredientScalarFieldEnum = {
   id: 'id',
-  name: 'name',
   quantity: 'quantity',
   unit: 'unit',
   order: 'order',
@@ -183,7 +197,6 @@ export type IngredientScalarFieldEnum = (typeof IngredientScalarFieldEnum)[keyof
 
 export const StepScalarFieldEnum = {
   id: 'id',
-  description: 'description',
   order: 'order',
   imageUrl: 'imageUrl',
   createdAt: 'createdAt',
@@ -276,6 +289,13 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -290,4 +310,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

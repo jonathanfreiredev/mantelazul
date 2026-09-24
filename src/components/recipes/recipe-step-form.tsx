@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { ImageUpload } from "../image-uploader/image-upload";
@@ -18,6 +19,7 @@ import { TrashIcon } from "lucide-react";
 interface RecipeStepFormProps {
   index: number;
   fieldId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the form values type lives with the caller; this component only wires fields through to react-hook-form.
   control: any;
 }
 
@@ -27,6 +29,7 @@ export function RecipeStepForm({
   control,
 }: RecipeStepFormProps) {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const t = useTranslations("RecipeForm");
 
   return (
     <FieldGroup key={fieldId} className="flex w-full flex-col gap-4 px-6 py-2">
@@ -37,7 +40,7 @@ export function RecipeStepForm({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={`steps.${index}.image`} className="sr-only">
-                Picture
+                {t("stepImage")}
               </FieldLabel>
               <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
                 <DialogTrigger asChild>
@@ -46,7 +49,7 @@ export function RecipeStepForm({
                       <>
                         <Image
                           src={field.value.preview}
-                          alt="Step Image"
+                          alt={t("stepImage")}
                           fill
                           className="object-cover"
                         />
@@ -66,18 +69,16 @@ export function RecipeStepForm({
                       </>
                     ) : (
                       <p className="flex h-full w-full items-center justify-center text-gray-500">
-                        Click to upload image
+                        {t("imagePlaceholder")}
                       </p>
                     )}
                   </div>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Upload Step Image</DialogTitle>
+                    <DialogTitle>{t("uploadStepImage")}</DialogTitle>
                     <DialogDescription>
-                      Choose an image to represent this step in your recipe. You
-                      can upload a new image or select an existing one from your
-                      library.
+                      {t("uploadStepImageDescription")}
                     </DialogDescription>
                   </DialogHeader>
 
@@ -104,13 +105,13 @@ export function RecipeStepForm({
           render={({ field: controllerField, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={`steps.${index}.description`}>
-                Description
+                {t("stepDescriptionLabel")}
               </FieldLabel>
               <Textarea
                 {...controllerField}
                 id={`steps.${index}.description`}
                 aria-invalid={fieldState.invalid}
-                placeholder="Step description"
+                placeholder={t("stepDescriptionPlaceholder")}
                 required
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}

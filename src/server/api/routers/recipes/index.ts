@@ -1,17 +1,51 @@
 import { Category, Difficulty, Unit } from "generated/prisma/enums";
 import slugify from "slugify";
 import z from "zod";
+import { DEFAULT_LOCALE, LOCALES, toLocale } from "~/lib/locales";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import {
+  DEFAULT_SEARCH_LIMIT,
+  MAX_SEARCH_LIMIT,
+  searchRecipes,
+} from "~/server/rag/search";
+import { removeRecipeIndex, syncRecipeIndex } from "~/server/rag/sync";
+import { generateRecipeTranslations } from "~/server/translations/generate";
+import {
+  recipeWithTranslationsInclude,
+  toRecipeDto,
+} from "~/server/translations/resolve";
+import { readSourceContent } from "~/server/translations/source";
+import { replaceRecipeTranslations } from "~/server/translations/store";
+import type { RecipeTranslationContent } from "~/server/translations/types";
 import type { RecipeDto } from "~/types/recipe";
-import { recipeIngredientsSchema, recipeSchema } from "./validation";
 import { deleteImageByUrl } from "../images/service";
+import { recipeIngredientsSchema, recipeSchema } from "./validation";
 import type { Prisma } from "generated/prisma/client";
 
 const reservedSlugs = ["new"];
+
+const optionalLocaleSchema = z.enum(LOCALES).optional();
+
+/** `"source"` resolves to the language the author wrote the recipe in. Used when editing. */
+const sourceOrLocaleSchema = z
+  .union([z.enum(LOCALES), z.literal("source")])
+  .optional();
+
+const PLACEHOLDER_INGREDIENT = "New ingredient";
+const PLACEHOLDER_STEP = "New step";
+
+function buildSlug(title: string): string {
+  return slugify(title, {
+    replacement: "-",
+    lower: true,
+    strict: true,
+    trim: true,
+  });
+}
 
 export const recipesRouter = createTRPCRouter({
   create: protectedProcedure
@@ -19,16 +53,12 @@ export const recipesRouter = createTRPCRouter({
       recipeSchema
         .extend({
           imageUrl: z.url().trim().nullable(),
+          locale: z.enum(LOCALES).default(DEFAULT_LOCALE),
         })
         .omit({ image: true, tags: true }),
     )
     .mutation(async ({ ctx, input }) => {
-      const slug = slugify(input.title, {
-        replacement: "-",
-        lower: true,
-        strict: true,
-        trim: true,
-      });
+      const slug = buildSlug(input.title);
 
       if (reservedSlugs.includes(slug)) {
         throw new Error(
@@ -46,42 +76,53 @@ export const recipesRouter = createTRPCRouter({
         );
       }
 
-      const newRecipe = await ctx.db.recipe.create({
-        data: {
-          title: input.title,
-          description: input.description,
-          slug,
-          imageUrl: input.imageUrl,
-          category: input.category,
-          difficulty: input.difficulty,
-          defaultServings: input.defaultServings,
-          preparationTime: input.preparationTime,
-          cookingTime: input.cookingTime,
-          restingTime: input.restingTime,
-          calories: input.calories,
-          carbohydrates: input.carbohydrates,
-          protein: input.protein,
-          fat: input.fat,
-          ingredients: {
-            create: {
-              name: "New ingredient",
-              quantity: "0",
-              unit: Unit.GRAM,
-              order: 0,
+      // The source text is written now; the other locales are generated once the ingredients
+      // and steps are set, so `create` does not pay for a translation that is about to change.
+      const sourceContent: RecipeTranslationContent = {
+        title: input.title,
+        description: input.description,
+        ingredients: [{ order: 0, name: PLACEHOLDER_INGREDIENT }],
+        steps: [{ order: 0, description: PLACEHOLDER_STEP }],
+      };
+
+      const newRecipe = await ctx.db.$transaction(async (tx) => {
+        const recipe = await tx.recipe.create({
+          data: {
+            slug,
+            imageUrl: input.imageUrl,
+            category: input.category,
+            difficulty: input.difficulty,
+            defaultServings: input.defaultServings,
+            preparationTime: input.preparationTime,
+            cookingTime: input.cookingTime,
+            restingTime: input.restingTime,
+            calories: input.calories,
+            carbohydrates: input.carbohydrates,
+            protein: input.protein,
+            fat: input.fat,
+            sourceLocale: input.locale,
+            ingredients: {
+              create: { quantity: "0", unit: Unit.GRAM, order: 0 },
             },
+            steps: { create: { order: 0 } },
+            author: { connect: { id: ctx.session.user.id } },
           },
-          steps: {
-            create: {
-              description: "New step",
-              order: 0,
-            },
-          },
-          author: { connect: { id: ctx.session.user.id } },
-        },
+        });
+
+        await replaceRecipeTranslations(
+          recipe.id,
+          { [input.locale]: sourceContent },
+          tx,
+        );
+
+        return recipe;
       });
+
+      await syncRecipeIndex(newRecipe.id);
 
       return newRecipe;
     }),
+
   update: protectedProcedure
     .input(
       z.object({
@@ -96,12 +137,7 @@ export const recipesRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, recipe } = input;
 
-      const slug = slugify(recipe.title, {
-        replacement: "-",
-        lower: true,
-        strict: true,
-        trim: true,
-      });
+      const slug = buildSlug(recipe.title);
 
       if (reservedSlugs.includes(slug)) {
         throw new Error(
@@ -127,6 +163,45 @@ export const recipesRouter = createTRPCRouter({
         throw new Error("Recipe not found");
       }
 
+      const source = await readSourceContent(id);
+
+      if (!source) {
+        throw new Error("Recipe translation not found");
+      }
+
+      const translations = await generateRecipeTranslations({
+        sourceLocale: source.sourceLocale,
+        content: {
+          ...source.content,
+          title: recipe.title,
+          description: recipe.description,
+        },
+      });
+
+      const updatedRecipe = await ctx.db.$transaction(async (tx) => {
+        const updated = await tx.recipe.update({
+          where: { id },
+          data: {
+            category: recipe.category,
+            difficulty: recipe.difficulty,
+            slug,
+            imageUrl: recipe.imageUrl,
+            defaultServings: recipe.defaultServings,
+            preparationTime: recipe.preparationTime,
+            cookingTime: recipe.cookingTime,
+            restingTime: recipe.restingTime,
+            calories: recipe.calories,
+            carbohydrates: recipe.carbohydrates,
+            protein: recipe.protein,
+            fat: recipe.fat,
+          },
+        });
+
+        await replaceRecipeTranslations(id, translations, tx);
+
+        return updated;
+      });
+
       if (
         currentRecipe.imageUrl &&
         currentRecipe.imageUrl !== recipe.imageUrl
@@ -134,25 +209,7 @@ export const recipesRouter = createTRPCRouter({
         await deleteImageByUrl(currentRecipe.imageUrl);
       }
 
-      const updatedRecipe = await ctx.db.recipe.update({
-        where: { id },
-        data: {
-          title: recipe.title,
-          description: recipe.description,
-          category: recipe.category,
-          difficulty: recipe.difficulty,
-          slug,
-          imageUrl: recipe.imageUrl,
-          defaultServings: recipe.defaultServings,
-          preparationTime: recipe.preparationTime,
-          cookingTime: recipe.cookingTime,
-          restingTime: recipe.restingTime,
-          calories: recipe.calories,
-          carbohydrates: recipe.carbohydrates,
-          protein: recipe.protein,
-          fat: recipe.fat,
-        },
-      });
+      await syncRecipeIndex(updatedRecipe.id);
 
       return updatedRecipe;
     }),
@@ -167,21 +224,39 @@ export const recipesRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { ingredients, recipeId } = input;
 
-      // Delete existing ingredients for the recipe
-      await ctx.db.ingredient.deleteMany({
-        where: { recipeId },
+      const source = await readSourceContent(recipeId);
+
+      if (!source) {
+        throw new Error("Recipe translation not found");
+      }
+
+      const translations = await generateRecipeTranslations({
+        sourceLocale: source.sourceLocale,
+        content: {
+          ...source.content,
+          ingredients: ingredients.map((ingredient) => ({
+            order: ingredient.order,
+            name: ingredient.name,
+          })),
+        },
       });
 
-      // Create new ingredients
-      await ctx.db.ingredient.createMany({
-        data: ingredients.map((ingredient) => ({
-          name: ingredient.name,
-          quantity: ingredient.quantity,
-          unit: ingredient.unit,
-          order: ingredient.order,
-          recipeId,
-        })),
+      await ctx.db.$transaction(async (tx) => {
+        await tx.ingredient.deleteMany({ where: { recipeId } });
+
+        await tx.ingredient.createMany({
+          data: ingredients.map((ingredient) => ({
+            quantity: ingredient.quantity,
+            unit: ingredient.unit,
+            order: ingredient.order,
+            recipeId,
+          })),
+        });
+
+        await replaceRecipeTranslations(recipeId, translations, tx);
       });
+
+      await syncRecipeIndex(recipeId);
 
       return { success: true };
     }),
@@ -210,6 +285,23 @@ export const recipesRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { steps, recipeId } = input;
 
+      const source = await readSourceContent(recipeId);
+
+      if (!source) {
+        throw new Error("Recipe translation not found");
+      }
+
+      const translations = await generateRecipeTranslations({
+        sourceLocale: source.sourceLocale,
+        content: {
+          ...source.content,
+          steps: steps.map((step) => ({
+            order: step.order,
+            description: step.description,
+          })),
+        },
+      });
+
       const currentSteps = await ctx.db.step.findMany({
         where: { recipeId },
       });
@@ -220,20 +312,21 @@ export const recipesRouter = createTRPCRouter({
         }
       }
 
-      // Delete existing steps for the recipe
-      await ctx.db.step.deleteMany({
-        where: { recipeId },
+      await ctx.db.$transaction(async (tx) => {
+        await tx.step.deleteMany({ where: { recipeId } });
+
+        await tx.step.createMany({
+          data: steps.map((step) => ({
+            imageUrl: step.imageUrl,
+            order: step.order,
+            recipeId,
+          })),
+        });
+
+        await replaceRecipeTranslations(recipeId, translations, tx);
       });
 
-      // Create new steps
-      await ctx.db.step.createMany({
-        data: steps.map((step) => ({
-          description: step.description,
-          imageUrl: step.imageUrl,
-          order: step.order,
-          recipeId,
-        })),
-      });
+      await syncRecipeIndex(recipeId);
 
       return { success: true };
     }),
@@ -255,12 +348,7 @@ export const recipesRouter = createTRPCRouter({
       const uniqueTags = Array.from(new Set(tags));
 
       for (const tagName of uniqueTags) {
-        const slug = slugify(tagName, {
-          replacement: "-",
-          lower: true,
-          strict: true,
-          trim: true,
-        });
+        const slug = buildSlug(tagName);
 
         let tag = await ctx.db.tag.findUnique({
           where: { slug: slug },
@@ -283,6 +371,8 @@ export const recipesRouter = createTRPCRouter({
         });
       }
 
+      await syncRecipeIndex(recipeId);
+
       return { success: true };
     }),
 
@@ -302,73 +392,49 @@ export const recipesRouter = createTRPCRouter({
         data: { published: !recipe.published },
       });
 
+      await syncRecipeIndex(updatedRecipe.id);
+
       return updatedRecipe;
     }),
 
   getBySlug: publicProcedure
-    .input(z.object({ slug: z.string() }))
+    .input(z.object({ slug: z.string(), locale: sourceOrLocaleSchema }))
     .query(async ({ ctx, input }): Promise<RecipeDto> => {
       const recipe = await ctx.db.recipe.findUnique({
         where: { slug: input.slug },
-        include: {
-          ingredients: {
-            orderBy: { order: "asc" },
-          },
-          steps: {
-            orderBy: { order: "asc" },
-          },
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
+        include: recipeWithTranslationsInclude,
       });
 
       if (!recipe) {
         throw new Error("Recipe not found");
       }
 
-      return {
-        ...recipe,
-        ingredients: recipe.ingredients.map((ingredient) => ({
-          ...ingredient,
-          quantity: ingredient.quantity.toString(),
-        })),
-      };
+      const locale =
+        input.locale === "source"
+          ? toLocale(recipe.sourceLocale)
+          : toLocale(input.locale);
+
+      return toRecipeDto(recipe, locale);
     }),
 
   getOne: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .input(z.object({ id: z.string(), locale: sourceOrLocaleSchema }))
+    .query(async ({ ctx, input }): Promise<RecipeDto> => {
       const recipe = await ctx.db.recipe.findUnique({
         where: { id: input.id },
-        include: {
-          ingredients: {
-            orderBy: { order: "asc" },
-          },
-          steps: {
-            orderBy: { order: "asc" },
-          },
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
+        include: recipeWithTranslationsInclude,
       });
 
       if (!recipe) {
         throw new Error("Recipe not found");
       }
 
-      return {
-        ...recipe,
-        ingredients: recipe.ingredients.map((ingredient) => ({
-          ...ingredient,
-          quantity: ingredient.quantity.toString(),
-        })),
-      };
+      const locale =
+        input.locale === "source"
+          ? toLocale(recipe.sourceLocale)
+          : toLocale(input.locale);
+
+      return toRecipeDto(recipe, locale);
     }),
 
   getPublicationStatus: publicProcedure
@@ -395,6 +461,7 @@ export const recipesRouter = createTRPCRouter({
         category: z.enum(Category).optional(),
         difficulty: z.enum(Difficulty).optional(),
         search: z.string().optional(),
+        locale: optionalLocaleSchema,
         skip: z.number(),
         take: z.number().optional(),
       }),
@@ -407,9 +474,12 @@ export const recipesRouter = createTRPCRouter({
         category,
         difficulty,
         search,
+        locale,
         skip,
         take = 15,
       } = input;
+
+      const resolvedLocale = toLocale(locale);
 
       const whereClause: Prisma.RecipeWhereInput = {};
 
@@ -430,9 +500,24 @@ export const recipesRouter = createTRPCRouter({
       }
 
       if (search) {
+        // Search every locale so a recipe is found no matter which language the user types in
+        // ("peruano" and "peruvian" both match). Matching `some` returns each recipe once, even
+        // when several translations match, so there are no duplicates.
         whereClause.OR = [
-          { title: { contains: search, mode: "insensitive" } },
-          { description: { contains: search, mode: "insensitive" } },
+          {
+            translations: {
+              some: {
+                title: { contains: search, mode: "insensitive" },
+              },
+            },
+          },
+          {
+            translations: {
+              some: {
+                description: { contains: search, mode: "insensitive" },
+              },
+            },
+          },
           {
             tags: {
               some: {
@@ -452,36 +537,16 @@ export const recipesRouter = createTRPCRouter({
 
       const recipes = await ctx.db.recipe.findMany({
         where: whereClause,
-        include: {
-          ingredients: {
-            orderBy: { order: "asc" },
-          },
-          steps: {
-            orderBy: { order: "asc" },
-          },
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
+        include: recipeWithTranslationsInclude,
         skip,
         take,
         orderBy: { [orderBy]: "desc" },
       });
 
-      const recipesWithStringQuantities = recipes.map((recipe) => ({
-        ...recipe,
-        ingredients: recipe.ingredients.map((ingredient) => ({
-          ...ingredient,
-          quantity: ingredient.quantity.toString(),
-        })),
-      }));
-
       const total = await ctx.db.recipe.count({ where: whereClause });
 
       return {
-        recipes: recipesWithStringQuantities,
+        recipes: recipes.map((recipe) => toRecipeDto(recipe, resolvedLocale)),
         total,
         skip,
         take,
@@ -489,67 +554,72 @@ export const recipesRouter = createTRPCRouter({
       };
     }),
 
-  getAllCreatedByUser: protectedProcedure.query(async ({ ctx }) => {
-    const recipes = await ctx.db.recipe.findMany({
-      where: { authorId: ctx.session.user.id },
-      include: {
-        ingredients: {
-          orderBy: { order: "asc" },
-        },
-        steps: {
-          orderBy: { order: "asc" },
-        },
-        tags: {
-          include: {
-            tag: true,
+  /**
+   * Semantic recipe retrieval used ONLY by the AI agent. It returns the matching record ids
+   * and their similarity; the agent's search tool hydrates them from Postgres afterwards.
+   * It does not reuse any of the server's listing procedures.
+   *
+   * There is a single mode: vector search. Pagination is done through `excludeIds` so
+   * "show me more" returns the next best distinct results.
+   *
+   * Scope "mine" always filters by the authenticated user, never by a client-provided id.
+   */
+  semanticSearch: protectedProcedure
+    .input(
+      z.object({
+        query: z.string().trim().min(1),
+        scope: z.enum(["all", "mine"]).default("all"),
+        maxTotalTime: z.int().positive().optional(),
+        excludeIds: z.array(z.string()).optional(),
+        take: z
+          .int()
+          .min(1)
+          .max(MAX_SEARCH_LIMIT)
+          .default(DEFAULT_SEARCH_LIMIT),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await searchRecipes({
+        queryText: input.query,
+        scope: input.scope,
+        userId: ctx.session.user.id,
+        filters: { maxTotalTime: input.maxTotalTime },
+        excludeIds: input.excludeIds,
+        limit: input.take,
+      });
+
+      return {
+        matches: result.matches,
+        hasMore: result.hasMore,
+      };
+    }),
+
+  /**
+   * All favourite recipes of the authenticated user, with their full data.
+   *
+   * Favourites are likes, which change per user and are not part of the vector index, so
+   * this stays a deterministic database query. It returns the complete recipes so it can
+   * back the favourites page; the AI agent adapts this output in its own tool.
+   */
+  getFavourites: protectedProcedure
+    .input(z.object({ locale: optionalLocaleSchema }).optional())
+    .query(async ({ ctx, input }) => {
+      const recipes = await ctx.db.recipe.findMany({
+        where: {
+          likes: {
+            some: {
+              userId: ctx.session.user.id,
+            },
           },
         },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        include: recipeWithTranslationsInclude,
+        orderBy: { createdAt: "desc" },
+      });
 
-    return recipes.map((recipe) => ({
-      ...recipe,
-      ingredients: recipe.ingredients.map((ingredient) => ({
-        ...ingredient,
-        quantity: ingredient.quantity.toString(),
-      })),
-    }));
-  }),
+      const resolvedLocale = toLocale(input?.locale);
 
-  getAllFavouritesByUser: protectedProcedure.query(async ({ ctx }) => {
-    const recipes = await ctx.db.recipe.findMany({
-      where: {
-        likes: {
-          some: {
-            userId: ctx.session.user.id,
-          },
-        },
-      },
-      include: {
-        ingredients: {
-          orderBy: { order: "asc" },
-        },
-        steps: {
-          orderBy: { order: "asc" },
-        },
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    return recipes.map((recipe) => ({
-      ...recipe,
-      ingredients: recipe.ingredients.map((ingredient) => ({
-        ...ingredient,
-        quantity: ingredient.quantity.toString(),
-      })),
-    }));
-  }),
+      return recipes.map((recipe) => toRecipeDto(recipe, resolvedLocale));
+    }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -581,6 +651,8 @@ export const recipesRouter = createTRPCRouter({
       await ctx.db.recipe.delete({
         where: { id },
       });
+
+      await removeRecipeIndex(id);
 
       return { success: true };
     }),

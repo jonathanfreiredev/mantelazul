@@ -1,5 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -22,14 +24,21 @@ import {
 } from "../ui/field";
 import { Input } from "../ui/input";
 
-const formSchema = z.object({
-  email: z.email({ message: "Please enter a valid email address" }),
-});
-
 export const ForgotPasswordForm = ({
   className,
   ...props
 }: React.ComponentProps<"div">) => {
+  const t = useTranslations("ForgotPasswordForm");
+  const tValidation = useTranslations("Validation");
+
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        email: z.email({ message: tValidation("invalidEmail") }),
+      }),
+    [tValidation],
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -46,13 +55,13 @@ export const ForgotPasswordForm = ({
           : "https://mantelazul.com/forgot-password",
       fetchOptions: {
         async onSuccess() {
-          toast.success("Password reset email sent!", {
+          toast.success(t("successTitle"), {
             position: "bottom-right",
           });
           form.reset();
         },
         onError(error) {
-          toast.error("Failed to send password reset email!", {
+          toast.error(t("errorTitle"), {
             description: error.error.message,
             position: "bottom-right",
           });
@@ -68,10 +77,8 @@ export const ForgotPasswordForm = ({
     >
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Forgot password</CardTitle>
-          <CardDescription>
-            Enter your email address below to receive a password reset link.
-          </CardDescription>
+          <CardTitle className="text-xl">{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form id="form-reset-link" onSubmit={form.handleSubmit(onSubmit)}>
@@ -83,7 +90,7 @@ export const ForgotPasswordForm = ({
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="email">Email</FieldLabel>
+                        <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
                         <Input
                           {...field}
                           id="email"
@@ -109,7 +116,7 @@ export const ForgotPasswordForm = ({
                 form="form-reset-link"
                 disabled={form.formState.isSubmitting}
               >
-                Send reset link
+                {t("submit")}
               </Button>
             </Field>
           </form>

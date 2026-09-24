@@ -1,7 +1,7 @@
 "use client";
 import { HeartIcon } from "lucide-react";
 import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 

@@ -1,17 +1,27 @@
 import { tool } from "ai";
 import z from "zod";
 import { api } from "~/trpc/server";
+import {
+  formatRecipeDetailForModel,
+  type RecipeDetail,
+} from "./format-recipe-for-model";
 
 export const toolGetOneRecipe = tool({
   description: `
-Retrieves a single recipe by its ID.
-This tool is useful for allowing users to view the details of a specific recipe, such as its ingredients, preparation steps, and nutritional information. It can be used in various contexts, such as when a user clicks on a recipe from a list to see more details or when they want to edit an existing recipe.
+Retrieves a single recipe by its id, with its full details: ingredients, preparation
+steps and nutritional information.
 
-IMPORTANT: This tool requires the ID of the recipe to retrieve. The ID should be provided as input when calling this tool.
+The recipe is returned in the language it was originally written in, so you can safely read it,
+change only what the user asked for and send it back with 'updateRecipe' without altering the
+other languages. Present it to the user in the language of the conversation.
+
+Use it to show a recipe in detail, before updating or deleting one, or when you only have
+an id from a previous tool result and need the rest of the recipe.
   `,
   inputSchema: z.object({
     id: z
       .string()
+      .min(1, "The recipe id is required")
       .describe("The ID of the recipe to retrieve. It is required."),
   }),
   execute: async ({ id }) => {
@@ -20,7 +30,7 @@ IMPORTANT: This tool requires the ID of the recipe to retrieve. The ID should be
       id,
       "---",
     );
-    const recipe = await api.recipes.getOne({ id });
+    const recipe = await api.recipes.getOne({ id, locale: "source" });
 
     return {
       success: true,
@@ -28,4 +38,8 @@ IMPORTANT: This tool requires the ID of the recipe to retrieve. The ID should be
       recipe,
     };
   },
+  toModelOutput: ({ output }) => ({
+    type: "text",
+    value: formatRecipeDetailForModel(output.recipe as RecipeDetail),
+  }),
 });

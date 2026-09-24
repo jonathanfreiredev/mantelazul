@@ -36,7 +36,6 @@ export type StepSumAggregateOutputType = {
 
 export type StepMinAggregateOutputType = {
   id: string | null
-  description: string | null
   order: number | null
   imageUrl: string | null
   createdAt: Date | null
@@ -46,7 +45,6 @@ export type StepMinAggregateOutputType = {
 
 export type StepMaxAggregateOutputType = {
   id: string | null
-  description: string | null
   order: number | null
   imageUrl: string | null
   createdAt: Date | null
@@ -56,7 +54,6 @@ export type StepMaxAggregateOutputType = {
 
 export type StepCountAggregateOutputType = {
   id: number
-  description: number
   order: number
   imageUrl: number
   createdAt: number
@@ -76,7 +73,6 @@ export type StepSumAggregateInputType = {
 
 export type StepMinAggregateInputType = {
   id?: true
-  description?: true
   order?: true
   imageUrl?: true
   createdAt?: true
@@ -86,7 +82,6 @@ export type StepMinAggregateInputType = {
 
 export type StepMaxAggregateInputType = {
   id?: true
-  description?: true
   order?: true
   imageUrl?: true
   createdAt?: true
@@ -96,7 +91,6 @@ export type StepMaxAggregateInputType = {
 
 export type StepCountAggregateInputType = {
   id?: true
-  description?: true
   order?: true
   imageUrl?: true
   createdAt?: true
@@ -193,7 +187,6 @@ export type StepGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 
 export type StepGroupByOutputType = {
   id: string
-  description: string
   order: number
   imageUrl: string | null
   createdAt: Date
@@ -226,7 +219,6 @@ export type StepWhereInput = {
   OR?: Prisma.StepWhereInput[]
   NOT?: Prisma.StepWhereInput | Prisma.StepWhereInput[]
   id?: Prisma.StringFilter<"Step"> | string
-  description?: Prisma.StringFilter<"Step"> | string
   order?: Prisma.IntFilter<"Step"> | number
   imageUrl?: Prisma.StringNullableFilter<"Step"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Step"> | Date | string
@@ -237,7 +229,6 @@ export type StepWhereInput = {
 
 export type StepOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  description?: Prisma.SortOrder
   order?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -251,7 +242,6 @@ export type StepWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.StepWhereInput | Prisma.StepWhereInput[]
   OR?: Prisma.StepWhereInput[]
   NOT?: Prisma.StepWhereInput | Prisma.StepWhereInput[]
-  description?: Prisma.StringFilter<"Step"> | string
   order?: Prisma.IntFilter<"Step"> | number
   imageUrl?: Prisma.StringNullableFilter<"Step"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Step"> | Date | string
@@ -262,7 +252,6 @@ export type StepWhereUniqueInput = Prisma.AtLeast<{
 
 export type StepOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  description?: Prisma.SortOrder
   order?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -280,7 +269,6 @@ export type StepScalarWhereWithAggregatesInput = {
   OR?: Prisma.StepScalarWhereWithAggregatesInput[]
   NOT?: Prisma.StepScalarWhereWithAggregatesInput | Prisma.StepScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Step"> | string
-  description?: Prisma.StringWithAggregatesFilter<"Step"> | string
   order?: Prisma.IntWithAggregatesFilter<"Step"> | number
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Step"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Step"> | Date | string
@@ -290,7 +278,6 @@ export type StepScalarWhereWithAggregatesInput = {
 
 export type StepCreateInput = {
   id?: string
-  description: string
   order: number
   imageUrl?: string | null
   createdAt?: Date | string
@@ -300,7 +287,6 @@ export type StepCreateInput = {
 
 export type StepUncheckedCreateInput = {
   id?: string
-  description: string
   order: number
   imageUrl?: string | null
   createdAt?: Date | string
@@ -310,7 +296,6 @@ export type StepUncheckedCreateInput = {
 
 export type StepUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -320,7 +305,6 @@ export type StepUpdateInput = {
 
 export type StepUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -330,7 +314,6 @@ export type StepUncheckedUpdateInput = {
 
 export type StepCreateManyInput = {
   id?: string
-  description: string
   order: number
   imageUrl?: string | null
   createdAt?: Date | string
@@ -340,7 +323,6 @@ export type StepCreateManyInput = {
 
 export type StepUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -349,7 +331,6 @@ export type StepUpdateManyMutationInput = {
 
 export type StepUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -369,7 +350,6 @@ export type StepOrderByRelationAggregateInput = {
 
 export type StepCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  description?: Prisma.SortOrder
   order?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -383,7 +363,6 @@ export type StepAvgOrderByAggregateInput = {
 
 export type StepMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  description?: Prisma.SortOrder
   order?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -393,7 +372,6 @@ export type StepMaxOrderByAggregateInput = {
 
 export type StepMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  description?: Prisma.SortOrder
   order?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -449,7 +427,6 @@ export type StepUncheckedUpdateManyWithoutRecipeNestedInput = {
 
 export type StepCreateWithoutRecipeInput = {
   id?: string
-  description: string
   order: number
   imageUrl?: string | null
   createdAt?: Date | string
@@ -458,7 +435,6 @@ export type StepCreateWithoutRecipeInput = {
 
 export type StepUncheckedCreateWithoutRecipeInput = {
   id?: string
-  description: string
   order: number
   imageUrl?: string | null
   createdAt?: Date | string
@@ -496,7 +472,6 @@ export type StepScalarWhereInput = {
   OR?: Prisma.StepScalarWhereInput[]
   NOT?: Prisma.StepScalarWhereInput | Prisma.StepScalarWhereInput[]
   id?: Prisma.StringFilter<"Step"> | string
-  description?: Prisma.StringFilter<"Step"> | string
   order?: Prisma.IntFilter<"Step"> | number
   imageUrl?: Prisma.StringNullableFilter<"Step"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Step"> | Date | string
@@ -506,7 +481,6 @@ export type StepScalarWhereInput = {
 
 export type StepCreateManyRecipeInput = {
   id?: string
-  description: string
   order: number
   imageUrl?: string | null
   createdAt?: Date | string
@@ -515,7 +489,6 @@ export type StepCreateManyRecipeInput = {
 
 export type StepUpdateWithoutRecipeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -524,7 +497,6 @@ export type StepUpdateWithoutRecipeInput = {
 
 export type StepUncheckedUpdateWithoutRecipeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -533,7 +505,6 @@ export type StepUncheckedUpdateWithoutRecipeInput = {
 
 export type StepUncheckedUpdateManyWithoutRecipeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -544,7 +515,6 @@ export type StepUncheckedUpdateManyWithoutRecipeInput = {
 
 export type StepSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  description?: boolean
   order?: boolean
   imageUrl?: boolean
   createdAt?: boolean
@@ -555,7 +525,6 @@ export type StepSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 
 export type StepSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  description?: boolean
   order?: boolean
   imageUrl?: boolean
   createdAt?: boolean
@@ -566,7 +535,6 @@ export type StepSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 
 export type StepSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  description?: boolean
   order?: boolean
   imageUrl?: boolean
   createdAt?: boolean
@@ -577,7 +545,6 @@ export type StepSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 
 export type StepSelectScalar = {
   id?: boolean
-  description?: boolean
   order?: boolean
   imageUrl?: boolean
   createdAt?: boolean
@@ -585,7 +552,7 @@ export type StepSelectScalar = {
   recipeId?: boolean
 }
 
-export type StepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "description" | "order" | "imageUrl" | "createdAt" | "updatedAt" | "recipeId", ExtArgs["result"]["step"]>
+export type StepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "order" | "imageUrl" | "createdAt" | "updatedAt" | "recipeId", ExtArgs["result"]["step"]>
 export type StepInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
 }
@@ -603,7 +570,6 @@ export type $StepPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    description: string
     order: number
     imageUrl: string | null
     createdAt: Date
@@ -1034,7 +1000,6 @@ export interface Prisma__StepClient<T, Null = never, ExtArgs extends runtime.Typ
  */
 export interface StepFieldRefs {
   readonly id: Prisma.FieldRef<"Step", 'String'>
-  readonly description: Prisma.FieldRef<"Step", 'String'>
   readonly order: Prisma.FieldRef<"Step", 'Int'>
   readonly imageUrl: Prisma.FieldRef<"Step", 'String'>
   readonly createdAt: Prisma.FieldRef<"Step", 'DateTime'>

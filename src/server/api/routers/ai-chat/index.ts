@@ -1,4 +1,5 @@
-import type { ReasoningUIPart } from "ai";
+import type { MyAgentUIMessage } from "~/lib/agent";
+import { sanitizeInterruptedToolParts } from "~/lib/chat-message-parts";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import z from "zod";
 
@@ -13,13 +14,7 @@ export const aiChatRouter = createTRPCRouter({
       async ({
         ctx,
         input: { chatId },
-      }): Promise<{
-        messages: {
-          id: string;
-          role: "system" | "user" | "assistant";
-          parts: ReasoningUIPart[];
-        }[];
-      }> => {
+      }): Promise<{ messages: MyAgentUIMessage[] }> => {
         const chat = await ctx.db.chat.findFirst({
           where: { id: chatId, userId: ctx.session?.user.id },
         });
@@ -36,7 +31,11 @@ export const aiChatRouter = createTRPCRouter({
         const uiMessages = messages.map((msg) => ({
           id: msg.id,
           role: msg.role.toLowerCase() as "system" | "user" | "assistant",
-          parts: JSON.parse(msg.content),
+          // Repair messages saved by an older, interrupted stream so they render and can be
+          // sent back to the model.
+          parts: sanitizeInterruptedToolParts(
+            JSON.parse(msg.content),
+          ) as MyAgentUIMessage["parts"],
         }));
 
         return { messages: uiMessages };

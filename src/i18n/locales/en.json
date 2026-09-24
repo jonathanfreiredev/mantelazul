@@ -1,0 +1,373 @@
+{
+  "Metadata": {
+    "title": "Mantel Azul",
+    "description": "Full-stack recipe app with Next.js, tRPC, Prisma, and Tailwind."
+  },
+  "Header": {
+    "language": "Language"
+  },
+  "Footer": {
+    "rights": "© {year} Mantel Azul. All rights reserved."
+  },
+  "Nav": {
+    "newRecipe": "New Recipe"
+  },
+  "Recipe": {
+    "ingredients": "Ingredients",
+    "steps": "Steps",
+    "stepCounter": "Step {current}/{total}",
+    "tags": "Tags",
+    "servings": "Servings",
+    "nutritionalInfo": "Nutritional information per serving",
+    "difficulty": "Difficulty",
+    "preparation": "Preparation",
+    "cooking": "Cooking",
+    "resting": "Resting",
+    "minutes": "{count} Min.",
+    "kcal": "Kcal",
+    "carbs": "Carbs",
+    "protein": "Protein",
+    "fat": "Fat",
+    "authorRole": "Food Editor at Mantel Azul",
+    "imageAlt": "Recipe image",
+    "stepImageAlt": "Step {number} image"
+  },
+  "RecipeForm": {
+    "imagePlaceholder": "Click to upload image",
+    "imageAlt": "Recipe Image",
+    "uploadTitle": "Upload Recipe Image",
+    "uploadDescription": "Choose an image to represent your recipe. You can upload an image file from your device.",
+    "title": "Title",
+    "titlePlaceholder": "Delicious Pancakes",
+    "description": "Description",
+    "descriptionPlaceholder": "Fluffy pancakes made with love",
+    "defaultServings": "Default Servings",
+    "category": "Category",
+    "difficulty": "Difficulty",
+    "select": "Select",
+    "timeLegend": "Time information",
+    "timeDescription": "Enter the preparation, cooking, and resting times for the recipe. This will help users plan their cooking accordingly.",
+    "preparation": "Preparation",
+    "cooking": "Cooking",
+    "resting": "Resting",
+    "min": "min",
+    "nutritionLegend": "Nutritional information per serving",
+    "nutritionDescription": "Enter the nutritional information for the recipe. This will help users understand the nutritional content of the dish.",
+    "calories": "Calories",
+    "carbohydrates": "Carbohydrates",
+    "protein": "Protein",
+    "fat": "Fat",
+    "kcal": "kcal",
+    "grams": "grams",
+    "createButton": "Create Recipe",
+    "createTitle": "New Recipe",
+    "createDescription": "Fill out the form below to create a new recipe.",
+    "createFailed": "Failed to create recipe",
+    "updateTitle": "Update Recipe",
+    "updateDescription": "Fill out the form below to update your recipe details.",
+    "updateButton": "Update Recipe",
+    "updateFailed": "Failed to update recipe",
+    "tabDetails": "Details",
+    "tabIngredients": "Ingredients",
+    "tabSteps": "Steps",
+    "tabTags": "Tags",
+    "ingredientsTitle": "Ingredients",
+    "ingredientsDescription": "Add the ingredients for your recipe. You can specify the quantity and unit for each ingredient to ensure your recipe is accurate and easy to follow.",
+    "editIngredient": "Edit Ingredient",
+    "editIngredientDescription": "Update the details of your ingredient below.",
+    "addIngredient": "Add Ingredient",
+    "saveIngredients": "Save Ingredients",
+    "ingredientName": "Name",
+    "ingredientNamePlaceholder": "Ingredient Name",
+    "ingredientQuantity": "Quantity",
+    "ingredientUnit": "Unit",
+    "removeIngredient": "Remove ingredient {name}",
+    "newIngredient": "New ingredient",
+    "stepsTitle": "Steps",
+    "stepsDescription": "Update the steps for your recipe. You can add, edit, reorder, or remove steps as needed to ensure your recipe is clear and easy to follow.",
+    "editStep": "Edit Step",
+    "editStepDescription": "Make changes to your step here. Click save when you're done.",
+    "addStep": "Add Step",
+    "saveSteps": "Save Steps",
+    "stepDescriptionLabel": "Description",
+    "stepDescriptionPlaceholder": "Step description",
+    "stepImage": "Step Image",
+    "uploadStepImage": "Upload Step Image",
+    "uploadStepImageDescription": "Choose an image to represent this step in your recipe. You can upload a new image or select an existing one from your library.",
+    "removeStep": "Remove step {name}",
+    "newStep": "New Step",
+    "submit": "Submit",
+    "tagsTitle": "Tags (optional)",
+    "tagsDescription": "Add tags to your recipe to make it easier to find and categorize.",
+    "tagsLabel": "Tags",
+    "selectTags": "Select tags...",
+    "noItems": "No items found.",
+    "addTag": "Add Tag: \"{tag}\"",
+    "saveTags": "Save Tags"
+  },
+  "UnitsFull": {
+    "GRAM": "Gram",
+    "KILOGRAM": "Kilogram",
+    "LITER": "Liter",
+    "MILLILITER": "Milliliter",
+    "CUP": "Cup",
+    "TABLESPOON": "Tablespoon",
+    "TEASPOON": "Teaspoon",
+    "UNIT": "Unit"
+  },
+  "Categories": {
+    "MAIN_COURSE": "Main Course",
+    "DESSERT": "Dessert",
+    "DRINK": "Drink",
+    "STARTER": "Starter",
+    "SNACK": "Snack",
+    "BREAKFAST": "Breakfast"
+  },
+  "Difficulty": {
+    "EASY": "Easy",
+    "MEDIUM": "Medium",
+    "HARD": "Hard"
+  },
+  "CategoryPages": {
+    "explore": {
+      "name": "Explore",
+      "description": ""
+    },
+    "mains": {
+      "name": "Mains",
+      "description": "Discover our collection of main dishes with a variety of flavors and ingredients to satisfy every palate."
+    },
+    "starters": {
+      "name": "Starters",
+      "description": "Kick off your meal with our delicious starter recipes, featuring a variety of flavors and ingredients to tantalize your taste buds."
+    },
+    "desserts": {
+      "name": "Desserts",
+      "description": "Indulge in our delectable desserts, from rich chocolate treats to light and fruity delights."
+    },
+    "drinks": {
+      "name": "Drinks",
+      "description": "Quench your thirst with our refreshing drink recipes, from vibrant cocktails to soothing mocktails."
+    },
+    "snacks": {
+      "name": "Snacks",
+      "description": "Satisfy your cravings with our delicious snack recipes, perfect for any time of day."
+    },
+    "breakfast": {
+      "name": "Breakfast",
+      "description": "Start your day with our delicious breakfast recipes, featuring a variety of options to energize your mornings."
+    },
+    "everything": {
+      "name": "Everything",
+      "description": "Explore our diverse collection of recipes, featuring mains, desserts, drinks, and sides to inspire your culinary adventures."
+    }
+  },
+  "RecipeCard": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmTitle": "Are you absolutely sure?",
+    "confirmDescription": "This action cannot be undone.",
+    "deleted": "Recipe deleted successfully",
+    "deleteFailed": "Failed to delete recipe",
+    "imageAlt": "Recipe cover"
+  },
+  "RecipesList": {
+    "loading": "Loading...",
+    "search": "Search",
+    "filter": "Filter",
+    "orderBy": "Order by",
+    "creationDate": "Creation date",
+    "likes": "Likes",
+    "category": "Category",
+    "difficulty": "Difficulty",
+    "clearFilters": "Clear filters",
+    "apply": "Apply",
+    "recipeCount": "{count, plural, =0 {No recipes} one {# recipe} other {# recipes}}",
+    "noRecipes": "No recipes found.",
+    "loadMore": "Load more"
+  },
+  "Validation": {
+    "invalidEmail": "Please enter a valid email address",
+    "nameMin": "Name must be at least 2 characters",
+    "passwordMin": "Password must be at least 8 characters long",
+    "confirmPasswordMin": "Confirm Password must be at least 8 characters long",
+    "passwordsDoNotMatch": "Passwords do not match"
+  },
+  "AuthButton": {
+    "signIn": "Log in",
+    "signUp": "Sign up"
+  },
+  "LoginForm": {
+    "title": "Log in",
+    "description": "Enter your email and password to log in to your account.",
+    "email": "Email",
+    "emailHint": "Choose a unique email for your account.",
+    "password": "Password",
+    "passwordHint": "Must be at least 8 characters long.",
+    "forgotPassword": "Forgot password?",
+    "submit": "Log in",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "successTitle": "Logged in successfully!",
+    "successDescription": "Welcome back to Mantel Azul.",
+    "errorTitle": "Failed to log in!"
+  },
+  "SignupForm": {
+    "title": "Create your account",
+    "description": "Enter your email below to create your account",
+    "name": "Name",
+    "email": "Email",
+    "emailHint": "Choose a unique email for your account.",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "passwordHint": "Must be at least 8 characters long.",
+    "submit": "Create Account",
+    "successTitle": "Account created successfully!",
+    "successDescription": "Welcome to Mantel Azul.",
+    "errorTitle": "Failed to log in!",
+    "mismatchTitle": "Passwords do not match!",
+    "mismatchDescription": "Please make sure your passwords match."
+  },
+  "ForgotPasswordForm": {
+    "title": "Forgot password",
+    "description": "Enter your email address below to receive a password reset link.",
+    "email": "Email",
+    "submit": "Send reset link",
+    "successTitle": "Password reset email sent!",
+    "errorTitle": "Failed to send password reset email!"
+  },
+  "ResetPasswordForm": {
+    "title": "Reset password",
+    "description": "Enter your new password below to reset your password.",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "passwordHint": "Must be at least 8 characters long.",
+    "submit": "Reset Password",
+    "successTitle": "Password reset successfully!",
+    "errorTitle": "Failed to reset password!",
+    "mismatchTitle": "Passwords do not match!",
+    "mismatchDescription": "Please make sure your passwords match."
+  },
+  "ChangePasswordForm": {
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "passwordHint": "Must be at least 8 characters long.",
+    "submit": "Change Password",
+    "successTitle": "Password changed successfully!",
+    "errorTitle": "Failed to change password!",
+    "mismatchTitle": "Passwords do not match!",
+    "mismatchDescription": "Please make sure your passwords match."
+  },
+  "ProfileForm": {
+    "title": "My Profile",
+    "description": "Update your profile information, such as your name and email.",
+    "name": "Name",
+    "email": "Email",
+    "emailHint": "Choose a unique email for your account.",
+    "submit": "Update Profile",
+    "changePassword": "Change password",
+    "changePasswordDescription": "Enter your new password below to change your password.",
+    "successTitle": "Profile updated successfully!",
+    "successDescription": "Your profile information has been updated.",
+    "errorTitle": "Failed to update profile!",
+    "emailErrorTitle": "Failed to update email!"
+  },
+  "Pages": {
+    "myRecipes": "My recipes",
+    "myCookbooks": "My cookbooks",
+    "createRecipe": "Create new recipe",
+    "viewRecipes": "View recipes",
+    "welcome": "Welcome to Mantel Azul!",
+    "limeAndGreenLeaves": "Lime and green leaves",
+    "aperolDrink": "Aperol drink",
+    "macarons": "Macarons",
+    "picnic": "Picnic"
+  },
+  "Common": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmTitle": "Are you absolutely sure?",
+    "confirmDescription": "This action cannot be undone."
+  },
+  "RecipeActions": {
+    "edit": "edit",
+    "save": "save",
+    "share": "share",
+    "copy": "Copy",
+    "urlCopied": "Recipe URL copied to clipboard",
+    "published": "Published",
+    "selectCookbook": "Select a cookbook to save this recipe",
+    "noCookbooks": "You don't have any cookbooks yet."
+  },
+  "Cookbook": {
+    "count": "{count, plural, =0 {No cookbooks} one {# cookbook} other {# cookbooks}}",
+    "create": "Create a cookbook",
+    "newTitle": "New Cookbook",
+    "newDescription": "Create a new cookbook to organize your recipes.",
+    "createSubmit": "Create Cookbook",
+    "updateTitle": "Update cookbook",
+    "updateDescription": "Update the name of your cookbook to keep it organized.",
+    "updateSubmit": "Update Cookbook",
+    "name": "Name",
+    "namePlaceholder": "My Cookbook",
+    "created": "Cookbook created successfully",
+    "createFailed": "Failed to create cookbook",
+    "updated": "Cookbook updated successfully",
+    "updateFailed": "Failed to update cookbook",
+    "deleted": "Cookbook deleted successfully",
+    "deleteFailed": "Failed to delete cookbook",
+    "noCookbooks": "No cookbooks found.",
+    "imageAlt": "Cookbook cover"
+  },
+  "Chat": {
+    "title": "Assistant",
+    "description": "The assistant can help you with a variety of tasks, such as answering questions, providing recommendations, and creating recipes.",
+    "placeholder": "Say something...",
+    "limitExceeded": "Message limit exceeded. Please delete the chat to start a new conversation.",
+    "attachedImageAlt": "Attached image preview",
+    "you": "YOU",
+    "ai": "AI",
+    "thinking": "Thinking",
+    "typing": "Typing",
+    "working": "Working",
+    "approve": "Approve",
+    "deny": "Deny",
+    "approveCreateRecipe": "Do you approve creating the following recipe: {title}?",
+    "approveUpdateRecipe": "Do you approve updating the following recipe: {title}?",
+    "approveDeleteRecipe": "Do you approve deleting this recipe? This cannot be undone.",
+    "created": "Created successfully",
+    "updated": "Updated successfully",
+    "viewRecipe": "View Recipe",
+    "creationDenied": "Recipe creation denied. The assistant will try to find another solution.",
+    "updateDenied": "Recipe update denied. The assistant will try to find another solution.",
+    "deleted": "Recipe deleted successfully.",
+    "deletionDenied": "Deletion denied. The recipe was not deleted.",
+    "attachTitle": "Attach an image to the chat",
+    "attachDescription": "The image will be sent to the AI assistant and can be used in the conversation."
+  },
+  "Menu": {
+    "menu": "Menu",
+    "cookbooks": "Cookbooks",
+    "myRecipes": "My recipes",
+    "myCookbooks": "My cookbooks",
+    "newRecipe": "New recipe",
+    "profile": "Profile",
+    "logIn": "Log in",
+    "signOut": "Sign out",
+    "toggleTheme": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "ImageUpload": {
+    "dropzone": "Drag 'n' drop an image here, or click to select an image"
+  },
+  "Ui": {
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "close": "Close",
+    "loading": "Loading",
+    "logoAlt": "Mantel Azul logo"
+  }
+}

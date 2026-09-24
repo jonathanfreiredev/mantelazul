@@ -1,0 +1,26 @@
+import { RecipeTagsForm } from "~/components/recipes/recipe-tags-form";
+import { TabsRecipeForm } from "~/components/recipes/tabs-recipe-form";
+import { api, HydrateClient } from "~/trpc/server";
+
+export default async function UpdateRecipeTagsPage({
+  params,
+}: {
+  params: Promise<{ recipeSlug: string }>;
+}) {
+  const { recipeSlug } = await params;
+
+  const recipe = await api.recipes.getBySlug({
+    slug: recipeSlug,
+    locale: "source",
+  });
+
+  void api.tags.getAll.prefetch();
+
+  return (
+    <HydrateClient>
+      <TabsRecipeForm formType="update" step="tags" recipeSlug={recipeSlug}>
+        <RecipeTagsForm recipe={recipe} />
+      </TabsRecipeForm>
+    </HydrateClient>
+  );
+}

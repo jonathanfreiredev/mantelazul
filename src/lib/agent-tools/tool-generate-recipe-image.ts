@@ -4,12 +4,13 @@ import { generateAndUpload } from "../cloudinary";
 
 export const toolGenerateRecipeImage = tool({
   description: `
-    Generates a high-quality, realistic professional photograph of a dish. The image is created using an AI image generation model and then uploaded to Cloudinary, returning a URL that can be used to display the image in the recipe.
-    
-    Use this tool when:
-    1. The user asks to "see" a recipe or "visualize" a dish if the recipe doesn't have an image yet.
-    2. The user wants to see the result before saving/creating the recipe.
-    3. You want to inspire the user with a visual representation of a culinary idea.
+Generates a high-quality, realistic photograph of a dish with an AI image model and
+uploads it to Cloudinary, returning a URL that can be used as the recipe image.
+
+Use it when:
+1. The user asks to "see" or "visualize" a dish that has no image yet.
+2. The user wants to see the result before saving the recipe.
+3. You want to inspire the user with a visual representation of a culinary idea.
   `,
   inputSchema: zodSchema(
     z.object({
@@ -32,8 +33,10 @@ export const toolGenerateRecipeImage = tool({
 
       return {
         success: true,
-        imageUrl: imageUrl,
-        message: `I've generated a professional photo of the ${recipeTitle}. It looks delicious!`,
+        imageUrl,
+        // The chat renders the image itself, so the model only needs a short confirmation and
+        // must never repeat this message or the url in its reply.
+        message: `Image of "${recipeTitle}" is now displayed in the chat.`,
       };
     } catch (error) {
       console.error("Error in toolGenerateRecipeImage:", error);

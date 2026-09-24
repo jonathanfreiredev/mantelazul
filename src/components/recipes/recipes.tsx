@@ -7,7 +7,8 @@ import {
   SearchIcon,
   SlidersHorizontalIcon,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "~/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { breakpoints, useMediaQuery } from "~/hooks/use-media-query";
 import { useGetAllRecipes } from "~/hooks/useGetAllRecipes";
@@ -36,7 +37,6 @@ import {
   InputGroupInput,
 } from "../ui/input-group";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { capitalize } from "~/lib/utils";
 
 export type OrderBy = "createdAt" | "likesCount";
 
@@ -47,21 +47,16 @@ interface RecipesProps {
   isEditable: boolean;
 }
 
-enum CategoryEnum {
-  MAIN_COURSE = "Main Course",
-  DESSERT = "Dessert",
-  DRINK = "Drink",
-  STARTER = "Starter",
-  SNACK = "Snack",
-  BREAKFAST = "Breakfast",
-}
-
 export function Recipes({
   authorId,
   cookbookId,
   categoryPage,
   isEditable,
 }: RecipesProps) {
+  const t = useTranslations("RecipesList");
+  const tCategories = useTranslations("Categories");
+  const tDifficulty = useTranslations("Difficulty");
+
   // State for filters and pagination
   const [openedDrawer, setOpenedDrawer] = useState(false);
   const [orderBy, setOrderBy] = useState<OrderBy>("createdAt");
@@ -100,7 +95,9 @@ export function Recipes({
   });
 
   if (isFetching && skip === 0) {
-    return <p className="text-muted-foreground mt-4 text-center">Loading...</p>;
+    return (
+      <p className="text-muted-foreground mt-4 text-center">{t("loading")}</p>
+    );
   }
 
   if (isError) return null;
@@ -153,7 +150,7 @@ export function Recipes({
                   setSkip(0);
                 }}
               >
-                Search
+                {t("search")}
               </InputGroupButton>
             </InputGroupAddon>
           </InputGroup>
@@ -162,11 +159,9 @@ export function Recipes({
         <div className="flex w-full justify-end">
           {(category || difficulty) && (
             <div className="flex items-center gap-2 rounded-md border px-3 py-1 text-sm">
-              {category && <span>{CategoryEnum[category]}</span>}
+              {category && <span>{tCategories(category)}</span>}
               {category && difficulty && " | "}
-              {difficulty && (
-                <span className="capitalize"> {difficulty.toLowerCase()}</span>
-              )}
+              {difficulty && <span>{tDifficulty(difficulty)}</span>}
             </div>
           )}
 
@@ -185,31 +180,31 @@ export function Recipes({
               <Button variant="ghost">
                 <div className="flex items-center gap-1">
                   <SlidersHorizontalIcon />
-                  Filter
+                  {t("filter")}
                 </div>
               </Button>
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle>Filter</DrawerTitle>
+                <DrawerTitle>{t("filter")}</DrawerTitle>
               </DrawerHeader>
 
               <div className="flex flex-col gap-4 p-4">
                 <FieldSet className="flex flex-col gap-2">
-                  <FieldLegend variant="label">Order by</FieldLegend>
+                  <FieldLegend variant="label">{t("orderBy")}</FieldLegend>
                   <RadioGroup
                     className="grid w-full grid-cols-2 gap-2"
                     value={draftOrderBy || undefined}
                     onValueChange={(value) => setDraftOrderBy(value as OrderBy)}
                   >
                     {Object.entries({
-                      createdAt: "Creation date",
-                      likesCount: "Likes",
+                      createdAt: t("creationDate"),
+                      likesCount: t("likes"),
                     }).map(([key, value]) => (
                       <FieldLabel htmlFor={key} key={key}>
                         <Field orientation="horizontal">
                           <FieldContent>
-                            <FieldTitle className="mx-auto capitalize">
+                            <FieldTitle className="mx-auto">
                               {key === "likesCount" ? (
                                 <HeartIcon className="w-4" />
                               ) : (
@@ -233,7 +228,7 @@ export function Recipes({
                   pathname.includes("recipes") ||
                   pathname.includes("cookbooks")) && (
                   <FieldSet className="flex flex-col gap-2">
-                    <FieldLegend variant="label">Category</FieldLegend>
+                    <FieldLegend variant="label">{t("category")}</FieldLegend>
                     <RadioGroup
                       className="grid w-full grid-cols-2 gap-2"
                       value={draftCategory || undefined}
@@ -245,13 +240,7 @@ export function Recipes({
                         <FieldLabel htmlFor={value} key={key}>
                           <Field orientation="horizontal">
                             <FieldContent>
-                              <FieldTitle>
-                                {key === Category.MAIN_COURSE
-                                  ? "Main Course"
-                                  : capitalize(
-                                      key.toLowerCase().replace(/_/g, " "),
-                                    )}
-                              </FieldTitle>
+                              <FieldTitle>{tCategories(key)}</FieldTitle>
                             </FieldContent>
                             <RadioGroupItem value={value} id={value} />
                           </Field>
@@ -262,7 +251,7 @@ export function Recipes({
                 )}
 
                 <FieldSet className="flex flex-col gap-2">
-                  <FieldLegend variant="label">Difficulty</FieldLegend>
+                  <FieldLegend variant="label">{t("difficulty")}</FieldLegend>
                   <RadioGroup
                     className="grid w-full grid-cols-3 gap-2"
                     value={draftDifficulty || undefined}
@@ -274,8 +263,8 @@ export function Recipes({
                       <FieldLabel htmlFor={value} key={key}>
                         <Field orientation="horizontal">
                           <FieldContent>
-                            <FieldTitle className="mx-auto capitalize">
-                              {key.toLowerCase()}
+                            <FieldTitle className="mx-auto">
+                              {tDifficulty(key)}
                             </FieldTitle>
                           </FieldContent>
                           <RadioGroupItem
@@ -292,7 +281,7 @@ export function Recipes({
 
               <DrawerFooter>
                 <Button variant="outline" onClick={clearFilters}>
-                  Clear filters
+                  {t("clearFilters")}
                 </Button>
 
                 <Button
@@ -306,7 +295,7 @@ export function Recipes({
                     setOpenedDrawer(false);
                   }}
                 >
-                  Apply
+                  {t("apply")}
                 </Button>
               </DrawerFooter>
             </DrawerContent>
@@ -314,10 +303,11 @@ export function Recipes({
         </div>
       </div>
 
-      <div className="text-muted-foreground my-4 self-start text-sm">
-        {pagination?.total || ""}{" "}
-        {pagination ? (pagination.total === 1 ? "recipe" : "recipes") : " "}
-      </div>
+      {pagination && (
+        <div className="text-muted-foreground my-4 self-start text-sm">
+          {t("recipeCount", { count: pagination.total })}
+        </div>
+      )}
 
       <div className="mb-10 grid w-full max-w-400 grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
         {recipes.map((recipe) => (
@@ -331,7 +321,7 @@ export function Recipes({
 
       {recipes.length === 0 && (
         <div className="mb-10 flex h-full w-full items-center justify-center">
-          <p className="text-muted-foreground text-center">No recipes found.</p>
+          <p className="text-muted-foreground text-center">{t("noRecipes")}</p>
         </div>
       )}
 
@@ -343,7 +333,7 @@ export function Recipes({
               setSkip((prev) => prev + pagination.take);
             }}
           >
-            {isFetching ? "Loading..." : "Load more"}
+            {isFetching ? t("loading") : t("loadMore")}
           </Button>
         </div>
       )}

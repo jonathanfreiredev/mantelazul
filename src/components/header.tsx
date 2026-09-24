@@ -1,12 +1,14 @@
-import Link from "next/link";
 import { getSession } from "~/server/better-auth/server";
+import { Link } from "~/i18n/navigation";
 import { DropdownAvatarMenu } from "./dropdown-avatar-menu";
 import { Logo } from "./logo";
 import { SidebarDrawer } from "./sidebar-drawer";
 import { SignInOrSignUpButton } from "./auth/sign-in-or-sign-up-button";
+import { LocaleSwitcher } from "./locale-switcher";
 import AIAgentChat from "./ai-chat/ai-agent-chat";
 import { api } from "~/trpc/server";
 import { createId } from "@paralleldrive/cuid2";
+import type { MyAgentUIMessage } from "~/lib/agent";
 
 export async function Header() {
   const session = await getSession();
@@ -15,7 +17,7 @@ export async function Header() {
 
   let chatId = null;
 
-  const messages = [];
+  const messages: MyAgentUIMessage[] = [];
 
   if (isLoggedIn) {
     const chat = await api.aiChat.getChatId();
@@ -39,7 +41,9 @@ export async function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex">
+          <div className="hidden items-center gap-2 sm:flex">
+            <LocaleSwitcher />
+
             {isLoggedIn ? (
               <DropdownAvatarMenu user={{ name: session.user.name }} />
             ) : (

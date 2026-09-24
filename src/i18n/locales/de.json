@@ -1,0 +1,373 @@
+{
+  "Metadata": {
+    "title": "Mantel Azul",
+    "description": "Full-Stack-Rezept-App mit Next.js, tRPC, Prisma und Tailwind."
+  },
+  "Header": {
+    "language": "Sprache"
+  },
+  "Footer": {
+    "rights": "© {year} Mantel Azul. Alle Rechte vorbehalten."
+  },
+  "Nav": {
+    "newRecipe": "Neues Rezept"
+  },
+  "Recipe": {
+    "ingredients": "Zutaten",
+    "steps": "Zubereitung",
+    "stepCounter": "Schritt {current}/{total}",
+    "tags": "Tags",
+    "servings": "Portionen",
+    "nutritionalInfo": "Nährwerte pro Portion",
+    "difficulty": "Schwierigkeit",
+    "preparation": "Vorbereitung",
+    "cooking": "Kochen",
+    "resting": "Ruhen",
+    "minutes": "{count} Min.",
+    "kcal": "Kcal",
+    "carbs": "Kohlenhydrate",
+    "protein": "Protein",
+    "fat": "Fett",
+    "authorRole": "Food-Redakteur bei Mantel Azul",
+    "imageAlt": "Rezeptbild",
+    "stepImageAlt": "Bild von Schritt {number}"
+  },
+  "RecipeForm": {
+    "imagePlaceholder": "Zum Hochladen klicken",
+    "imageAlt": "Rezeptbild",
+    "uploadTitle": "Rezeptbild hochladen",
+    "uploadDescription": "Wähle ein Bild für dein Rezept. Du kannst eine Datei von deinem Gerät hochladen.",
+    "title": "Titel",
+    "titlePlaceholder": "Leckere Pfannkuchen",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "Fluffige Pfannkuchen, mit Liebe gemacht",
+    "defaultServings": "Standardportionen",
+    "category": "Kategorie",
+    "difficulty": "Schwierigkeit",
+    "select": "Auswählen",
+    "timeLegend": "Zeitangaben",
+    "timeDescription": "Gib die Vorbereitungs-, Koch- und Ruhezeit des Rezepts an. So können Nutzer ihre Zubereitung besser planen.",
+    "preparation": "Vorbereitung",
+    "cooking": "Kochen",
+    "resting": "Ruhen",
+    "min": "Min.",
+    "nutritionLegend": "Nährwerte pro Portion",
+    "nutritionDescription": "Gib die Nährwerte des Rezepts an. So kennen Nutzer den Nährwert des Gerichts.",
+    "calories": "Kalorien",
+    "carbohydrates": "Kohlenhydrate",
+    "protein": "Protein",
+    "fat": "Fett",
+    "kcal": "kcal",
+    "grams": "Gramm",
+    "createButton": "Rezept erstellen",
+    "createTitle": "Neues Rezept",
+    "createDescription": "Fülle das Formular aus, um ein neues Rezept zu erstellen.",
+    "createFailed": "Rezept konnte nicht erstellt werden",
+    "updateTitle": "Rezept bearbeiten",
+    "updateDescription": "Fülle das Formular aus, um die Rezeptdetails zu aktualisieren.",
+    "updateButton": "Rezept aktualisieren",
+    "updateFailed": "Rezept konnte nicht aktualisiert werden",
+    "tabDetails": "Details",
+    "tabIngredients": "Zutaten",
+    "tabSteps": "Zubereitung",
+    "tabTags": "Tags",
+    "ingredientsTitle": "Zutaten",
+    "ingredientsDescription": "Füge die Zutaten für dein Rezept hinzu. Du kannst für jede Zutat Menge und Einheit angeben, damit das Rezept genau und leicht nachzukochen ist.",
+    "editIngredient": "Zutat bearbeiten",
+    "editIngredientDescription": "Aktualisiere die Angaben zu deiner Zutat.",
+    "addIngredient": "Zutat hinzufügen",
+    "saveIngredients": "Zutaten speichern",
+    "ingredientName": "Name",
+    "ingredientNamePlaceholder": "Name der Zutat",
+    "ingredientQuantity": "Menge",
+    "ingredientUnit": "Einheit",
+    "removeIngredient": "Zutat {name} entfernen",
+    "newIngredient": "Neue Zutat",
+    "stepsTitle": "Zubereitung",
+    "stepsDescription": "Aktualisiere die Zubereitungsschritte deines Rezepts. Du kannst Schritte hinzufügen, bearbeiten, umsortieren oder entfernen.",
+    "editStep": "Schritt bearbeiten",
+    "editStepDescription": "Nimm deine Änderungen vor und speichere, wenn du fertig bist.",
+    "addStep": "Schritt hinzufügen",
+    "saveSteps": "Schritte speichern",
+    "stepDescriptionLabel": "Beschreibung",
+    "stepDescriptionPlaceholder": "Beschreibung des Schritts",
+    "stepImage": "Bild des Schritts",
+    "uploadStepImage": "Bild des Schritts hochladen",
+    "uploadStepImageDescription": "Wähle ein Bild für diesen Schritt. Du kannst ein neues hochladen oder eines aus deiner Bibliothek wählen.",
+    "removeStep": "Schritt {name} entfernen",
+    "newStep": "Neuer Schritt",
+    "submit": "Übernehmen",
+    "tagsTitle": "Tags (optional)",
+    "tagsDescription": "Füge Tags hinzu, damit dein Rezept leichter zu finden und zu sortieren ist.",
+    "tagsLabel": "Tags",
+    "selectTags": "Tags auswählen...",
+    "noItems": "Keine Einträge gefunden.",
+    "addTag": "Tag hinzufügen: \"{tag}\"",
+    "saveTags": "Tags speichern"
+  },
+  "UnitsFull": {
+    "GRAM": "Gramm",
+    "KILOGRAM": "Kilogramm",
+    "LITER": "Liter",
+    "MILLILITER": "Milliliter",
+    "CUP": "Tasse",
+    "TABLESPOON": "Esslöffel",
+    "TEASPOON": "Teelöffel",
+    "UNIT": "Stück"
+  },
+  "Categories": {
+    "MAIN_COURSE": "Hauptgericht",
+    "DESSERT": "Dessert",
+    "DRINK": "Getränk",
+    "STARTER": "Vorspeise",
+    "SNACK": "Snack",
+    "BREAKFAST": "Frühstück"
+  },
+  "Difficulty": {
+    "EASY": "Einfach",
+    "MEDIUM": "Mittel",
+    "HARD": "Schwer"
+  },
+  "CategoryPages": {
+    "explore": {
+      "name": "Entdecken",
+      "description": ""
+    },
+    "mains": {
+      "name": "Hauptgerichte",
+      "description": "Entdecke unsere Sammlung von Hauptgerichten mit einer Vielfalt an Aromen und Zutaten für jeden Geschmack."
+    },
+    "starters": {
+      "name": "Vorspeisen",
+      "description": "Starte dein Essen mit unseren köstlichen Vorspeisen, mit Aromen und Zutaten, die deinen Appetit wecken."
+    },
+    "desserts": {
+      "name": "Desserts",
+      "description": "Gönn dir unsere köstlichen Desserts, von intensiven Schokoladenspezialitäten bis zu leichten Fruchtgenüssen."
+    },
+    "drinks": {
+      "name": "Getränke",
+      "description": "Lösche deinen Durst mit unseren erfrischenden Drink-Rezepten, von lebendigen Cocktails bis zu sanften Mocktails."
+    },
+    "snacks": {
+      "name": "Snacks",
+      "description": "Stille deinen Hunger mit unseren köstlichen Snack-Rezepten, perfekt für jede Tageszeit."
+    },
+    "breakfast": {
+      "name": "Frühstück",
+      "description": "Starte den Tag mit unseren köstlichen Frühstücksrezepten und vielen Optionen für energiegeladene Morgen."
+    },
+    "everything": {
+      "name": "Alles",
+      "description": "Entdecke unsere vielfältige Rezeptsammlung mit Hauptgerichten, Desserts, Getränken und Beilagen für deine kulinarischen Abenteuer."
+    }
+  },
+  "RecipeCard": {
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "confirmTitle": "Bist du sicher?",
+    "confirmDescription": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleted": "Rezept erfolgreich gelöscht",
+    "deleteFailed": "Rezept konnte nicht gelöscht werden",
+    "imageAlt": "Rezeptbild"
+  },
+  "RecipesList": {
+    "loading": "Wird geladen...",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "orderBy": "Sortieren nach",
+    "creationDate": "Erstellungsdatum",
+    "likes": "Likes",
+    "category": "Kategorie",
+    "difficulty": "Schwierigkeit",
+    "clearFilters": "Filter zurücksetzen",
+    "apply": "Anwenden",
+    "recipeCount": "{count, plural, =0 {Keine Rezepte} one {# Rezept} other {# Rezepte}}",
+    "noRecipes": "Keine Rezepte gefunden.",
+    "loadMore": "Mehr laden"
+  },
+  "Validation": {
+    "invalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein",
+    "nameMin": "Der Name muss mindestens 2 Zeichen lang sein",
+    "passwordMin": "Das Passwort muss mindestens 8 Zeichen lang sein",
+    "confirmPasswordMin": "Die Passwortbestätigung muss mindestens 8 Zeichen lang sein",
+    "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein"
+  },
+  "AuthButton": {
+    "signIn": "Anmelden",
+    "signUp": "Registrieren"
+  },
+  "LoginForm": {
+    "title": "Anmelden",
+    "description": "Gib deine E-Mail und dein Passwort ein, um dich anzumelden.",
+    "email": "E-Mail",
+    "emailHint": "Wähle eine eindeutige E-Mail für dein Konto.",
+    "password": "Passwort",
+    "passwordHint": "Muss mindestens 8 Zeichen lang sein.",
+    "forgotPassword": "Passwort vergessen?",
+    "submit": "Anmelden",
+    "noAccount": "Noch kein Konto?",
+    "signUp": "Registrieren",
+    "successTitle": "Erfolgreich angemeldet!",
+    "successDescription": "Willkommen zurück bei Mantel Azul.",
+    "errorTitle": "Anmeldung fehlgeschlagen"
+  },
+  "SignupForm": {
+    "title": "Konto erstellen",
+    "description": "Gib deine E-Mail ein, um dein Konto zu erstellen",
+    "name": "Name",
+    "email": "E-Mail",
+    "emailHint": "Wähle eine eindeutige E-Mail für dein Konto.",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "passwordHint": "Muss mindestens 8 Zeichen lang sein.",
+    "submit": "Konto erstellen",
+    "successTitle": "Konto erfolgreich erstellt!",
+    "successDescription": "Willkommen bei Mantel Azul.",
+    "errorTitle": "Konto konnte nicht erstellt werden",
+    "mismatchTitle": "Die Passwörter stimmen nicht überein!",
+    "mismatchDescription": "Bitte stelle sicher, dass die Passwörter übereinstimmen."
+  },
+  "ForgotPasswordForm": {
+    "title": "Passwort vergessen",
+    "description": "Gib deine E-Mail-Adresse ein, um einen Link zum Zurücksetzen zu erhalten.",
+    "email": "E-Mail",
+    "submit": "Link senden",
+    "successTitle": "E-Mail zum Zurücksetzen gesendet!",
+    "errorTitle": "E-Mail zum Zurücksetzen konnte nicht gesendet werden"
+  },
+  "ResetPasswordForm": {
+    "title": "Passwort zurücksetzen",
+    "description": "Gib unten dein neues Passwort ein, um es zurückzusetzen.",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "passwordHint": "Muss mindestens 8 Zeichen lang sein.",
+    "submit": "Passwort zurücksetzen",
+    "successTitle": "Passwort erfolgreich zurückgesetzt!",
+    "errorTitle": "Passwort konnte nicht zurückgesetzt werden",
+    "mismatchTitle": "Die Passwörter stimmen nicht überein!",
+    "mismatchDescription": "Bitte stelle sicher, dass die Passwörter übereinstimmen."
+  },
+  "ChangePasswordForm": {
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "passwordHint": "Muss mindestens 8 Zeichen lang sein.",
+    "submit": "Passwort ändern",
+    "successTitle": "Passwort erfolgreich geändert!",
+    "errorTitle": "Passwort konnte nicht geändert werden",
+    "mismatchTitle": "Die Passwörter stimmen nicht überein!",
+    "mismatchDescription": "Bitte stelle sicher, dass die Passwörter übereinstimmen."
+  },
+  "ProfileForm": {
+    "title": "Mein Profil",
+    "description": "Aktualisiere deine Profilinformationen wie Name und E-Mail.",
+    "name": "Name",
+    "email": "E-Mail",
+    "emailHint": "Wähle eine eindeutige E-Mail für dein Konto.",
+    "submit": "Profil aktualisieren",
+    "changePassword": "Passwort ändern",
+    "changePasswordDescription": "Gib unten dein neues Passwort ein, um es zu ändern.",
+    "successTitle": "Profil erfolgreich aktualisiert!",
+    "successDescription": "Deine Profilinformationen wurden aktualisiert.",
+    "errorTitle": "Profil konnte nicht aktualisiert werden",
+    "emailErrorTitle": "E-Mail konnte nicht aktualisiert werden"
+  },
+  "Pages": {
+    "myRecipes": "Meine Rezepte",
+    "myCookbooks": "Meine Kochbücher",
+    "createRecipe": "Rezept erstellen",
+    "viewRecipes": "Rezepte ansehen",
+    "welcome": "Willkommen bei Mantel Azul!",
+    "limeAndGreenLeaves": "Limette und grüne Blätter",
+    "aperolDrink": "Aperol-Getränk",
+    "macarons": "Macarons",
+    "picnic": "Picknick"
+  },
+  "Common": {
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "confirmTitle": "Bist du sicher?",
+    "confirmDescription": "Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "RecipeActions": {
+    "edit": "bearbeiten",
+    "save": "speichern",
+    "share": "teilen",
+    "copy": "Kopieren",
+    "urlCopied": "Rezept-URL in die Zwischenablage kopiert",
+    "published": "Veröffentlicht",
+    "selectCookbook": "Wähle ein Kochbuch, um dieses Rezept zu speichern",
+    "noCookbooks": "Du hast noch keine Kochbücher."
+  },
+  "Cookbook": {
+    "count": "{count, plural, =0 {Keine Kochbücher} one {# Kochbuch} other {# Kochbücher}}",
+    "create": "Kochbuch erstellen",
+    "newTitle": "Neues Kochbuch",
+    "newDescription": "Erstelle ein neues Kochbuch, um deine Rezepte zu organisieren.",
+    "createSubmit": "Kochbuch erstellen",
+    "updateTitle": "Kochbuch bearbeiten",
+    "updateDescription": "Aktualisiere den Namen deines Kochbuchs.",
+    "updateSubmit": "Kochbuch aktualisieren",
+    "name": "Name",
+    "namePlaceholder": "Mein Kochbuch",
+    "created": "Kochbuch erfolgreich erstellt",
+    "createFailed": "Kochbuch konnte nicht erstellt werden",
+    "updated": "Kochbuch erfolgreich aktualisiert",
+    "updateFailed": "Kochbuch konnte nicht aktualisiert werden",
+    "deleted": "Kochbuch erfolgreich gelöscht",
+    "deleteFailed": "Kochbuch konnte nicht gelöscht werden",
+    "noCookbooks": "Keine Kochbücher gefunden.",
+    "imageAlt": "Kochbuch-Cover"
+  },
+  "Chat": {
+    "title": "Assistent",
+    "description": "Der Assistent hilft dir bei verschiedenen Aufgaben: Fragen beantworten, Empfehlungen geben und Rezepte erstellen.",
+    "placeholder": "Schreib etwas...",
+    "limitExceeded": "Nachrichtenlimit erreicht. Lösche den Chat, um ein neues Gespräch zu starten.",
+    "attachedImageAlt": "Vorschau des angehängten Bildes",
+    "you": "DU",
+    "ai": "KI",
+    "thinking": "Denkt nach",
+    "typing": "Schreibt",
+    "working": "Arbeitet",
+    "approve": "Bestätigen",
+    "deny": "Ablehnen",
+    "approveCreateRecipe": "Bestätigst du das Erstellen des folgenden Rezepts: {title}?",
+    "approveUpdateRecipe": "Bestätigst du das Aktualisieren des folgenden Rezepts: {title}?",
+    "approveDeleteRecipe": "Bestätigst du das Löschen dieses Rezepts? Das kann nicht rückgängig gemacht werden.",
+    "created": "Erfolgreich erstellt",
+    "updated": "Erfolgreich aktualisiert",
+    "viewRecipe": "Rezept ansehen",
+    "creationDenied": "Erstellen des Rezepts abgelehnt. Der Assistent sucht eine andere Lösung.",
+    "updateDenied": "Aktualisieren des Rezepts abgelehnt. Der Assistent sucht eine andere Lösung.",
+    "deleted": "Rezept erfolgreich gelöscht.",
+    "deletionDenied": "Löschen abgelehnt. Das Rezept wurde nicht gelöscht.",
+    "attachTitle": "Bild an den Chat anhängen",
+    "attachDescription": "Das Bild wird an den Assistenten gesendet und kann im Gespräch verwendet werden."
+  },
+  "Menu": {
+    "menu": "Menü",
+    "cookbooks": "Kochbücher",
+    "myRecipes": "Meine Rezepte",
+    "myCookbooks": "Meine Kochbücher",
+    "newRecipe": "Neues Rezept",
+    "profile": "Profil",
+    "logIn": "Anmelden",
+    "signOut": "Abmelden",
+    "toggleTheme": "Design wechseln",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "ImageUpload": {
+    "dropzone": "Ziehe ein Bild hierher oder klicke, um eines auszuwählen"
+  },
+  "Ui": {
+    "previousSlide": "Vorherige Folie",
+    "nextSlide": "Nächste Folie",
+    "close": "Schließen",
+    "loading": "Wird geladen",
+    "logoAlt": "Mantel Azul Logo"
+  }
+}

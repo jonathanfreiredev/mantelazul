@@ -4,13 +4,15 @@ import { api } from "~/trpc/server";
 
 export const toolGetTags = tool({
   description: `
-Retrieves all available tags that can be associated with a recipe. 
-This tool can be used to get the tags before creating the recipe.
-This tool can also be used to provide the user with options for categorizing their recipe based on predefined tags in the system.
+Retrieves all the tags currently available in the app.
 
-IMPORTANT: This tool does not take any input, it simply returns the list of tags available in the system.
+Use it before creating or updating a recipe to reuse existing tags instead of inventing
+new ones. It takes no input.
+
+NOTE: The tags stored in the app are the ones returned by this tool, so prefer them when
+they fit what the user asked for.
   `,
-  inputSchema: z.object({}),
+  inputSchema: z.object({}).strict(),
   execute: async () => {
     console.log("Executing toolGetTags to retrieve all available tags...");
     const tags = await api.tags.getAll();
@@ -24,4 +26,11 @@ IMPORTANT: This tool does not take any input, it simply returns the list of tags
       })),
     };
   },
+  toModelOutput: ({ output }) => ({
+    type: "text",
+    value:
+      output.tags.length > 0
+        ? `Available tags: ${output.tags.map((tag) => tag.name).join(", ")}`
+        : "No tags available yet.",
+  }),
 });

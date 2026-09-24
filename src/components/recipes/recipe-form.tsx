@@ -2,9 +2,9 @@
 import { Category, Difficulty } from "generated/prisma/enums";
 import { TrashIcon } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
-import { capitalize } from "~/lib/utils";
 import { ImageUpload } from "../image-uploader/image-upload";
 import { Button } from "../ui/button";
 import {
@@ -43,11 +43,15 @@ import {
 import { Textarea } from "../ui/textarea";
 
 interface RecipeFormProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the form values type lives with the caller; this component only wires fields through to react-hook-form.
   control: any;
 }
 
 export function RecipeForm({ control }: RecipeFormProps) {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const t = useTranslations("RecipeForm");
+  const tCategories = useTranslations("Categories");
+  const tDifficulty = useTranslations("Difficulty");
 
   return (
     <FieldSet className="mb-5 w-full">
@@ -58,7 +62,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor="image" className="sr-only">
-                Picture
+                {t("imageAlt")}
               </FieldLabel>
               <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
                 <DialogTrigger asChild>
@@ -67,7 +71,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
                       <>
                         <Image
                           src={field.value.preview}
-                          alt="Recipe Image"
+                          alt={t("imageAlt")}
                           fill
                           className="object-cover"
                         />
@@ -88,17 +92,16 @@ export function RecipeForm({ control }: RecipeFormProps) {
                       </>
                     ) : (
                       <p className="flex h-full w-full items-center justify-center text-gray-500">
-                        Click to upload image
+                        {t("imagePlaceholder")}
                       </p>
                     )}
                   </div>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Upload Recipe Image</DialogTitle>
+                    <DialogTitle>{t("uploadTitle")}</DialogTitle>
                     <DialogDescription>
-                      Choose an image to represent your recipe. You can upload
-                      an image file from your device.
+                      {t("uploadDescription")}
                     </DialogDescription>
                   </DialogHeader>
 
@@ -124,12 +127,12 @@ export function RecipeForm({ control }: RecipeFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="title">Title</FieldLabel>
+              <FieldLabel htmlFor="title">{t("title")}</FieldLabel>
               <Input
                 {...field}
                 id="title"
                 type="text"
-                placeholder="Delicious Pancakes"
+                placeholder={t("titlePlaceholder")}
                 required
               />
 
@@ -143,12 +146,12 @@ export function RecipeForm({ control }: RecipeFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="description">Description</FieldLabel>
+              <FieldLabel htmlFor="description">{t("description")}</FieldLabel>
               <Textarea
                 {...field}
                 id="description"
                 aria-invalid={fieldState.invalid}
-                placeholder="Fluffy pancakes made with love"
+                placeholder={t("descriptionPlaceholder")}
                 rows={2}
               />
 
@@ -163,7 +166,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor="defaultServings">
-                Default Servings
+                {t("defaultServings")}
               </FieldLabel>
               <InputGroup>
                 <InputGroupInput
@@ -190,7 +193,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
           render={({ field, fieldState }) => (
             <Field orientation="vertical" data-invalid={fieldState.invalid}>
               <FieldContent>
-                <FieldLabel htmlFor="category">Category</FieldLabel>
+                <FieldLabel htmlFor="category">{t("category")}</FieldLabel>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -205,14 +208,12 @@ export function RecipeForm({ control }: RecipeFormProps) {
                   aria-invalid={fieldState.invalid}
                   className="min-w-30"
                 >
-                  <SelectValue placeholder="Select" />
+                  <SelectValue placeholder={t("select")} />
                 </SelectTrigger>
                 <SelectContent position="item-aligned">
                   {Object.entries(Category).map(([key, value]) => (
                     <SelectItem key={key} value={value}>
-                      {key === Category.MAIN_COURSE
-                        ? "Main Course"
-                        : capitalize(key.toLowerCase().replace(/_/g, " "))}
+                      {tCategories(value)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -227,7 +228,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
           render={({ field, fieldState }) => (
             <Field orientation="vertical" data-invalid={fieldState.invalid}>
               <FieldContent>
-                <FieldLabel htmlFor="difficulty">Difficulty</FieldLabel>
+                <FieldLabel htmlFor="difficulty">{t("difficulty")}</FieldLabel>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -242,12 +243,12 @@ export function RecipeForm({ control }: RecipeFormProps) {
                   aria-invalid={fieldState.invalid}
                   className="min-w-30"
                 >
-                  <SelectValue placeholder="Select" />
+                  <SelectValue placeholder={t("select")} />
                 </SelectTrigger>
                 <SelectContent position="item-aligned">
                   {Object.entries(Difficulty).map(([key, value]) => (
                     <SelectItem key={key} value={value}>
-                      {capitalize(key.toLowerCase())}
+                      {tDifficulty(value)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -259,11 +260,8 @@ export function RecipeForm({ control }: RecipeFormProps) {
         <FieldSeparator />
 
         <FieldSet>
-          <FieldLegend>Time information</FieldLegend>
-          <FieldDescription>
-            Enter the preparation, cooking, and resting times for the recipe.
-            This will help users plan their cooking accordingly.
-          </FieldDescription>
+          <FieldLegend>{t("timeLegend")}</FieldLegend>
+          <FieldDescription>{t("timeDescription")}</FieldDescription>
 
           <FieldGroup className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
             <Controller
@@ -271,7 +269,9 @@ export function RecipeForm({ control }: RecipeFormProps) {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="preparationTime">Preparation</FieldLabel>
+                  <FieldLabel htmlFor="preparationTime">
+                    {t("preparation")}
+                  </FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       {...field}
@@ -285,7 +285,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
                       }}
                     />
                     <InputGroupAddon align="inline-end">
-                      <InputGroupText>min</InputGroupText>
+                      <InputGroupText>{t("min")}</InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
 
@@ -301,7 +301,9 @@ export function RecipeForm({ control }: RecipeFormProps) {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="cookingTime">Cooking</FieldLabel>
+                  <FieldLabel htmlFor="cookingTime">
+                    {t("cooking")}
+                  </FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       {...field}
@@ -315,7 +317,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
                       }}
                     />
                     <InputGroupAddon align="inline-end">
-                      <InputGroupText>min</InputGroupText>
+                      <InputGroupText>{t("min")}</InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
 
@@ -331,7 +333,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="restingTime">Resting</FieldLabel>
+                  <FieldLabel htmlFor="restingTime">{t("resting")}</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       {...field}
@@ -345,7 +347,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
                       }}
                     />
                     <InputGroupAddon align="inline-end">
-                      <InputGroupText>min</InputGroupText>
+                      <InputGroupText>{t("min")}</InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
 
@@ -361,11 +363,8 @@ export function RecipeForm({ control }: RecipeFormProps) {
         <FieldSeparator />
 
         <FieldSet>
-          <FieldLegend>Nutritional information per serving</FieldLegend>
-          <FieldDescription>
-            Enter the nutritional information for the recipe. This will help
-            users understand the nutritional content of the dish.
-          </FieldDescription>
+          <FieldLegend>{t("nutritionLegend")}</FieldLegend>
+          <FieldDescription>{t("nutritionDescription")}</FieldDescription>
 
           <FieldGroup className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
             <Controller
@@ -373,7 +372,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="calories">Calories</FieldLabel>
+                  <FieldLabel htmlFor="calories">{t("calories")}</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       {...field}
@@ -387,7 +386,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
                       }}
                     />
                     <InputGroupAddon align="inline-end">
-                      <InputGroupText>kcal</InputGroupText>
+                      <InputGroupText>{t("kcal")}</InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
 
@@ -403,7 +402,9 @@ export function RecipeForm({ control }: RecipeFormProps) {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="carbohydrates">Carbohydrates</FieldLabel>
+                  <FieldLabel htmlFor="carbohydrates">
+                    {t("carbohydrates")}
+                  </FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       {...field}
@@ -417,7 +418,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
                       }}
                     />
                     <InputGroupAddon align="inline-end">
-                      <InputGroupText>grams</InputGroupText>
+                      <InputGroupText>{t("grams")}</InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
 
@@ -433,7 +434,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="protein">Protein</FieldLabel>
+                  <FieldLabel htmlFor="protein">{t("protein")}</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       {...field}
@@ -447,7 +448,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
                       }}
                     />
                     <InputGroupAddon align="inline-end">
-                      <InputGroupText>grams</InputGroupText>
+                      <InputGroupText>{t("grams")}</InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
 
@@ -463,7 +464,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="fat">Fat</FieldLabel>
+                  <FieldLabel htmlFor="fat">{t("fat")}</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       {...field}
@@ -477,7 +478,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
                       }}
                     />
                     <InputGroupAddon align="inline-end">
-                      <InputGroupText>grams</InputGroupText>
+                      <InputGroupText>{t("grams")}</InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
 
