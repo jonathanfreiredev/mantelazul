@@ -1,4 +1,6 @@
+import type { Unit } from "generated/prisma/enums";
 import type { RecipeSearchHit } from "~/server/rag/types";
+import { formatUnit } from "~/lib/units";
 
 /** A recipe summary as returned by the favourites tool (not a search hit). */
 export interface RecipeSummary {
@@ -32,7 +34,7 @@ export interface RecipeDetail {
   ingredients: {
     name: string;
     quantity: string;
-    unit: string;
+    unit: Unit;
     order: number;
   }[];
   steps: { description: string; order: number }[];
@@ -84,7 +86,7 @@ export function formatRecipeDetailForModel(recipe: RecipeDetail): string {
   const ingredients = recipe.ingredients
     .map(
       (ingredient) =>
-        `- ${ingredient.quantity} ${ingredient.unit} ${ingredient.name}`,
+        `- ${ingredient.quantity} ${formatUnit(ingredient.unit)} ${ingredient.name}`,
     )
     .join("\n");
 

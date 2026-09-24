@@ -27,10 +27,9 @@ import { ChatInput } from "./chat-input";
 import { ChatMessage } from "./chat-message";
 import { type AssistantActivity } from "./assistant-activity-indicator";
 
-const MAX_MESSAGES = 25;
-const BOTTOM_THRESHOLD_PX = 100;
-const SCROLL_TO_BOTTOM_DELAY_MS = 50;
-const SCROLL_LISTENER_ATTACH_DELAY_MS = 100;
+const MAX_MESSAGES = 50;
+/** Distance from the bottom within which the user is considered "at the bottom". */
+const BOTTOM_THRESHOLD_PX = 80;
 const MAX_ATTACHED_IMAGE_BYTES = 10 * 1024 * 1024;
 
 /**
@@ -67,6 +66,8 @@ export default function AIAgentChat({
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  /** Mirrors `isAtBottom` for the scroll effect, which must not re-run on every scroll. */
+  const isPinnedToBottomRef = useRef(true);
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -120,48 +121,55 @@ export default function AIAgentChat({
     messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
-  const shouldAutoScroll = () => {
-    const el = containerRef.current;
-    if (!el) return true;
+  const isNearBottom = () => {
+    const element = containerRef.current;
+    if (!element) return true;
 
     return (
-      el.scrollHeight - el.scrollTop - el.clientHeight < BOTTOM_THRESHOLD_PX
+      element.scrollHeight - element.scrollTop - element.clientHeight <
+      BOTTOM_THRESHOLD_PX
     );
   };
 
-  // Scroll to bottom when opening the chat.
+  // Track whether the user is at the bottom, both in state (for the button) and in a ref
+  // (for the scroll effect, so it does not re-run on every scroll event).
   useEffect(() => {
     if (!opened) return;
 
-    const timeout = setTimeout(
-      () => scrollToBottom("auto"),
-      SCROLL_TO_BOTTOM_DELAY_MS,
-    );
-
-    return () => clearTimeout(timeout);
-  }, [opened]);
-
-  // Auto-scroll when new messages arrive, but only if the user is near the bottom.
-  useEffect(() => {
-    if (opened && shouldAutoScroll()) {
-      scrollToBottom(status === "streaming" ? "auto" : "smooth");
-    }
-  }, [messages, status, opened, uploadingImage]);
-
-  // Track whether the user is at the bottom, to toggle the scroll-to-bottom button.
-  useEffect(() => {
-    if (!opened) return;
-
-    const el = containerRef.current;
-    if (!el) return;
+    const element = containerRef.current;
+    if (!element) return;
 
     const handleScroll = () => {
-      setIsAtBottom(shouldAutoScroll());
+      const nearBottom = isNearBottom();
+      isPinnedToBottomRef.current = nearBottom;
+      setIsAtBottom(nearBottom);
     };
 
-    el.addEventListener("scroll", handleScroll);
-    return () => el.removeEventListener("scroll", handleScroll);
+    element.addEventListener("scroll", handleScroll, { passive: true });
+    return () => element.removeEventListener("scroll", handleScroll);
   }, [opened]);
+
+  // Keep the latest message in view while the assistant streams. The container grows on every
+  // chunk (and tool step), which fires no scroll event, so we observe its height instead.
+  useEffect(() => {
+    if (!opened) return;
+
+    const element = containerRef.current;
+    if (!element) return;
+
+    const followIfPinned = () => {
+      if (isPinnedToBottomRef.current) scrollToBottom("auto");
+    };
+
+    const observer = new ResizeObserver(followIfPinned);
+    observer.observe(element);
+
+    // Pin to the bottom on open, and whenever a new message is sent.
+    isPinnedToBottomRef.current = true;
+    followIfPinned();
+
+    return () => observer.disconnect();
+  }, [opened, messages.length]);
 
   const handleSendMessage = async (text: string) => {
     if (text.trim() === "" || isBusy || isAtMessageLimit) return;
@@ -338,7 +346,11 @@ export default function AIAgentChat({
                 className="pointer-events-auto mx-auto rounded-full shadow-lg shadow-gray-500/50"
                 size="icon-lg"
                 variant="outline"
-                onClick={() => scrollToBottom("smooth")}
+                onClick={() => {
+                  isPinnedToBottomRef.current = true;
+                  setIsAtBottom(true);
+                  scrollToBottom("smooth");
+                }}
               >
                 <ArrowDownIcon />
               </Button>

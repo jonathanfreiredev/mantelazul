@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { MarkdownText } from "./markdown-text";
 
 interface MessagePartProps {
   part:
@@ -15,9 +16,7 @@ interface MessagePartProps {
  */
 export function MessagePart({ part, partIndex }: MessagePartProps) {
   if (part.type === "text") {
-    return (
-      <div className="wrap-break-word whitespace-pre-wrap">{part.text}</div>
-    );
+    return <MarkdownText>{part.text}</MarkdownText>;
   }
 
   const isImage = part.mediaType.startsWith("image/");

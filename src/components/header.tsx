@@ -7,6 +7,7 @@ import { SignInOrSignUpButton } from "./auth/sign-in-or-sign-up-button";
 import AIAgentChat from "./ai-chat/ai-agent-chat";
 import { api } from "~/trpc/server";
 import { createId } from "@paralleldrive/cuid2";
+import type { MyAgentUIMessage } from "~/lib/agent";
 
 export async function Header() {
   const session = await getSession();
@@ -15,7 +16,7 @@ export async function Header() {
 
   let chatId = null;
 
-  const messages = [];
+  const messages: MyAgentUIMessage[] = [];
 
   if (isLoggedIn) {
     const chat = await api.aiChat.getChatId();

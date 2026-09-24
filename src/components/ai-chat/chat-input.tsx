@@ -48,6 +48,18 @@ export function ChatInput({
           placeholder="Say something..."
           disabled={disabled}
           onChange={(event) => onChange(event.currentTarget.value)}
+          onKeyDown={(event) => {
+            // Enter submits, like in any chat app. Shift/Cmd/Ctrl+Enter inserts a newline.
+            if (
+              event.key === "Enter" &&
+              !event.shiftKey &&
+              !event.metaKey &&
+              !event.ctrlKey
+            ) {
+              event.preventDefault();
+              if (!disabled && !isBusy && value.trim() !== "") onSubmit();
+            }
+          }}
         />
         <div className="mt-1 flex items-center justify-between">
           {showAttachButton ? (

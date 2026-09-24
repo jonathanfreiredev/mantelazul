@@ -97,7 +97,7 @@ model Recipe {
   id              String     @id @default(cuid())
   title           String
   description     String
-  published       Boolean    @default(false)
+  published       Boolean    @default(true)
   slug            String     @unique
   imageUrl        String?
   defaultServings Int

@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { DecimalToString } from "~/types/decimal-to-string";
 import { Button } from "../ui/button";
 import { formatQuantity } from "~/lib/utils";
+import { formatUnit } from "~/lib/units";
 
 interface IngredientsSectionProps {
   defaultServings: number;
@@ -45,7 +46,7 @@ export function IngredientsSection({
               {formatQuantity(
                 parseFloat(ingredient.quantity) * (servings / defaultServings),
               )}{" "}
-              {ingredient.unit.toLowerCase()}
+              {formatUnit(ingredient.unit)}
             </span>
 
             <span className="flex-1">{ingredient.name}</span>

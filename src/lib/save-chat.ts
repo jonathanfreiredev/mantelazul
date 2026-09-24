@@ -1,4 +1,5 @@
 import { type UIMessage } from "ai";
+import { sanitizeInterruptedMessages } from "~/lib/chat-message-parts";
 import { db } from "~/server/db";
 
 export async function saveChat(
@@ -14,7 +15,9 @@ export async function saveChat(
 
   if (!chat) throw new Error("Chat not found");
 
-  const lastTwoMessages = messages.slice(-2);
+  // A stream that was aborted mid-tool-call leaves non-terminal tool parts behind; persist them
+  // as terminal errors so reloading the chat cannot jam it.
+  const lastTwoMessages = sanitizeInterruptedMessages(messages).slice(-2);
 
   for (const msg of lastTwoMessages) {
     const content = JSON.stringify(msg.parts);

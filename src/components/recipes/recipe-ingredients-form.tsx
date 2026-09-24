@@ -7,6 +7,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { type z } from "zod";
 import { breakpoints, useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
+import { formatUnit } from "~/lib/units";
 import { recipeIngredientsSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/react";
 import type { RecipeDto } from "~/types/recipe";
@@ -120,7 +121,7 @@ export const RecipeIngredientsForm = ({
                           <p>{field.name}</p>
                           <div className="flex flex-row items-center gap-1 text-gray-700">
                             <p>{field.quantity}</p>
-                            <p>{field.unit.toLowerCase()}</p>
+                            <p>{formatUnit(field.unit)}</p>
                           </div>
                         </DrawerTrigger>
                         <DrawerContent>

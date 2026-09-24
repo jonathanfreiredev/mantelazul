@@ -33,8 +33,10 @@ Use it when:
 
       return {
         success: true,
-        imageUrl: imageUrl,
-        message: `I've generated a professional photo of the ${recipeTitle}. It looks delicious!`,
+        imageUrl,
+        // The chat renders the image itself, so the model only needs a short confirmation and
+        // must never repeat this message or the url in its reply.
+        message: `Image of "${recipeTitle}" is now displayed in the chat.`,
       };
     } catch (error) {
       console.error("Error in toolGenerateRecipeImage:", error);

@@ -4,6 +4,7 @@ import { NotepadTextIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "../../ui/button";
 import { ApprovalActions } from "./approval-actions";
+import { RecipeResultHeader } from "./recipe-result-header";
 import { ToolResultCard } from "./tool-result-card";
 import { type ToolPart } from "./tool-part";
 
@@ -43,10 +44,11 @@ export function RecipeApprovalTool({
 
       return (
         <ToolResultCard>
-          <p>
-            Recipe &quot;{recipe.title}&quot; {isCreate ? "created" : "updated"}{" "}
-            successfully!
-          </p>
+          <RecipeResultHeader
+            title={recipe.title}
+            imageUrl={recipe.imageUrl}
+            caption={isCreate ? "Created successfully" : "Updated successfully"}
+          />
           <Button
             variant="outline"
             onClick={() => {

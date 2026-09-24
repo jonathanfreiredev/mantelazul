@@ -1,3 +1,4 @@
+import { openai, type OpenAIImageModelGenerationOptions } from "@ai-sdk/openai";
 import { generateImage } from "ai";
 import {
   v2 as cloudinary,
@@ -5,18 +6,12 @@ import {
   type UploadApiResponse,
 } from "cloudinary";
 import { env } from "~/env";
-import {
-  createBlackForestLabs,
-  type BlackForestLabsImageModelOptions,
-} from "@ai-sdk/black-forest-labs";
 
 cloudinary.config({
   cloud_name: env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
   api_key: env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
   api_secret: env.CLOUDINARY_API_SECRET,
 });
-
-const blackForestLabs = createBlackForestLabs();
 
 export function uploadToCloudinary(buffer: Buffer): Promise<UploadApiResponse> {
   return new Promise((resolve, reject) => {
@@ -56,19 +51,16 @@ export async function generateAndUpload(
   title: string,
   styleHint?: string,
 ): Promise<string> {
-  const model =
-    process.env.NODE_ENV === "production" ? "flux-2-pro" : "flux-2-klein-9b";
   const { image } = await generateImage({
-    model: blackForestLabs.image(model),
+    model: openai.image("gpt-image-2.5-sunburst"),
     prompt: `Professional gourmet food photography of ${title}${
       styleHint ? `, ${styleHint} style` : ""
-    }, high resolution, 8k, appetizing lighting, macro lens, elegant plating.`,
-    aspectRatio: "1:1",
+    }, high resolution, 8k, appetizing lighting, macro lens plating.`,
+    size: "1024x1024",
     providerOptions: {
-      blackForestLabs: {
-        width: 1024,
-        height: 1024,
-      } satisfies BlackForestLabsImageModelOptions,
+      openai: {
+        quality: "medium",
+      } satisfies OpenAIImageModelGenerationOptions,
     },
   });
 

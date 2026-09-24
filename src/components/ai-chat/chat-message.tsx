@@ -10,7 +10,8 @@ import { MessagePart } from "./message-part";
 import { DeleteRecipeTool } from "./tools/delete-recipe-tool";
 import { GeneratedImagePart } from "./tools/generated-image-part";
 import { RecipeApprovalTool } from "./tools/recipe-approval-tool";
-import { isToolPart } from "./tools/tool-part";
+import { ToolErrorCard } from "./tools/tool-error-card";
+import { isToolErrorPart, isToolPart } from "./tools/tool-part";
 
 interface ChatMessageProps {
   message: MyAgentUIMessage;
@@ -44,7 +45,7 @@ export function ChatMessage({
             : "bg-neutral-200 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100"
         }`}
       >
-        <div className="whitespace-pre-wrap">
+        <div>
           <p className="mb-1 text-xs font-extralight opacity-70">
             {isUser ? "YOU " : "AI "}
           </p>
@@ -53,6 +54,17 @@ export function ChatMessage({
 
           {message.parts.map((part, index) => {
             const key = `${message.id}-${index}`;
+
+            // Failed and interrupted tool calls are rendered uniformly, before the tools with
+            // their own success UI.
+            if (isToolErrorPart(part)) {
+              return (
+                <ToolErrorCard
+                  key={part.toolCallId}
+                  errorText={part.errorText}
+                />
+              );
+            }
 
             if (isToolPart(part, ["createRecipe", "updateRecipe"])) {
               return (
