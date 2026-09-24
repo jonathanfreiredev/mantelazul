@@ -12,21 +12,27 @@ const recipeInputSchema = z.object({
     ),
   title: z
     .string()
+    .trim()
     .min(1, "Title is required")
-    .describe("The name of the recipe. It is required"),
+    .describe("The name of the recipe. It is required."),
   description: z
     .string()
-    .describe("Short description of the dish It is required."),
+    .trim()
+    .min(1, "Description is required")
+    .describe("Short description of the dish. It is required."),
   category: z
     .enum(Category)
     .describe(
-      "The category of the recipe. Category in UPPERCASE (e.g., MAIN_COURSE, DESSERT). It is required.",
+      "The category of the recipe, in UPPERCASE (e.g. MAIN_COURSE, DESSERT). It is required.",
     ),
-  imageUrl: z.url().nullable().describe("URL of the recipe image."),
+  imageUrl: z
+    .url()
+    .optional()
+    .describe("URL of the recipe image, or omit it to keep the current one."),
   difficulty: z
     .enum(Difficulty)
     .describe(
-      "The difficulty level of the recipe. Difficulty in UPPERCASE (e.g., EASY, MEDIUM, HARD). It is required.",
+      "The difficulty level of the recipe, in UPPERCASE (e.g. EASY, MEDIUM, HARD). It is required.",
     ),
   defaultServings: intSchema
     .min(1, "It must be at least 1")
@@ -52,21 +58,21 @@ const recipeInputSchema = z.object({
           .trim()
           .min(1, "Ingredient name is required")
           .describe("Name of the ingredient. It is required."),
-        quantity: z
+        quantity: z.coerce
           .number()
           .describe(
-            "Quantity of the ingredient (e.g., '1', '0.5', '2.75'). It can be a decimal number represented as a string with a dot as the decimal separator. Maximum 3 decimal places. It does not need to include the unit, just the numeric value. It is required.",
+            "Quantity of the ingredient as a number (e.g. 1, 0.5, 2.75), using a dot as the decimal separator. Up to 3 decimals are kept. It does not need to include the unit, just the numeric value. It is required.",
           ),
         unit: z
           .enum(Unit)
           .describe(
-            "Unit of measurement for the ingredient. Unit in UPPERCASE (e.g., GRAM, CUP, TABLESPOON). It is required.",
+            "Unit of measurement for the ingredient, in UPPERCASE (e.g. GRAM, CUP, TABLESPOON). It is required.",
           ),
       }),
     )
     .min(1, "At least one ingredient is required")
     .describe(
-      "List of ingredients for the recipe. Each ingredient includes a name, quantity, and unit of measurement. List the ingredients in the order they are used in the recipe.",
+      "Ingredients for the recipe, one entry each, in the order they are used. Each ingredient has a name, a numeric quantity and a unit of measurement.",
     ),
   steps: z
     .array(
@@ -78,31 +84,30 @@ const recipeInputSchema = z.object({
     )
     .min(1, "At least one step is required")
     .describe(
-      "List of preparation steps for the recipe. List the steps in the order they should be performed. Each step should be a clear and concise instruction for the user to follow. Minimum 1 step is required.",
+      "Preparation steps for the recipe, listed in the order they should be performed. Each step is a clear, concise instruction for the user to follow.",
     ),
   tags: z
-    .array(z.string())
+    .array(z.string().trim().min(1, "Tag cannot be empty"))
     .describe(
-      "List of tags for the recipe. E.g., 'vegan', 'gluten-free', etc. It does not need a hash symbol (#) before the tag name. Tags have to be in the same language as the recipe.",
+      "Tags for the recipe, e.g. 'vegan', 'gluten-free'. Do not prefix them with '#'. Tags must be in the same language as the recipe.",
     ),
 });
 
 export const toolUpdateRecipe = tool({
   description: `
-Update an existing recipe with new information. This tool should be used when the user wants to make changes to a recipe that has already been created. The input should include the unique identifier of the recipe to be updated, along with any fields that need to be changed (e.g., title, description, ingredients, steps, etc.).
+Updates an existing recipe. Use it when the user wants to change a recipe that already exists.
+
+The input carries the recipe id plus the full recipe (title, description, ingredients,
+steps and metadata). Include every field, even the ones that do not change, so the recipe
+stays complete and consistent after the update.
 
 IMPORTANT:
-- Only call this tool when the user has clearly confirmed they want to update the recipe.
-- Do NOT call this tool during brainstorming or suggestion phases.
-- The recipe should include a clear title, ingredients list, step-by-step instructions, and relevant metadata (e.g., category, difficulty, nutritional info).
-- The recipe must already exist and be fully defined before calling this tool.
-- Include all fields that need to be updated in the input, even if they are not being changed, to ensure the recipe remains complete and consistent after the update.
-- Include a imageUrl in the input. Generate a new image only if the user explicitly asks for it or if the title has changed. Do not generate a new image on every update to avoid unnecessary API calls and to keep the existing image if the changes are minor.
-
-The recipe should include a clear title, ingredients list, step-by-step instructions, and relevant metadata (e.g., category, difficulty, nutritional info).
+- Only call this tool once the user has explicitly confirmed they want the change.
+- Do NOT call it during brainstorming or suggestion phases.
+- Call 'getOneRecipe' first to read the recipe, then send it back with only the requested change.
+- This tool requires user approval before it runs.
   `,
   inputSchema: zodSchema(recipeInputSchema),
-  needsApproval: true,
   execute: async (recipe) => {
     const newRecipe = await api.recipes.update({
       id: recipe.id,
@@ -152,7 +157,7 @@ The recipe should include a clear title, ingredients list, step-by-step instruct
 
     return {
       success: true,
-      message: "Recipe created successfully",
+      message: "Recipe updated successfully",
       recipe: updatedRecipe,
     };
   },

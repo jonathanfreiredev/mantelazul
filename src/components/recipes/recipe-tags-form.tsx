@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { cn } from "~/lib/utils";
 import { recipeTagsSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/react";

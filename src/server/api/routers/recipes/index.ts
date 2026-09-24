@@ -10,6 +10,12 @@ import type { RecipeDto } from "~/types/recipe";
 import { recipeIngredientsSchema, recipeSchema } from "./validation";
 import { deleteImageByUrl } from "../images/service";
 import type { Prisma } from "generated/prisma/client";
+import {
+  DEFAULT_SEARCH_LIMIT,
+  MAX_SEARCH_LIMIT,
+  searchRecipes,
+} from "~/server/rag/search";
+import { removeRecipeIndex, syncRecipeIndex } from "~/server/rag/sync";
 
 const reservedSlugs = ["new"];
 
@@ -79,6 +85,8 @@ export const recipesRouter = createTRPCRouter({
           author: { connect: { id: ctx.session.user.id } },
         },
       });
+
+      await syncRecipeIndex(newRecipe.id);
 
       return newRecipe;
     }),
@@ -154,6 +162,8 @@ export const recipesRouter = createTRPCRouter({
         },
       });
 
+      await syncRecipeIndex(updatedRecipe.id);
+
       return updatedRecipe;
     }),
 
@@ -182,6 +192,8 @@ export const recipesRouter = createTRPCRouter({
           recipeId,
         })),
       });
+
+      await syncRecipeIndex(recipeId);
 
       return { success: true };
     }),
@@ -235,6 +247,8 @@ export const recipesRouter = createTRPCRouter({
         })),
       });
 
+      await syncRecipeIndex(recipeId);
+
       return { success: true };
     }),
 
@@ -283,6 +297,8 @@ export const recipesRouter = createTRPCRouter({
         });
       }
 
+      await syncRecipeIndex(recipeId);
+
       return { success: true };
     }),
 
@@ -301,6 +317,8 @@ export const recipesRouter = createTRPCRouter({
         where: { id: input.recipeId },
         data: { published: !recipe.published },
       });
+
+      await syncRecipeIndex(updatedRecipe.id);
 
       return updatedRecipe;
     }),
@@ -489,35 +507,54 @@ export const recipesRouter = createTRPCRouter({
       };
     }),
 
-  getAllCreatedByUser: protectedProcedure.query(async ({ ctx }) => {
-    const recipes = await ctx.db.recipe.findMany({
-      where: { authorId: ctx.session.user.id },
-      include: {
-        ingredients: {
-          orderBy: { order: "asc" },
-        },
-        steps: {
-          orderBy: { order: "asc" },
-        },
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+  /**
+   * Semantic recipe retrieval used ONLY by the AI agent. It returns the matching record ids
+   * and their similarity; the agent's search tool hydrates them from Postgres afterwards.
+   * It does not reuse any of the server's listing procedures.
+   *
+   * There is a single mode: vector search. Pagination is done through `excludeIds` so
+   * "show me more" returns the next best distinct results.
+   *
+   * Scope "mine" always filters by the authenticated user, never by a client-provided id.
+   */
+  semanticSearch: protectedProcedure
+    .input(
+      z.object({
+        query: z.string().trim().min(1),
+        scope: z.enum(["all", "mine"]).default("all"),
+        maxTotalTime: z.int().positive().optional(),
+        excludeIds: z.array(z.string()).optional(),
+        take: z
+          .int()
+          .min(1)
+          .max(MAX_SEARCH_LIMIT)
+          .default(DEFAULT_SEARCH_LIMIT),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await searchRecipes({
+        queryText: input.query,
+        scope: input.scope,
+        userId: ctx.session.user.id,
+        filters: { maxTotalTime: input.maxTotalTime },
+        excludeIds: input.excludeIds,
+        limit: input.take,
+      });
 
-    return recipes.map((recipe) => ({
-      ...recipe,
-      ingredients: recipe.ingredients.map((ingredient) => ({
-        ...ingredient,
-        quantity: ingredient.quantity.toString(),
-      })),
-    }));
-  }),
+      return {
+        matches: result.matches,
+        hasMore: result.hasMore,
+      };
+    }),
 
-  getAllFavouritesByUser: protectedProcedure.query(async ({ ctx }) => {
+  /**
+   * All favourite recipes of the authenticated user, with their full data.
+   *
+   * Favourites are likes, which change per user and are not part of the vector index, so
+   * this stays a deterministic database query. It returns the complete recipes so it can
+   * back the favourites page; the AI agent adapts this output in its own tool.
+   */
+  getFavourites: protectedProcedure.query(async ({ ctx }) => {
     const recipes = await ctx.db.recipe.findMany({
       where: {
         likes: {
@@ -581,6 +618,8 @@ export const recipesRouter = createTRPCRouter({
       await ctx.db.recipe.delete({
         where: { id },
       });
+
+      await removeRecipeIndex(id);
 
       return { success: true };
     }),

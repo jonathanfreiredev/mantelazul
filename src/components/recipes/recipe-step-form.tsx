@@ -18,6 +18,7 @@ import { TrashIcon } from "lucide-react";
 interface RecipeStepFormProps {
   index: number;
   fieldId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the form values type lives with the caller; this component only wires fields through to react-hook-form.
   control: any;
 }
 

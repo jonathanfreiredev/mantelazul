@@ -18,6 +18,10 @@ export const env = createEnv({
     RESEND_API_KEY: z.string(),
     CLOUDINARY_API_SECRET: z.string(),
     BFL_API_KEY: z.string(),
+    // Chroma vector database. Defaults to the local server started with
+    // `pnpm chroma:dev` (SQLite persistence in ./.chroma). Point this to your
+    // self-hosted instance or Chroma Cloud URL in production.
+    CHROMA_URL: z.url().default("http://localhost:8000"),
   },
 
   /**
@@ -44,6 +48,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     NEXT_PUBLIC_CLOUDINARY_API_KEY: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
     BFL_API_KEY: process.env.BFL_API_KEY,
+    CHROMA_URL: process.env.CHROMA_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

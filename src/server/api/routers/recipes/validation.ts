@@ -1,7 +1,7 @@
 import { Category, Difficulty, Unit } from "generated/prisma/enums";
 import z from "zod";
 
-export const intSchema = z.int("It must be a positive number");
+export const intSchema = z.int().nonnegative("It cannot be negative");
 
 export const recipeSchema = z.object({
   title: z.string().min(1, "Title is required").trim(),

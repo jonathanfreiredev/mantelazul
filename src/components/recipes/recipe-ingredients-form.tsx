@@ -4,7 +4,7 @@ import { Unit } from "generated/prisma/enums";
 import { XIcon } from "lucide-react";
 import { redirect, useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { breakpoints, useMediaQuery } from "~/hooks/use-media-query";
 import { cn } from "~/lib/utils";
 import { recipeIngredientsSchema } from "~/server/api/routers/recipes/validation";

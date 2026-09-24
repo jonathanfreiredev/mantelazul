@@ -24,33 +24,45 @@ export function ImageUpload({
   const [isLoading, setIsLoading] = useState(false);
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      setIsLoading(true);
       if (acceptedFiles.length === 0) return;
 
-      const processedFiles = await Promise.all(
-        acceptedFiles.map(async (file) => {
-          try {
-            return await processImage(file);
-          } catch (e) {
-            console.error("Error redimensionando:", e);
-            return file;
-          }
-        }),
-      );
+      setIsLoading(true);
+      try {
+        const processedFiles = await Promise.all(
+          acceptedFiles.map(async (file) => {
+            try {
+              return await processImage(file);
+            } catch (e) {
+              console.error("Error redimensionando:", e);
+              return file;
+            }
+          }),
+        );
 
-      const newImages: ImageWithPreview[] = processedFiles.map((file) => ({
-        file,
-        preview: URL.createObjectURL(file),
-      }));
+        const newImages: ImageWithPreview[] = processedFiles.map((file) => ({
+          file,
+          preview: URL.createObjectURL(file),
+        }));
 
-      handleImages(newImages);
-      setIsLoading(false);
+        handleImages(newImages);
+      } finally {
+        setIsLoading(false);
+      }
     },
     [handleImages],
   );
 
+  // react-dropzone expects a void handler; wrap the async work so the promise
+  // is not passed through to a property that requires a void return.
+  const handleDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      void onDrop(acceptedFiles);
+    },
+    [onDrop],
+  );
+
   const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
+    onDrop: handleDrop,
     accept: {
       "image/jpeg": [],
       "image/png": [],

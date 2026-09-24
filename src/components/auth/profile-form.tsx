@@ -15,6 +15,14 @@ import {
   CardTitle,
 } from "../ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import {
   Field,
   FieldDescription,
   FieldError,
@@ -23,19 +31,7 @@ import {
   FieldSet,
 } from "../ui/field";
 import { Input } from "../ui/input";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
-import type { Label } from "radix-ui";
 import { ChangePasswordForm } from "./change-password-form";
-import { useState } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),

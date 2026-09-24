@@ -1,7 +1,14 @@
 import { generateImage } from "ai";
-import { createBlackForestLabs } from "@ai-sdk/black-forest-labs";
-import { v2 as cloudinary } from "cloudinary";
+import {
+  v2 as cloudinary,
+  type DeleteApiResponse,
+  type UploadApiResponse,
+} from "cloudinary";
 import { env } from "~/env";
+import {
+  createBlackForestLabs,
+  type BlackForestLabsImageModelOptions,
+} from "@ai-sdk/black-forest-labs";
 
 cloudinary.config({
   cloud_name: env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -11,7 +18,7 @@ cloudinary.config({
 
 const blackForestLabs = createBlackForestLabs();
 
-export function uploadToCloudinary(buffer: Buffer): Promise<any> {
+export function uploadToCloudinary(buffer: Buffer): Promise<UploadApiResponse> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
@@ -19,7 +26,7 @@ export function uploadToCloudinary(buffer: Buffer): Promise<any> {
           upload_preset: "mantelazul",
         },
         (error, result) => {
-          if (error) reject(error);
+          if (error || !result) reject(error ?? new Error("Upload failed"));
           else resolve(result);
         },
       )
@@ -27,7 +34,9 @@ export function uploadToCloudinary(buffer: Buffer): Promise<any> {
   });
 }
 
-export function deleteFromCloudinary(publicId: string): Promise<any> {
+export function deleteFromCloudinary(
+  publicId: string,
+): Promise<DeleteApiResponse> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.destroy(
       `mantelazul/${publicId}`,
@@ -36,7 +45,7 @@ export function deleteFromCloudinary(publicId: string): Promise<any> {
       },
       (error, result) => {
         console.log("Cloudinary delete result:", result);
-        if (error) reject(error);
+        if (error || !result) reject(error ?? new Error("Delete failed"));
         else resolve(result);
       },
     );
@@ -59,7 +68,7 @@ export async function generateAndUpload(
       blackForestLabs: {
         width: 1024,
         height: 1024,
-      },
+      } satisfies BlackForestLabsImageModelOptions,
     },
   });
 

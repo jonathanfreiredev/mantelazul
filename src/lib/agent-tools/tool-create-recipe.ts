@@ -3,29 +3,37 @@ import { Category, Difficulty, Unit } from "generated/prisma/enums";
 import z from "zod";
 import { intSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/server";
+import { generateAndUpload } from "../cloudinary";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
 
 const recipeInputSchema = z.object({
   title: z
     .string()
+    .trim()
     .min(1, "Title is required")
     .describe("The name of the recipe. It is required."),
   description: z
     .string()
-    .describe("Short description of the dish It is required."),
+    .trim()
+    .min(1, "Description is required")
+    .describe("Short description of the dish. It is required."),
   category: z
     .enum(Category)
     .describe(
-      "The category of the recipe. Category in UPPERCASE (e.g., MAIN_COURSE, DESSERT). It is required.",
+      "The category of the recipe, in UPPERCASE (e.g. MAIN_COURSE, DESSERT). It is required.",
     ),
   difficulty: z
     .enum(Difficulty)
     .describe(
-      "The difficulty level of the recipe. Difficulty in UPPERCASE (e.g., EASY, MEDIUM, HARD). It is required.",
+      "The difficulty level of the recipe, in UPPERCASE (e.g. EASY, MEDIUM, HARD). It is required.",
     ),
   imageUrl: z
     .url()
-    .nullable()
-    .describe("URL of the recipe image. It is required."),
+    .optional()
+    .describe(
+      "URL of the recipe image. Omit it to let the app generate one automatically.",
+    ),
   defaultServings: intSchema
     .min(1, "It must be at least 1")
     .describe(
@@ -50,21 +58,21 @@ const recipeInputSchema = z.object({
           .trim()
           .min(1, "Ingredient name is required")
           .describe("Name of the ingredient. It is required."),
-        quantity: z
+        quantity: z.coerce
           .number()
           .describe(
-            "Quantity of the ingredient (e.g., '1', '0.5', '2.75'). It can be a decimal number represented as a string with a dot as the decimal separator. Maximum 3 decimal places. It does not need to include the unit, just the numeric value. It is required.",
+            "Quantity of the ingredient as a number (e.g. 1, 0.5, 2.75), using a dot as the decimal separator. Up to 3 decimals are kept. It does not need to include the unit, just the numeric value. It is required.",
           ),
         unit: z
           .enum(Unit)
           .describe(
-            "Unit of measurement for the ingredient. Unit in UPPERCASE (e.g., GRAM, CUP, TABLESPOON). It is required.",
+            "Unit of measurement for the ingredient, in UPPERCASE (e.g. GRAM, CUP, TABLESPOON). It is required.",
           ),
       }),
     )
     .min(1, "At least one ingredient is required")
     .describe(
-      "List of ingredients for the recipe. Each ingredient includes a name, quantity, and unit of measurement. List the ingredients in the order they are used in the recipe.",
+      "Ingredients for the recipe, one entry each, in the order they are used. Each ingredient has a name, a numeric quantity and a unit of measurement.",
     ),
   steps: z
     .array(
@@ -76,32 +84,46 @@ const recipeInputSchema = z.object({
     )
     .min(1, "At least one step is required")
     .describe(
-      "List of preparation steps for the recipe. List the steps in the order they should be performed. Each step should be a clear and concise instruction for the user to follow. Minimum 1 step is required.",
+      "Preparation steps for the recipe, listed in the order they should be performed. Each step is a clear, concise instruction for the user to follow.",
     ),
   tags: z
-    .array(z.string())
+    .array(z.string().trim().min(1, "Tag cannot be empty"))
     .describe(
-      "List of tags for the recipe. E.g., 'vegan', 'gluten-free', etc. It does not need a hash symbol (#) before the tag name. Tags have to be in the same language as the recipe.",
+      "Tags for the recipe, e.g. 'vegan', 'gluten-free'. Do not prefix them with '#'. Tags must be in the same language as the recipe.",
     ),
 });
 
 export const toolCreateRecipe = tool({
   description: `
-Creates and stores a finalized cooking recipe after the user has explicitly approved it.
+Creates and stores a finalized cooking recipe.
+
+The recipe must already be fully defined and agreed upon, with a title, an ingredients
+list, step-by-step instructions and its metadata (category, difficulty, nutrition).
 
 IMPORTANT:
-- Only call this tool when the user has clearly confirmed they want to create/save the recipe.
-- Do NOT call this tool during brainstorming or suggestion phases.
-- The recipe must already be fully defined and agreed upon.
-- Add an image to the recipe. If the user has provided an image, first ask them to use this image in the recipe. If they confirm,
-  use the URL of that image in the recipe.
-- If the user has not provided an image, you can generate a relevant image using an image generation tool and include it in the recipe.
-
-The recipe should include a clear title, ingredients list, step-by-step instructions, and relevant metadata (e.g., category, difficulty, nutritional info).
+- Only call this tool once the user has explicitly confirmed they want to save the recipe.
+- Do NOT call it during brainstorming or suggestion phases.
+- This tool requires user approval before it runs.
   `,
   inputSchema: zodSchema(recipeInputSchema),
-  needsApproval: true,
   execute: async (recipe) => {
+    const image = recipe.imageUrl
+      ? recipe.imageUrl
+      : await generateImageForRecipe({
+          title: recipe.title,
+          description: recipe.description,
+          category: recipe.category,
+          difficulty: recipe.difficulty,
+          defaultServings: recipe.defaultServings,
+          preparationTime: recipe.preparationTime,
+          cookingTime: recipe.cookingTime,
+          restingTime: recipe.restingTime,
+          calories: recipe.calories,
+          carbohydrates: recipe.carbohydrates,
+          protein: recipe.protein,
+          fat: recipe.fat,
+        });
+
     const newRecipe = await api.recipes.create({
       title: recipe.title,
       description: recipe.description,
@@ -115,7 +137,7 @@ The recipe should include a clear title, ingredients list, step-by-step instruct
       carbohydrates: recipe.carbohydrates,
       protein: recipe.protein,
       fat: recipe.fat,
-      imageUrl: recipe.imageUrl || null,
+      imageUrl: image || null,
     });
 
     await api.recipes.updateIngredients({
@@ -151,3 +173,41 @@ The recipe should include a clear title, ingredients list, step-by-step instruct
     };
   },
 });
+
+const generateImageForRecipe = async (recipe: {
+  title: string;
+  description: string;
+  category: Category;
+  difficulty: Difficulty;
+  defaultServings: number;
+  preparationTime: number;
+  cookingTime: number;
+  restingTime: number;
+  calories: number;
+  carbohydrates: number;
+  protein: number;
+  fat: number;
+}) => {
+  const styleHint = await generateText({
+    model: openai("gpt-6-luna"),
+    prompt: `Given the following recipe details, generate a concise visual style hint for an AI image generator. The hint should describe the desired visual style, lighting, and presentation of the dish in a few words. Avoid mentioning specific camera settings or technical photography terms. Focus on the overall aesthetic and mood that would make the dish look appealing and appetizing.
+    Recipe Details:
+    Title: ${recipe.title}
+    Description: ${recipe.description}
+    Category: ${recipe.category}
+    Difficulty: ${recipe.difficulty}
+    Default Servings: ${recipe.defaultServings}
+    Preparation Time: ${recipe.preparationTime} minutes
+    Cooking Time: ${recipe.cookingTime} minutes
+    Resting Time: ${recipe.restingTime} minutes
+    Calories: ${recipe.calories} kcal
+    Carbohydrates: ${recipe.carbohydrates} g
+    Protein: ${recipe.protein} g
+    Fat: ${recipe.fat} g
+
+    Please provide the visual style hint in a single sentence.`,
+  });
+
+  const imageUrl = await generateAndUpload(recipe.title, styleHint.text);
+  return imageUrl;
+};

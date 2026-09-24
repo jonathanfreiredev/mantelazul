@@ -13,6 +13,9 @@
 /prisma/db.sqlite-journal
 db.sqlite
 
+# chroma vector database (local SQLite persistence)
+/.chroma
+
 # next.js
 /.next/
 /out/
