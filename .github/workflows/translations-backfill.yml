@@ -1,0 +1,39 @@
+name: Translations Backfill (manual)
+
+# Manual only: regenerates every locale of every recipe from its authoritative source text. The
+# author's own language is restored verbatim, so the original wording is never altered.
+#
+# Run it once after applying the translation migration, so production recipes get their English
+# and German text (the migration only copies the authored language).
+#
+# Required repository secrets: DATABASE_URL, OPENAI_API_KEY
+on:
+  workflow_dispatch:
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Backfill recipe translations
+        run: pnpm translations:backfill
+        env:
+          # Only a subset of the app's env is needed here, so validation is skipped instead of
+          # wiring every secret (Resend, Cloudinary, Chroma, ...) into this job.
+          SKIP_ENV_VALIDATION: "1"
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
