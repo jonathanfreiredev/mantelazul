@@ -500,11 +500,13 @@ export const recipesRouter = createTRPCRouter({
       }
 
       if (search) {
+        // Search every locale so a recipe is found no matter which language the user types in
+        // ("peruano" and "peruvian" both match). Matching `some` returns each recipe once, even
+        // when several translations match, so there are no duplicates.
         whereClause.OR = [
           {
             translations: {
               some: {
-                locale: resolvedLocale,
                 title: { contains: search, mode: "insensitive" },
               },
             },
@@ -512,7 +514,6 @@ export const recipesRouter = createTRPCRouter({
           {
             translations: {
               some: {
-                locale: resolvedLocale,
                 description: { contains: search, mode: "insensitive" },
               },
             },

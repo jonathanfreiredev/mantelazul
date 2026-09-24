@@ -1,48 +1,45 @@
 "use client";
 
 import { GlobeIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter } from "~/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { LOCALE_NAMES, useLocaleSwitch } from "~/hooks/use-locale-switch";
 import { LOCALES, type Locale } from "~/lib/locales";
+import { Button } from "./ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
-// Each language is named in its own language, which is what users expect from a switcher.
-const LOCALE_NAMES: Record<Locale, string> = {
-  en: "English",
-  es: "Español",
-  de: "Deutsch",
-};
-
+/**
+ * Header language picker. It is an icon button to match the other header controls (assistant,
+ * avatar, burger); the active language is marked inside the menu.
+ */
 export function LocaleSwitcher() {
-  const locale = useLocale() as Locale;
-  const pathname = usePathname();
-  const router = useRouter();
   const t = useTranslations("Header");
+  const { locale, switchTo } = useLocaleSwitch();
 
   return (
-    <Select
-      value={locale}
-      onValueChange={(next) =>
-        router.replace(pathname, { locale: next as Locale })
-      }
-    >
-      <SelectTrigger aria-label={t("language")} className="w-34">
-        <GlobeIcon className="size-4" />
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent position="item-aligned">
-        {LOCALES.map((option) => (
-          <SelectItem key={option} value={option}>
-            {LOCALE_NAMES[option]}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon-lg" aria-label={t("language")}>
+          <GlobeIcon />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuRadioGroup
+          value={locale}
+          onValueChange={(next) => switchTo(next as Locale)}
+        >
+          {LOCALES.map((option) => (
+            <DropdownMenuRadioItem key={option} value={option}>
+              {LOCALE_NAMES[option]}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

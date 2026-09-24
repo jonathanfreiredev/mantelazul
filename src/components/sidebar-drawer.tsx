@@ -11,6 +11,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "~/i18n/navigation";
 import { categories } from "~/lib/categories-list";
 import { SidebarDrawerAuth } from "./sidebar-drawer-auth";
+import { SidebarDrawerLocale } from "./sidebar-drawer-locale";
 import { Button } from "./ui/button";
 import {
   Drawer,
@@ -46,7 +47,7 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
             </Button>
           </DrawerClose>
         </DrawerHeader>
-        <div className="flex w-full flex-col gap-0 px-2">
+        <div className="flex min-h-0 w-full flex-1 flex-col gap-0 overflow-y-auto px-2 pb-4">
           {categories.map((category) => (
             <DrawerClose key={category.name} asChild>
               <Item
@@ -156,6 +157,8 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
               </Link>
             </Item>
           </DrawerClose>
+
+          <SidebarDrawerLocale />
 
           <SidebarDrawerAuth />
         </div>

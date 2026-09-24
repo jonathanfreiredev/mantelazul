@@ -41,9 +41,9 @@ export async function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <LocaleSwitcher />
+          <div className="hidden items-center gap-2 sm:flex">
+            <LocaleSwitcher />
 
-          <div className="hidden sm:flex">
             {isLoggedIn ? (
               <DropdownAvatarMenu user={{ name: session.user.name }} />
             ) : (
