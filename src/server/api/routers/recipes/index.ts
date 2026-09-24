@@ -127,6 +127,9 @@ export const recipesRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
+        // Optional: when present, this is the language the submitted text is treated as being
+        // written in. Omit it to keep the recipe's current source language.
+        sourceLocale: z.enum(LOCALES).optional(),
         recipe: recipeSchema
           .extend({
             imageUrl: z.url().trim().nullable(),
@@ -135,7 +138,7 @@ export const recipesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, recipe } = input;
+      const { id, recipe, sourceLocale } = input;
 
       const slug = buildSlug(recipe.title);
 
@@ -169,8 +172,12 @@ export const recipesRouter = createTRPCRouter({
         throw new Error("Recipe translation not found");
       }
 
+      // The submitted text is authoritative in `sourceLocale`: changing the source language
+      // re-labels the text and regenerates every other locale from it.
+      const nextSourceLocale = sourceLocale ?? source.sourceLocale;
+
       const translations = await generateRecipeTranslations({
-        sourceLocale: source.sourceLocale,
+        sourceLocale: nextSourceLocale,
         content: {
           ...source.content,
           title: recipe.title,
@@ -186,6 +193,7 @@ export const recipesRouter = createTRPCRouter({
             difficulty: recipe.difficulty,
             slug,
             imageUrl: recipe.imageUrl,
+            sourceLocale: nextSourceLocale,
             defaultServings: recipe.defaultServings,
             preparationTime: recipe.preparationTime,
             cookingTime: recipe.cookingTime,

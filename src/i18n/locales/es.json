@@ -30,6 +30,8 @@
     "fat": "Grasas",
     "authorRole": "Editor gastronómico en Mantel Azul",
     "imageAlt": "Imagen de la receta",
+    "originalLanguage": "Idioma original",
+    "autoTranslated": "Traducido automáticamente",
     "stepImageAlt": "Imagen del paso {number}"
   },
   "RecipeForm": {
@@ -37,6 +39,8 @@
     "imageAlt": "Imagen de la receta",
     "uploadTitle": "Subir imagen de la receta",
     "uploadDescription": "Elige una imagen para representar tu receta. Puedes subir un archivo desde tu dispositivo.",
+    "sourceLocale": "Idioma original",
+    "sourceLocaleDescription": "Idioma en el que se escribió originalmente la receta. Si lo cambias, se regeneran los demás idiomas a partir del texto de abajo.",
     "title": "Título",
     "titlePlaceholder": "Tortitas deliciosas",
     "description": "Descripción",
@@ -323,7 +327,7 @@
   "Chat": {
     "title": "Asistente",
     "description": "El asistente puede ayudarte con diversas tareas, como responder preguntas, darte recomendaciones y crear recetas.",
-    "placeholder": "Escribe algo...",
+    "placeholder": "¿Cómo puedo ayudarte hoy?",
     "limitExceeded": "Se superó el límite de mensajes. Elimina el chat para empezar una conversación nueva.",
     "attachedImageAlt": "Vista previa de la imagen adjunta",
     "you": "TÚ",

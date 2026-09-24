@@ -58,6 +58,7 @@ export const agent = new ToolLoopAgent({
     - Use 'getTags' to see how recipes are categorized before creating or updating one, and reuse the existing tags when they fit.
     - Use 'createRecipe' only after the user explicitly confirms they want to save a new recipe, and only with complete data. The app generates an image automatically if you do not pass one.
     - Use 'updateRecipe' only after the user explicitly confirms the change. Call 'getOneRecipe' first and include all existing fields, changing only what the user asked for.
+    - If the user asks to change the language a recipe is written in, set 'sourceLocale' in 'updateRecipe' and send the title, description, ingredients and steps in that language.
     - Use 'deleteRecipe' only after the user explicitly confirms they want to delete a recipe. It requires approval, like 'createRecipe' and 'updateRecipe'.
     - Use 'generateRecipeImage' to create appealing visuals for recipes that lack images, especially if the user requested it. The image is shown to the user automatically: after calling it, just add a brief sentence and never repeat the url or the tool message.
 

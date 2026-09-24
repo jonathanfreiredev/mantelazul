@@ -19,6 +19,7 @@ export interface RecipeSummary {
 /** Full recipe as returned by `getOne`, with its ingredients and steps. */
 export interface RecipeDetail {
   id: string;
+  sourceLocale: string;
   title: string;
   description: string;
   category: string;
@@ -98,6 +99,7 @@ export function formatRecipeDetailForModel(recipe: RecipeDetail): string {
 
   return [
     `Recipe: ${recipe.title} (id: ${recipe.id})`,
+    `Source language: ${recipe.sourceLocale}`,
     `Category: ${recipe.category} | Difficulty: ${recipe.difficulty} | Servings: ${recipe.defaultServings}`,
     `Total time: ${recipe.preparationTime + recipe.cookingTime + recipe.restingTime} min (prep ${recipe.preparationTime}, cook ${recipe.cookingTime}, rest ${recipe.restingTime})`,
     `Description: ${recipe.description}`,

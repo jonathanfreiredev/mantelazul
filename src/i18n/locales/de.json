@@ -30,6 +30,8 @@
     "fat": "Fett",
     "authorRole": "Food-Redakteur bei Mantel Azul",
     "imageAlt": "Rezeptbild",
+    "originalLanguage": "Originalsprache",
+    "autoTranslated": "Automatisch übersetzt",
     "stepImageAlt": "Bild von Schritt {number}"
   },
   "RecipeForm": {
@@ -37,6 +39,8 @@
     "imageAlt": "Rezeptbild",
     "uploadTitle": "Rezeptbild hochladen",
     "uploadDescription": "Wähle ein Bild für dein Rezept. Du kannst eine Datei von deinem Gerät hochladen.",
+    "sourceLocale": "Ausgangssprache",
+    "sourceLocaleDescription": "Sprache, in der das Rezept ursprünglich geschrieben wurde. Eine Änderung erzeugt die anderen Sprachen aus dem Text unten neu.",
     "title": "Titel",
     "titlePlaceholder": "Leckere Pfannkuchen",
     "description": "Beschreibung",
@@ -323,7 +327,7 @@
   "Chat": {
     "title": "Assistent",
     "description": "Der Assistent hilft dir bei verschiedenen Aufgaben: Fragen beantworten, Empfehlungen geben und Rezepte erstellen.",
-    "placeholder": "Schreib etwas...",
+    "placeholder": "Wie kann ich dir heute helfen?",
     "limitExceeded": "Nachrichtenlimit erreicht. Lösche den Chat, um ein neues Gespräch zu starten.",
     "attachedImageAlt": "Vorschau des angehängten Bildes",
     "you": "DU",

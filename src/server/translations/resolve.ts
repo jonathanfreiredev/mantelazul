@@ -1,5 +1,5 @@
 import type { Prisma } from "generated/prisma/client";
-import { DEFAULT_LOCALE, type Locale } from "~/lib/locales";
+import { DEFAULT_LOCALE, toLocale, type Locale } from "~/lib/locales";
 import type { RecipeDto } from "~/types/recipe";
 import type {
   RecipeTranslationContent,
@@ -67,6 +67,10 @@ export function toRecipeDto(
     ? toContent(row)
     : { title: "", description: "", ingredients: [], steps: [] };
 
+  // Which language the text really came from: `locale` may have fallen back to the canonical or
+  // the source language when the requested translation is missing.
+  const resolvedLocale = row ? toLocale(row.locale) : locale;
+
   const ingredientNames = new Map(
     content.ingredients.map((ingredient) => [ingredient.order, ingredient.name]),
   );
@@ -79,6 +83,7 @@ export function toRecipeDto(
 
   return {
     ...rest,
+    resolvedLocale,
     title: content.title,
     description: content.description,
     ingredients: recipe.ingredients.map((ingredient) => ({

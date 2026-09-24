@@ -30,6 +30,8 @@
     "fat": "Fat",
     "authorRole": "Food Editor at Mantel Azul",
     "imageAlt": "Recipe image",
+    "originalLanguage": "Original language",
+    "autoTranslated": "Automatically translated",
     "stepImageAlt": "Step {number} image"
   },
   "RecipeForm": {
@@ -37,6 +39,8 @@
     "imageAlt": "Recipe Image",
     "uploadTitle": "Upload Recipe Image",
     "uploadDescription": "Choose an image to represent your recipe. You can upload an image file from your device.",
+    "sourceLocale": "Source language",
+    "sourceLocaleDescription": "Language the recipe was originally written in. Changing it regenerates the other languages from the text below.",
     "title": "Title",
     "titlePlaceholder": "Delicious Pancakes",
     "description": "Description",
@@ -323,7 +327,7 @@
   "Chat": {
     "title": "Assistant",
     "description": "The assistant can help you with a variety of tasks, such as answering questions, providing recommendations, and creating recipes.",
-    "placeholder": "Say something...",
+    "placeholder": "How can I help you today?",
     "limitExceeded": "Message limit exceeded. Please delete the chat to start a new conversation.",
     "attachedImageAlt": "Attached image preview",
     "you": "YOU",
