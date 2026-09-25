@@ -9,6 +9,14 @@
   "Footer": {
     "rights": "© {year} Mantel Azul. Alle Rechte vorbehalten."
   },
+  "Legal": {
+    "privacyLink": "Datenschutz",
+    "termsLink": "Nutzungsbedingungen",
+    "privacyTitle": "Datenschutzerklärung",
+    "privacyDescription": "Welche Daten Mantel Azul verarbeitet, zu welchem Zweck, wer sie sonst sieht und was du dagegen tun kannst.",
+    "termsTitle": "Nutzungsbedingungen",
+    "termsDescription": "Die Regeln für die Nutzung von Mantel Azul, einschließlich dessen, was die KI tut und was sie nicht verspricht."
+  },
   "Nav": {
     "newRecipe": "Neues Rezept"
   },
@@ -414,6 +422,7 @@
     "placeholder": "Wie kann ich dir heute helfen?",
     "limitExceeded": "Nachrichtenlimit erreicht. Lösche den Chat, um ein neues Gespräch zu starten.",
     "attachedImageAlt": "Vorschau des angehängten Bildes",
+    "generatedImage": "KI-generiertes Bild",
     "you": "DU",
     "ai": "KI",
     "thinking": "Denkt nach",
