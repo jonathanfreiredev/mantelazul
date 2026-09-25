@@ -1,6 +1,7 @@
 import { tool, zodSchema } from "ai";
 import { Category, Difficulty, Unit } from "generated/prisma/enums";
 import z from "zod";
+import { LOCALES } from "~/lib/locales";
 import { intSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/server";
 
@@ -10,6 +11,12 @@ const recipeInputSchema = z.object({
     .describe(
       "The unique identifier of the recipe to be updated. It is required.",
     ),
+  sourceLocale: z
+    .enum(LOCALES)
+    .describe(
+      "Language the recipe is written in, as an ISO 639-1 code: 'en' (English), 'es' (Spanish) or 'de' (German). Omit it to keep the current source language. Set it only when the user wants to change the language the recipe is written in; the text you send is then treated as being in that language and the other languages are regenerated from it.",
+    )
+    .optional(),
   title: z
     .string()
     .trim()
@@ -105,12 +112,15 @@ IMPORTANT:
 - Only call this tool once the user has explicitly confirmed they want the change.
 - Do NOT call it during brainstorming or suggestion phases.
 - Call 'getOneRecipe' first to read the recipe, then send it back with only the requested change.
+- To change the language the recipe is written in, set 'sourceLocale' and send the title,
+  description, ingredients and steps in that language.
 - This tool requires user approval before it runs.
   `,
   inputSchema: zodSchema(recipeInputSchema),
   execute: async (recipe) => {
     const newRecipe = await api.recipes.update({
       id: recipe.id,
+      sourceLocale: recipe.sourceLocale,
       recipe: {
         title: recipe.title,
         description: recipe.description,

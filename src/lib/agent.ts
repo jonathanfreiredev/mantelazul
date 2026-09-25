@@ -1,33 +1,34 @@
 import { openai } from "@ai-sdk/openai";
 import { isStepCount, ToolLoopAgent, type InferAgentUIMessage } from "ai";
+import { MAX_MEALS_PER_BATCH } from "~/server/api/routers/meal-plan/validation";
 import { toolCreateRecipe } from "./agent-tools/tool-create-recipe";
 import { toolDeleteRecipe } from "./agent-tools/tool-delete-recipe";
 import { toolGenerateRecipeImage } from "./agent-tools/tool-generate-recipe-image";
 import { toolGetFavouriteRecipes } from "./agent-tools/tool-get-favourite-recipes";
+import { toolGetMealPlan } from "./agent-tools/tool-get-meal-plan";
 import { toolGetOneRecipe } from "./agent-tools/tool-get-one-recipe";
 import { toolGetTags } from "./agent-tools/tool-get-tags";
+import { toolPlanMeals } from "./agent-tools/tool-plan-meals";
 import { toolSearchRecipes } from "./agent-tools/tool-search-recipes";
 import { toolUpdateRecipe } from "./agent-tools/tool-update-recipe";
 
-export const agent = new ToolLoopAgent({
-  model: openai("gpt-6-luna"),
-  tools: {
-    getTags: toolGetTags,
-    searchRecipes: toolSearchRecipes,
-    getFavouriteRecipes: toolGetFavouriteRecipes,
-    getOneRecipe: toolGetOneRecipe,
-    createRecipe: toolCreateRecipe,
-    updateRecipe: toolUpdateRecipe,
-    deleteRecipe: toolDeleteRecipe,
-    generateRecipeImage: toolGenerateRecipeImage,
-  },
-  stopWhen: isStepCount(10),
-  toolApproval: {
-    createRecipe: "user-approval",
-    updateRecipe: "user-approval",
-    deleteRecipe: "user-approval",
-  },
-  instructions: `
+/** What the agent needs to know about the current request. */
+export interface AgentContext {
+  /** Today's date, `YYYY-MM-DD`, so the agent can resolve "next week" and similar. */
+  today: string;
+  /** Name of the household the user belongs to, or null when they belong to none. */
+  householdName: string | null;
+}
+
+/** Tool-loop steps allowed per user message. Planning a week takes a few reads and one write. */
+const MAX_AGENT_STEPS = 15;
+
+function buildInstructions({ today, householdName }: AgentContext): string {
+  const household = householdName
+    ? `The user belongs to the household "${householdName}", so meals can be shared with it.`
+    : "The user does not belong to a household, so every meal they plan is private to them. Do not offer to share meals with a household.";
+
+  return `
     You are "Recipe Assistant", a specialized AI expert for a recipe application.
 
     CORE RULE:
@@ -58,8 +59,18 @@ export const agent = new ToolLoopAgent({
     - Use 'getTags' to see how recipes are categorized before creating or updating one, and reuse the existing tags when they fit.
     - Use 'createRecipe' only after the user explicitly confirms they want to save a new recipe, and only with complete data. The app generates an image automatically if you do not pass one.
     - Use 'updateRecipe' only after the user explicitly confirms the change. Call 'getOneRecipe' first and include all existing fields, changing only what the user asked for.
+    - If the user asks to change the language a recipe is written in, set 'sourceLocale' in 'updateRecipe' and send the title, description, ingredients and steps in that language.
     - Use 'deleteRecipe' only after the user explicitly confirms they want to delete a recipe. It requires approval, like 'createRecipe' and 'updateRecipe'.
     - Use 'generateRecipeImage' to create appealing visuals for recipes that lack images, especially if the user requested it. The image is shown to the user automatically: after calling it, just add a brief sentence and never repeat the url or the tool message.
+
+    MEAL PLANNING (THE CALENDAR):
+    - Today is ${today}. Resolve every relative date the user mentions ("next week", "tomorrow", "the weekend") against it, and always write dates as YYYY-MM-DD.
+    - Use 'getMealPlan' to read the calendar before planning, and tell the user what those days already contain. Meals are added on top of what is already planned: never assume a day is empty and never promise to remove or replace anything.
+    - ${household}
+    - Build the plan with recipes that ALREADY exist. Find them with 'searchRecipes' and use the ids it returns. Never invent a recipe id, and never call 'createRecipe' as part of planning: if nothing suitable exists, say so and offer to create the recipe first, as a separate step.
+    - Write the whole plan at once with 'planMeals'. It takes up to ${MAX_MEALS_PER_BATCH} meals in one call and writes them all or none.
+    - Ask the user before planning whenever you do not know something: the date range, the servings, or whether the meals are for the household or private. One question is enough; the same visibility can apply to the whole plan.
+    - After writing, summarise the plan briefly. The calendar card is shown to the user automatically, so do not repeat it in full.
 
     PAGINATION AND "SHOW ME MORE" RULE (VERY IMPORTANT):
     - Whenever the user asks to see more options after a previous list ("show me more", "other options", "something else"), DO NOT repeat recipes you already showed.
@@ -82,8 +93,37 @@ export const agent = new ToolLoopAgent({
 
     TONAL GUIDELINES:
     - Be helpful, professional, and inspiring. Act like a knowledgeable sous-chef.
-  `,
-});
+  `;
+}
 
-export type MyAgentUIMessage = InferAgentUIMessage<typeof agent>;
-export type MyAgentUITools = typeof agent.tools;
+/**
+ * Builds the agent for one request. It is a factory because the instructions carry data that
+ * changes per request: today's date and whether the user has a household to share meals with.
+ */
+export function createAgent(context: AgentContext) {
+  return new ToolLoopAgent({
+    model: openai("gpt-6-luna"),
+    tools: {
+      getTags: toolGetTags,
+      searchRecipes: toolSearchRecipes,
+      getFavouriteRecipes: toolGetFavouriteRecipes,
+      getOneRecipe: toolGetOneRecipe,
+      getMealPlan: toolGetMealPlan,
+      createRecipe: toolCreateRecipe,
+      updateRecipe: toolUpdateRecipe,
+      deleteRecipe: toolDeleteRecipe,
+      planMeals: toolPlanMeals,
+      generateRecipeImage: toolGenerateRecipeImage,
+    },
+    stopWhen: isStepCount(MAX_AGENT_STEPS),
+    toolApproval: {
+      updateRecipe: "user-approval",
+      deleteRecipe: "user-approval",
+    },
+    instructions: buildInstructions(context),
+  });
+}
+
+export type MyAgent = ReturnType<typeof createAgent>;
+export type MyAgentUIMessage = InferAgentUIMessage<MyAgent>;
+export type MyAgentUITools = MyAgent["tools"];

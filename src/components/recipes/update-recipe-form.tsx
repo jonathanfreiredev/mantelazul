@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "~/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { type z } from "zod";
+import { z } from "zod";
+import { LOCALES, toLocale } from "~/lib/locales";
 import { cn } from "~/lib/utils";
 import { recipeSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/react";
@@ -20,6 +21,14 @@ import {
 } from "../ui/card";
 import { Field } from "../ui/field";
 
+/**
+ * The update form can also change the recipe's source language, which the shared
+ * `recipeSchema` (used by create) does not carry.
+ */
+const updateRecipeSchema = recipeSchema.extend({
+  sourceLocale: z.enum(LOCALES),
+});
+
 interface UpdateRecipeFormProps {
   recipe: RecipeDto;
 }
@@ -34,7 +43,7 @@ export const UpdateRecipeForm = ({
 
   const updateRecipeMutation = api.recipes.update.useMutation();
 
-  const form = useForm<z.infer<typeof recipeSchema>>({
+  const form = useForm<z.infer<typeof updateRecipeSchema>>({
     defaultValues: {
       title: recipe.title,
       description: recipe.description,
@@ -52,20 +61,21 @@ export const UpdateRecipeForm = ({
       protein: recipe.protein,
       fat: recipe.fat,
       tags: recipe.tags.map((recipeTag) => recipeTag.tag.name),
+      sourceLocale: toLocale(recipe.sourceLocale),
     },
     resolver: async (data, context, options) => {
       if (process.env.NODE_ENV === "development") {
         console.log(
           "validation result",
-          await zodResolver(recipeSchema)(data, context, options),
+          await zodResolver(updateRecipeSchema)(data, context, options),
         );
       }
-      return zodResolver(recipeSchema)(data, context, options);
+      return zodResolver(updateRecipeSchema)(data, context, options);
     },
   });
 
-  async function onSubmit(data: z.infer<typeof recipeSchema>) {
-    const { image, ...restData } = data;
+  async function onSubmit(data: z.infer<typeof updateRecipeSchema>) {
+    const { image, sourceLocale, ...restData } = data;
 
     console.log("Submitting form with data:", data);
 
@@ -95,6 +105,7 @@ export const UpdateRecipeForm = ({
     const updatedRecipe = await updateRecipeMutation.mutateAsync(
       {
         id: recipe.id,
+        sourceLocale,
         recipe: {
           ...restData,
           imageUrl,
@@ -126,7 +137,7 @@ export const UpdateRecipeForm = ({
         </CardHeader>
         <CardContent>
           <form id="form-create-recipe" onSubmit={form.handleSubmit(onSubmit)}>
-            <RecipeForm control={form.control} />
+            <RecipeForm control={form.control} showSourceLocale />
 
             <Field>
               <Button

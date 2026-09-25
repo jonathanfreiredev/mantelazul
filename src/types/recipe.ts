@@ -1,4 +1,5 @@
 import type { Ingredient, Recipe, Step, Tag } from "generated/prisma/client";
+import type { Locale } from "~/lib/locales";
 import type { DecimalToString } from "./decimal-to-string";
 
 /** An ingredient with its localized name resolved for the requested language. */
@@ -19,4 +20,6 @@ export type RecipeDto = Recipe & {
   tags: {
     tag: Tag;
   }[];
+  /** The locale the text was actually taken from, after the translation fallbacks. */
+  resolvedLocale: Locale;
 };

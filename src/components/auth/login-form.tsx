@@ -26,10 +26,16 @@ import {
 } from "../ui/field";
 import { Input } from "../ui/input";
 
+interface LoginFormProps extends React.ComponentProps<"div"> {
+  /** Where to land after signing in, e.g. an invitation page. Defaults to the home page. */
+  redirectTo?: string;
+}
+
 export const LoginForm = ({
   className,
+  redirectTo,
   ...props
-}: React.ComponentProps<"div">) => {
+}: LoginFormProps) => {
   const t = useTranslations("LoginForm");
   const tValidation = useTranslations("Validation");
   const router = useRouter();
@@ -63,7 +69,7 @@ export const LoginForm = ({
           });
           form.reset();
 
-          router.replace("/");
+          router.replace(redirectTo ?? "/");
           router.refresh();
         },
         onError(error) {
@@ -163,7 +169,13 @@ export const LoginForm = ({
 
               <FieldDescription className="text-center">
                 {t("noAccount")}{" "}
-                <Link href="/signup">
+                <Link
+                  href={
+                    redirectTo
+                      ? `/signup?next=${encodeURIComponent(redirectTo)}`
+                      : "/signup"
+                  }
+                >
                   <Button
                     variant="link"
                     onClick={() => {

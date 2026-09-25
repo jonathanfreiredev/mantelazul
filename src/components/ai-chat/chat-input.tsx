@@ -37,7 +37,7 @@ export function ChatInput({
   const t = useTranslations("Chat");
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-zinc-300 bg-white/40 px-4 py-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col gap-2 rounded-lg border border-zinc-300 bg-white/80 px-4 py-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
       <form
         onSubmit={(event) => {
           event.preventDefault();

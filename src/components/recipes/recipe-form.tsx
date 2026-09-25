@@ -5,6 +5,8 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
+import { LOCALE_NAMES } from "~/hooks/use-locale-switch";
+import { LOCALES } from "~/lib/locales";
 import { ImageUpload } from "../image-uploader/image-upload";
 import { Button } from "../ui/button";
 import {
@@ -45,9 +47,14 @@ import { Textarea } from "../ui/textarea";
 interface RecipeFormProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the form values type lives with the caller; this component only wires fields through to react-hook-form.
   control: any;
+  /** Renders the source-language picker. Only the update form can change it. */
+  showSourceLocale?: boolean;
 }
 
-export function RecipeForm({ control }: RecipeFormProps) {
+export function RecipeForm({
+  control,
+  showSourceLocale = false,
+}: RecipeFormProps) {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const t = useTranslations("RecipeForm");
   const tCategories = useTranslations("Categories");
@@ -121,6 +128,48 @@ export function RecipeForm({ control }: RecipeFormProps) {
             </Field>
           )}
         />
+
+        {showSourceLocale && (
+          <Controller
+            name="sourceLocale"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field orientation="vertical" data-invalid={fieldState.invalid}>
+                <FieldContent>
+                  <FieldLabel htmlFor="sourceLocale">
+                    {t("sourceLocale")}
+                  </FieldLabel>
+                  <FieldDescription>
+                    {t("sourceLocaleDescription")}
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </FieldContent>
+                <Select
+                  name={field.name}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    id="sourceLocale"
+                    aria-invalid={fieldState.invalid}
+                    className="min-w-30"
+                  >
+                    <SelectValue placeholder={t("select")} />
+                  </SelectTrigger>
+                  <SelectContent position="item-aligned">
+                    {LOCALES.map((locale) => (
+                      <SelectItem key={locale} value={locale}>
+                        {LOCALE_NAMES[locale]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+          />
+        )}
 
         <Controller
           name="title"
@@ -301,9 +350,7 @@ export function RecipeForm({ control }: RecipeFormProps) {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="cookingTime">
-                    {t("cooking")}
-                  </FieldLabel>
+                  <FieldLabel htmlFor="cookingTime">{t("cooking")}</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       {...field}

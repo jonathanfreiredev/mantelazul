@@ -127,6 +127,9 @@ export const recipesRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
+        // Optional: when present, this is the language the submitted text is treated as being
+        // written in. Omit it to keep the recipe's current source language.
+        sourceLocale: z.enum(LOCALES).optional(),
         recipe: recipeSchema
           .extend({
             imageUrl: z.url().trim().nullable(),
@@ -135,7 +138,7 @@ export const recipesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, recipe } = input;
+      const { id, recipe, sourceLocale } = input;
 
       const slug = buildSlug(recipe.title);
 
@@ -169,8 +172,12 @@ export const recipesRouter = createTRPCRouter({
         throw new Error("Recipe translation not found");
       }
 
+      // The submitted text is authoritative in `sourceLocale`: changing the source language
+      // re-labels the text and regenerates every other locale from it.
+      const nextSourceLocale = sourceLocale ?? source.sourceLocale;
+
       const translations = await generateRecipeTranslations({
-        sourceLocale: source.sourceLocale,
+        sourceLocale: nextSourceLocale,
         content: {
           ...source.content,
           title: recipe.title,
@@ -186,6 +193,7 @@ export const recipesRouter = createTRPCRouter({
             difficulty: recipe.difficulty,
             slug,
             imageUrl: recipe.imageUrl,
+            sourceLocale: nextSourceLocale,
             defaultServings: recipe.defaultServings,
             preparationTime: recipe.preparationTime,
             cookingTime: recipe.cookingTime,
@@ -462,6 +470,11 @@ export const recipesRouter = createTRPCRouter({
         difficulty: z.enum(Difficulty).optional(),
         search: z.string().optional(),
         locale: optionalLocaleSchema,
+        /**
+         * Adds the caller's own unpublished recipes to a public listing, so a draft can be
+         * planned without publishing it first.
+         */
+        includeOwnUnpublished: z.boolean().optional(),
         skip: z.number(),
         take: z.number().optional(),
       }),
@@ -475,6 +488,7 @@ export const recipesRouter = createTRPCRouter({
         difficulty,
         search,
         locale,
+        includeOwnUnpublished,
         skip,
         take = 15,
       } = input;
@@ -485,8 +499,16 @@ export const recipesRouter = createTRPCRouter({
 
       if (authorId) {
         whereClause.authorId = authorId;
-      } else {
-        if (!cookbookId) {
+      } else if (!cookbookId) {
+        if (includeOwnUnpublished && ctx.session?.user) {
+          // Everything published, plus whatever the caller wrote themselves. Kept in `AND` so it
+          // combines with the search conditions instead of replacing them.
+          whereClause.AND = [
+            {
+              OR: [{ published: true }, { authorId: ctx.session.user.id }],
+            },
+          ];
+        } else {
           whereClause.published = true;
         }
       }

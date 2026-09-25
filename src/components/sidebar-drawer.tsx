@@ -1,5 +1,7 @@
 import {
   BookIcon,
+  CalendarDaysIcon,
+  HouseIcon,
   MenuIcon,
   NotepadTextIcon,
   PlusIcon,
@@ -48,43 +50,29 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
           </DrawerClose>
         </DrawerHeader>
         <div className="flex min-h-0 w-full flex-1 flex-col gap-0 overflow-y-auto px-2 pb-4">
-          {categories.map((category) => (
-            <DrawerClose key={category.name} asChild>
-              <Item
-                variant="default"
-                size="sm"
-                className="cursor-pointer"
-                asChild
-              >
-                <Link href={category.href}>
-                  <ItemMedia>
-                    <SquareDotIcon className="size-5" />
-                  </ItemMedia>
-                  <ItemContent>
-                    <ItemTitle>{tCategories(`${category.name}.name`)}</ItemTitle>
-                  </ItemContent>
-                </Link>
-              </Item>
-            </DrawerClose>
-          ))}
-
-          <DrawerClose asChild>
-            <Item
-              variant="default"
-              size="sm"
-              className="cursor-pointer"
-              asChild
-            >
-              <Link href={isLoggedIn ? "/cookbooks" : "/login"}>
-                <ItemMedia>
-                  <BookIcon className="size-5" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{t("cookbooks")}</ItemTitle>
-                </ItemContent>
-              </Link>
-            </Item>
-          </DrawerClose>
+          {categories
+            .filter((category) => category.name !== "explore")
+            .map((category) => (
+              <DrawerClose key={category.name} asChild>
+                <Item
+                  variant="default"
+                  size="sm"
+                  className="cursor-pointer"
+                  asChild
+                >
+                  <Link href={category.href}>
+                    <ItemMedia>
+                      <SquareDotIcon className="size-5" />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>
+                        {tCategories(`${category.name}.name`)}
+                      </ItemTitle>
+                    </ItemContent>
+                  </Link>
+                </Item>
+              </DrawerClose>
+            ))}
 
           <DrawerClose asChild>
             <Item
@@ -135,6 +123,42 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
                 </ItemMedia>
                 <ItemContent>
                   <ItemTitle>{t("newRecipe")}</ItemTitle>
+                </ItemContent>
+              </Link>
+            </Item>
+          </DrawerClose>
+
+          <DrawerClose asChild>
+            <Item
+              variant="default"
+              size="sm"
+              className="cursor-pointer"
+              asChild
+            >
+              <Link href={isLoggedIn ? "/calendar" : "/login"}>
+                <ItemMedia>
+                  <CalendarDaysIcon className="size-5" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{t("calendar")}</ItemTitle>
+                </ItemContent>
+              </Link>
+            </Item>
+          </DrawerClose>
+
+          <DrawerClose asChild>
+            <Item
+              variant="default"
+              size="sm"
+              className="cursor-pointer"
+              asChild
+            >
+              <Link href={isLoggedIn ? "/household" : "/login"}>
+                <ItemMedia>
+                  <HouseIcon className="size-5" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{t("household")}</ItemTitle>
                 </ItemContent>
               </Link>
             </Item>

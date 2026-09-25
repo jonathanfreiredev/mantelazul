@@ -2,6 +2,10 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { db } from "~/server/db";
 import { resend } from "../resend";
+import {
+  deleteMemberlessHouseholds,
+  reassignHouseholdOwnership,
+} from "../households";
 
 export const auth = betterAuth({
   baseURL: {
@@ -35,6 +39,18 @@ export const auth = betterAuth({
     changeEmail: {
       enabled: true,
       updateEmailWithoutVerification: true,
+    },
+    deleteUser: {
+      enabled: true,
+      // Deleting an account cascades the meals it created (`MealPlanEntry.createdById`) and drops
+      // the user out of their household. Ownership is handed over first so the household survives
+      // with a valid owner, and memberless households are removed afterwards.
+      beforeDelete: async (user) => {
+        await reassignHouseholdOwnership(user.id);
+      },
+      afterDelete: async () => {
+        await deleteMemberlessHouseholds();
+      },
     },
   },
 });

@@ -1,4 +1,5 @@
 import type { Unit } from "generated/prisma/enums";
+import type { MealPlanEntryDto } from "~/types/meal-plan";
 import type { RecipeSearchHit } from "~/server/rag/types";
 import { formatUnit } from "~/lib/units";
 
@@ -19,6 +20,7 @@ export interface RecipeSummary {
 /** Full recipe as returned by `getOne`, with its ingredients and steps. */
 export interface RecipeDetail {
   id: string;
+  sourceLocale: string;
   title: string;
   description: string;
   category: string;
@@ -81,6 +83,29 @@ export function formatRecipeListForModel(
   return lines.join("\n");
 }
 
+/**
+ * Renders a slice of the meal calendar as compact plain text for the model: one line per meal,
+ * with the day first so a whole plan reads as a schedule.
+ */
+export function formatMealPlanForModel(entries: MealPlanEntryDto[]): string {
+  if (entries.length === 0) return "Nothing is planned in that range.";
+
+  return entries
+    .map((entry) => {
+      const servings =
+        entry.servings === null
+          ? `default servings (${entry.recipe.defaultServings})`
+          : `${entry.servings} servings`;
+      const visibility = entry.isPrivate
+        ? "private to the user"
+        : "shared with the household";
+      const note = entry.note ? ` | note: ${entry.note}` : "";
+
+      return `- ${entry.date}: ${entry.recipe.title} | ${servings} | ${visibility}${note}`;
+    })
+    .join("\n");
+}
+
 /** Renders a full recipe as plain text sections for the model. */
 export function formatRecipeDetailForModel(recipe: RecipeDetail): string {
   const ingredients = recipe.ingredients
@@ -98,6 +123,7 @@ export function formatRecipeDetailForModel(recipe: RecipeDetail): string {
 
   return [
     `Recipe: ${recipe.title} (id: ${recipe.id})`,
+    `Source language: ${recipe.sourceLocale}`,
     `Category: ${recipe.category} | Difficulty: ${recipe.difficulty} | Servings: ${recipe.defaultServings}`,
     `Total time: ${recipe.preparationTime + recipe.cookingTime + recipe.restingTime} min (prep ${recipe.preparationTime}, cook ${recipe.cookingTime}, rest ${recipe.restingTime})`,
     `Description: ${recipe.description}`,

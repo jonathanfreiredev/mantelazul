@@ -111,6 +111,30 @@ export type Cookbook = Prisma.CookbookModel
  */
 export type CookbookRecipe = Prisma.CookbookRecipeModel
 /**
+ * Model Household
+ * *
+ *  * A group of people sharing a meal plan. A user belongs to at most one household at a time.
+ *  * Meals are shared with every member of the household they point to; meals without a household
+ *  * are private to their creator.
+ */
+export type Household = Prisma.HouseholdModel
+/**
+ * Model HouseholdInvite
+ * *
+ *  * An invitation to join a household, addressed to an email. It does not require the invitee to
+ *  * have an account yet: the token is what proves the invitation.
+ */
+export type HouseholdInvite = Prisma.HouseholdInviteModel
+/**
+ * Model MealPlanEntry
+ * *
+ *  * A recipe planned for a specific day. `householdId` is the sharing switch: with a household the
+ *  * meal is visible to every member, without it the meal is private to `createdBy`. It is stored on
+ *  * the row (not derived from the creator's current household) so that leaving a household does not
+ *  * drag the meal away from the other members.
+ */
+export type MealPlanEntry = Prisma.MealPlanEntryModel
+/**
  * Model Chat
  * 
  */

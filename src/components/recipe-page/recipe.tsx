@@ -1,5 +1,6 @@
 "use client";
-import { useLocale } from "next-intl";
+import { LanguagesIcon, SparklesIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { toLocale } from "~/lib/locales";
 import { api } from "~/trpc/react";
 import Image from "next/image";
@@ -15,6 +16,7 @@ import { authClient } from "~/server/better-auth/client";
 import { EditRecipeButton } from "../recipes/edit-recipe-button";
 import { TagsSection } from "./tags-section";
 import { SaveRecipeButton } from "../recipes/save-recipe-button";
+import { AddToCalendarButton } from "../recipes/add-to-calendar-button";
 
 interface RecipeProps {
   slug: string;
@@ -22,6 +24,7 @@ interface RecipeProps {
 
 export function Recipe({ slug }: RecipeProps) {
   const locale = useLocale();
+  const t = useTranslations("Recipe");
   const [recipe] = api.recipes.getBySlug.useSuspenseQuery({
     slug,
     locale: toLocale(locale),
@@ -32,6 +35,8 @@ export function Recipe({ slug }: RecipeProps) {
   if (isPending) return null;
 
   const isLoggedIn = !!data?.session;
+  const isOriginalLanguage =
+    recipe.resolvedLocale === toLocale(recipe.sourceLocale);
 
   return (
     <div className="mx-auto flex w-full max-w-230 flex-col items-center sm:px-10">
@@ -49,6 +54,20 @@ export function Recipe({ slug }: RecipeProps) {
         <h2 className="nowrap line-clamp-2 text-3xl font-bold">
           {recipe.title}
         </h2>
+
+        <div className="border-border bg-muted/50 text-muted-foreground mt-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs">
+          {isOriginalLanguage ? (
+            <>
+              <LanguagesIcon className="size-3.5" />
+              {t("originalLanguage")}
+            </>
+          ) : (
+            <>
+              <SparklesIcon className="size-3.5" />
+              {t("autoTranslated")}
+            </>
+          )}
+        </div>
 
         <div className="mt-6 flex items-center justify-center gap-8">
           <RecipeLikeButton
@@ -71,6 +90,14 @@ export function Recipe({ slug }: RecipeProps) {
             className="text-md text-gray-800"
             size="xl"
             positionIcon="top"
+            isLoggedIn={isLoggedIn}
+          />
+
+          <AddToCalendarButton
+            recipeId={recipe.id}
+            defaultServings={recipe.defaultServings}
+            className="text-md text-gray-800"
+            size="xl"
             isLoggedIn={isLoggedIn}
           />
 

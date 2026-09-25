@@ -1,5 +1,5 @@
 import type { Prisma } from "generated/prisma/client";
-import { DEFAULT_LOCALE, type Locale } from "~/lib/locales";
+import { DEFAULT_LOCALE, toLocale, type Locale } from "~/lib/locales";
 import type { RecipeDto } from "~/types/recipe";
 import type {
   RecipeTranslationContent,
@@ -27,14 +27,15 @@ type TranslationRow = {
 };
 
 /**
- * Picks the translation to show, falling back to the canonical language and then to the
- * source language, so a recipe is never rendered empty while its translations are missing.
+ * Picks the translation to show, falling back to the canonical language and then to the source
+ * language, so a recipe is never rendered empty while its translations are missing. Generic over
+ * the row shape so callers can select only the fields they need.
  */
-function selectTranslation(
-  translations: TranslationRow[],
+export function pickTranslation<T extends { locale: string }>(
+  translations: T[],
   locale: Locale,
   sourceLocale: string,
-): TranslationRow | undefined {
+): T | undefined {
   return (
     translations.find((row) => row.locale === locale) ??
     translations.find((row) => row.locale === DEFAULT_LOCALE) ??
@@ -61,11 +62,15 @@ export function toRecipeDto(
   recipe: RecipeWithTranslations,
   locale: Locale,
 ): RecipeDto {
-  const row = selectTranslation(recipe.translations, locale, recipe.sourceLocale);
+  const row = pickTranslation(recipe.translations, locale, recipe.sourceLocale);
 
   const content: RecipeTranslationContent = row
     ? toContent(row)
     : { title: "", description: "", ingredients: [], steps: [] };
+
+  // Which language the text really came from: `locale` may have fallen back to the canonical or
+  // the source language when the requested translation is missing.
+  const resolvedLocale = row ? toLocale(row.locale) : locale;
 
   const ingredientNames = new Map(
     content.ingredients.map((ingredient) => [ingredient.order, ingredient.name]),
@@ -79,6 +84,7 @@ export function toRecipeDto(
 
   return {
     ...rest,
+    resolvedLocale,
     title: content.title,
     description: content.description,
     ingredients: recipe.ingredients.map((ingredient) => ({
