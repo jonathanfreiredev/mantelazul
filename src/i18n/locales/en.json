@@ -277,6 +277,25 @@
     "errorTitle": "Failed to update profile!",
     "emailErrorTitle": "Failed to update email!"
   },
+  "DeleteAccount": {
+    "title": "Delete account",
+    "description": "Permanently delete your account and the content that only belongs to you.",
+    "delete": "Delete account",
+    "dialogTitle": "Delete your account?",
+    "dialogDescription": "This action cannot be undone.",
+    "sharedMeals": "{count, plural, one {# meal shared with your household will be deleted} other {# meals shared with your household will be deleted}}",
+    "sharedMealsWarning": "The other household members will lose them.",
+    "privateMeals": "{count, plural, one {# private meal will be deleted} other {# private meals will be deleted}}",
+    "unpublishedRecipes": "{count, plural, one {# unpublished recipe and its image will be deleted} other {# unpublished recipes and their images will be deleted}}",
+    "leavesHousehold": "You will leave {name}; the other members keep the household.",
+    "removesHousehold": "{name} will disappear with its meals, because you are the only member.",
+    "publishedRecipes": "Your published recipes stay public, without an author.",
+    "password": "Password",
+    "passwordHint": "Confirm with your password to continue.",
+    "cancel": "Cancel",
+    "confirm": "Delete my account",
+    "errorTitle": "Could not delete your account"
+  },
   "Pages": {
     "myRecipes": "My recipes",
     "myCookbooks": "My cookbooks",

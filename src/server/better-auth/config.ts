@@ -1,11 +1,16 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { db } from "~/server/db";
-import { resend } from "../resend";
+import {
+  clearRecipeLikes,
+  deleteUnpublishedRecipes,
+  revokePendingInvitesForEmail,
+} from "../account-deletion";
 import {
   deleteMemberlessHouseholds,
   reassignHouseholdOwnership,
 } from "../households";
+import { resend } from "../resend";
 
 export const auth = betterAuth({
   baseURL: {
@@ -42,11 +47,16 @@ export const auth = betterAuth({
     },
     deleteUser: {
       enabled: true,
-      // Deleting an account cascades the meals it created (`MealPlanEntry.createdById`) and drops
-      // the user out of their household. Ownership is handed over first so the household survives
-      // with a valid owner, and memberless households are removed afterwards.
+      // Deleting an account cascades everything the user owns: sessions, accounts, cookbooks, the
+      // chat and the meals they created (`MealPlanEntry.createdById`), shared ones included. The
+      // recipes survive as public content, so their likes, the unpublished ones and the
+      // invitations to this email are cleaned up first. Ownership is handed over so the household
+      // survives with a valid owner, and memberless households are removed afterwards.
       beforeDelete: async (user) => {
         await reassignHouseholdOwnership(user.id);
+        await clearRecipeLikes(user.id);
+        await deleteUnpublishedRecipes(user.id);
+        await revokePendingInvitesForEmail(user.email);
       },
       afterDelete: async () => {
         await deleteMemberlessHouseholds();

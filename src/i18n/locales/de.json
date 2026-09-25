@@ -277,6 +277,25 @@
     "errorTitle": "Profil konnte nicht aktualisiert werden",
     "emailErrorTitle": "E-Mail konnte nicht aktualisiert werden"
   },
+  "DeleteAccount": {
+    "title": "Konto löschen",
+    "description": "Lösche dein Konto dauerhaft und die Inhalte, die nur dir gehören.",
+    "delete": "Konto löschen",
+    "dialogTitle": "Konto löschen?",
+    "dialogDescription": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "sharedMeals": "{count, plural, one {# mit dem Haushalt geteilte Mahlzeit wird gelöscht} other {# mit dem Haushalt geteilte Mahlzeiten werden gelöscht}}",
+    "sharedMealsWarning": "Die anderen Haushaltsmitglieder verlieren sie.",
+    "privateMeals": "{count, plural, one {# private Mahlzeit wird gelöscht} other {# private Mahlzeiten werden gelöscht}}",
+    "unpublishedRecipes": "{count, plural, one {# unveröffentlichtes Rezept und sein Bild werden gelöscht} other {# unveröffentlichte Rezepte und ihre Bilder werden gelöscht}}",
+    "leavesHousehold": "Du verlässt {name}; die anderen Mitglieder behalten den Haushalt.",
+    "removesHousehold": "{name} verschwindet mit seinen Mahlzeiten, weil du das einzige Mitglied bist.",
+    "publishedRecipes": "Deine veröffentlichten Rezepte bleiben öffentlich, ohne Autor.",
+    "password": "Passwort",
+    "passwordHint": "Bestätige mit deinem Passwort, um fortzufahren.",
+    "cancel": "Abbrechen",
+    "confirm": "Mein Konto löschen",
+    "errorTitle": "Konto konnte nicht gelöscht werden"
+  },
   "Pages": {
     "myRecipes": "Meine Rezepte",
     "myCookbooks": "Meine Kochbücher",

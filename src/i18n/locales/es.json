@@ -277,6 +277,25 @@
     "errorTitle": "No se pudo actualizar el perfil",
     "emailErrorTitle": "No se pudo actualizar el correo"
   },
+  "DeleteAccount": {
+    "title": "Eliminar cuenta",
+    "description": "Elimina tu cuenta de forma permanente y el contenido que solo te pertenece.",
+    "delete": "Eliminar cuenta",
+    "dialogTitle": "¿Eliminar tu cuenta?",
+    "dialogDescription": "Esta acción no se puede deshacer.",
+    "sharedMeals": "{count, plural, one {# comida compartida con tu hogar se eliminará} other {# comidas compartidas con tu hogar se eliminarán}}",
+    "sharedMealsWarning": "Los demás miembros del hogar las perderán.",
+    "privateMeals": "{count, plural, one {# comida privada se eliminará} other {# comidas privadas se eliminarán}}",
+    "unpublishedRecipes": "{count, plural, one {# receta sin publicar y su imagen se eliminarán} other {# recetas sin publicar y sus imágenes se eliminarán}}",
+    "leavesHousehold": "Saldrás de {name}; los demás miembros conservan el hogar.",
+    "removesHousehold": "{name} desaparecerá con sus comidas, porque eres el único miembro.",
+    "publishedRecipes": "Tus recetas publicadas siguen siendo públicas, sin autor.",
+    "password": "Contraseña",
+    "passwordHint": "Confirma con tu contraseña para continuar.",
+    "cancel": "Cancelar",
+    "confirm": "Eliminar mi cuenta",
+    "errorTitle": "No se pudo eliminar tu cuenta"
+  },
   "Pages": {
     "myRecipes": "Mis recetas",
     "myCookbooks": "Mis recetarios",
