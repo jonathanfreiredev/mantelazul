@@ -348,6 +348,10 @@
     "updateDenied": "Actualización de la receta rechazada. El asistente buscará otra solución.",
     "deleted": "Receta eliminada correctamente.",
     "deletionDenied": "Eliminación rechazada. La receta no se eliminó.",
+    "plannedMeals": "{count, plural, one {# comida añadida a tu calendario} other {# comidas añadidas a tu calendario}}",
+    "planMealsFailed": "Algunas recetas no se pudieron añadir: ya no existen o no son visibles para ti.",
+    "planMealsShared": "Compartida con el hogar",
+    "viewCalendar": "Ver calendario",
     "attachTitle": "Adjuntar una imagen al chat",
     "attachDescription": "La imagen se enviará al asistente y podrá usarse en la conversación."
   },

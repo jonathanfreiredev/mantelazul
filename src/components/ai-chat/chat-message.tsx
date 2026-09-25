@@ -10,6 +10,7 @@ import {
 import { MessagePart } from "./message-part";
 import { DeleteRecipeTool } from "./tools/delete-recipe-tool";
 import { GeneratedImagePart } from "./tools/generated-image-part";
+import { PlannedMealsTool } from "./tools/planned-meals-tool";
 import { RecipeApprovalTool } from "./tools/recipe-approval-tool";
 import { ToolErrorCard } from "./tools/tool-error-card";
 import { isToolErrorPart, isToolPart } from "./tools/tool-part";
@@ -93,6 +94,16 @@ export function ChatMessage({
 
             if (isToolPart(part, ["generateRecipeImage"])) {
               return <GeneratedImagePart key={part.toolCallId} part={part} />;
+            }
+
+            if (isToolPart(part, ["planMeals"])) {
+              return (
+                <PlannedMealsTool
+                  key={part.toolCallId}
+                  part={part}
+                  onNavigate={onNavigate}
+                />
+              );
             }
 
             if (part.type === "text" || part.type === "file") {

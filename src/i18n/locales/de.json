@@ -348,6 +348,10 @@
     "updateDenied": "Aktualisieren des Rezepts abgelehnt. Der Assistent sucht eine andere Lösung.",
     "deleted": "Rezept erfolgreich gelöscht.",
     "deletionDenied": "Löschen abgelehnt. Das Rezept wurde nicht gelöscht.",
+    "plannedMeals": "{count, plural, one {# Mahlzeit zum Kalender hinzugefügt} other {# Mahlzeiten zum Kalender hinzugefügt}}",
+    "planMealsFailed": "Einige Rezepte konnten nicht hinzugefügt werden: Sie existieren nicht mehr oder sind für dich nicht sichtbar.",
+    "planMealsShared": "Mit dem Haushalt geteilt",
+    "viewCalendar": "Kalender ansehen",
     "attachTitle": "Bild an den Chat anhängen",
     "attachDescription": "Das Bild wird an den Assistenten gesendet und kann im Gespräch verwendet werden."
   },

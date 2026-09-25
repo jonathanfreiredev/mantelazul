@@ -29,3 +29,8 @@ export interface MealPlanWeekDto {
   startDate: string;
   entries: MealPlanEntryDto[];
 }
+
+/** A list of entries with no week around them, used for arbitrary ranges and for batch writes. */
+export interface MealPlanEntriesDto {
+  entries: MealPlanEntryDto[];
+}

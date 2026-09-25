@@ -47,3 +47,12 @@ export function addDays(isoDate: string, days: number): string {
 export function todayIso(): string {
   return toIsoDate(new Date());
 }
+
+/** Whole days from `from` to `to`; negative when `to` is earlier. */
+export function daysBetween(from: string, to: string): number {
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+  return Math.round(
+    (toDbDate(to).getTime() - toDbDate(from).getTime()) / MS_PER_DAY,
+  );
+}
