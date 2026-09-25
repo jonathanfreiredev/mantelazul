@@ -410,6 +410,9 @@ export const ModelName = {
   RecipeLike: 'RecipeLike',
   Cookbook: 'Cookbook',
   CookbookRecipe: 'CookbookRecipe',
+  Household: 'Household',
+  HouseholdInvite: 'HouseholdInvite',
+  MealPlanEntry: 'MealPlanEntry',
   Chat: 'Chat',
   Message: 'Message'
 } as const
@@ -427,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "recipe" | "recipeTranslation" | "ingredient" | "step" | "tag" | "recipeTag" | "recipeLike" | "cookbook" | "cookbookRecipe" | "chat" | "message"
+    modelProps: "user" | "session" | "account" | "verification" | "recipe" | "recipeTranslation" | "ingredient" | "step" | "tag" | "recipeTag" | "recipeLike" | "cookbook" | "cookbookRecipe" | "household" | "householdInvite" | "mealPlanEntry" | "chat" | "message"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1393,6 +1396,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Household: {
+      payload: Prisma.$HouseholdPayload<ExtArgs>
+      fields: Prisma.HouseholdFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HouseholdFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HouseholdFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload>
+        }
+        findFirst: {
+          args: Prisma.HouseholdFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HouseholdFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload>
+        }
+        findMany: {
+          args: Prisma.HouseholdFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload>[]
+        }
+        create: {
+          args: Prisma.HouseholdCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload>
+        }
+        createMany: {
+          args: Prisma.HouseholdCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HouseholdCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload>[]
+        }
+        delete: {
+          args: Prisma.HouseholdDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload>
+        }
+        update: {
+          args: Prisma.HouseholdUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload>
+        }
+        deleteMany: {
+          args: Prisma.HouseholdDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HouseholdUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HouseholdUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload>[]
+        }
+        upsert: {
+          args: Prisma.HouseholdUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdPayload>
+        }
+        aggregate: {
+          args: Prisma.HouseholdAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHousehold>
+        }
+        groupBy: {
+          args: Prisma.HouseholdGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HouseholdGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HouseholdCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HouseholdCountAggregateOutputType> | number
+        }
+      }
+    }
+    HouseholdInvite: {
+      payload: Prisma.$HouseholdInvitePayload<ExtArgs>
+      fields: Prisma.HouseholdInviteFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HouseholdInviteFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HouseholdInviteFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload>
+        }
+        findFirst: {
+          args: Prisma.HouseholdInviteFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HouseholdInviteFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload>
+        }
+        findMany: {
+          args: Prisma.HouseholdInviteFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload>[]
+        }
+        create: {
+          args: Prisma.HouseholdInviteCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload>
+        }
+        createMany: {
+          args: Prisma.HouseholdInviteCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HouseholdInviteCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload>[]
+        }
+        delete: {
+          args: Prisma.HouseholdInviteDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload>
+        }
+        update: {
+          args: Prisma.HouseholdInviteUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload>
+        }
+        deleteMany: {
+          args: Prisma.HouseholdInviteDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HouseholdInviteUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HouseholdInviteUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload>[]
+        }
+        upsert: {
+          args: Prisma.HouseholdInviteUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HouseholdInvitePayload>
+        }
+        aggregate: {
+          args: Prisma.HouseholdInviteAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHouseholdInvite>
+        }
+        groupBy: {
+          args: Prisma.HouseholdInviteGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HouseholdInviteGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HouseholdInviteCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HouseholdInviteCountAggregateOutputType> | number
+        }
+      }
+    }
+    MealPlanEntry: {
+      payload: Prisma.$MealPlanEntryPayload<ExtArgs>
+      fields: Prisma.MealPlanEntryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MealPlanEntryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MealPlanEntryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload>
+        }
+        findFirst: {
+          args: Prisma.MealPlanEntryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MealPlanEntryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload>
+        }
+        findMany: {
+          args: Prisma.MealPlanEntryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload>[]
+        }
+        create: {
+          args: Prisma.MealPlanEntryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload>
+        }
+        createMany: {
+          args: Prisma.MealPlanEntryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MealPlanEntryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload>[]
+        }
+        delete: {
+          args: Prisma.MealPlanEntryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload>
+        }
+        update: {
+          args: Prisma.MealPlanEntryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload>
+        }
+        deleteMany: {
+          args: Prisma.MealPlanEntryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MealPlanEntryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MealPlanEntryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload>[]
+        }
+        upsert: {
+          args: Prisma.MealPlanEntryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MealPlanEntryPayload>
+        }
+        aggregate: {
+          args: Prisma.MealPlanEntryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMealPlanEntry>
+        }
+        groupBy: {
+          args: Prisma.MealPlanEntryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MealPlanEntryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MealPlanEntryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MealPlanEntryCountAggregateOutputType> | number
+        }
+      }
+    }
     Chat: {
       payload: Prisma.$ChatPayload<ExtArgs>
       fields: Prisma.ChatFieldRefs
@@ -1587,7 +1812,8 @@ export const UserScalarFieldEnum = {
   emailVerified: 'emailVerified',
   image: 'image',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  householdId: 'householdId'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -1753,6 +1979,48 @@ export const CookbookRecipeScalarFieldEnum = {
 } as const
 
 export type CookbookRecipeScalarFieldEnum = (typeof CookbookRecipeScalarFieldEnum)[keyof typeof CookbookRecipeScalarFieldEnum]
+
+
+export const HouseholdScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  ownerId: 'ownerId'
+} as const
+
+export type HouseholdScalarFieldEnum = (typeof HouseholdScalarFieldEnum)[keyof typeof HouseholdScalarFieldEnum]
+
+
+export const HouseholdInviteScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  token: 'token',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  householdId: 'householdId',
+  invitedById: 'invitedById'
+} as const
+
+export type HouseholdInviteScalarFieldEnum = (typeof HouseholdInviteScalarFieldEnum)[keyof typeof HouseholdInviteScalarFieldEnum]
+
+
+export const MealPlanEntryScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  order: 'order',
+  servings: 'servings',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  householdId: 'householdId',
+  recipeId: 'recipeId',
+  createdById: 'createdById'
+} as const
+
+export type MealPlanEntryScalarFieldEnum = (typeof MealPlanEntryScalarFieldEnum)[keyof typeof MealPlanEntryScalarFieldEnum]
 
 
 export const ChatScalarFieldEnum = {
@@ -1939,6 +2207,20 @@ export type EnumUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'Unit[]'
  */
 export type ListEnumUnitFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Unit[]'>
+    
+
+
+/**
+ * Reference to a field of type 'InviteStatus'
+ */
+export type EnumInviteStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InviteStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'InviteStatus[]'
+ */
+export type ListEnumInviteStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InviteStatus[]'>
     
 
 
@@ -2133,6 +2415,9 @@ export type GlobalOmitConfig = {
   recipeLike?: Prisma.RecipeLikeOmit
   cookbook?: Prisma.CookbookOmit
   cookbookRecipe?: Prisma.CookbookRecipeOmit
+  household?: Prisma.HouseholdOmit
+  householdInvite?: Prisma.HouseholdInviteOmit
+  mealPlanEntry?: Prisma.MealPlanEntryOmit
   chat?: Prisma.ChatOmit
   message?: Prisma.MessageOmit
 }

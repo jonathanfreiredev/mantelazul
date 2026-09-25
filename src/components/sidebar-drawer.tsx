@@ -1,5 +1,7 @@
 import {
   BookIcon,
+  CalendarDaysIcon,
+  HouseIcon,
   MenuIcon,
   NotepadTextIcon,
   PlusIcon,
@@ -121,6 +123,42 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
                 </ItemMedia>
                 <ItemContent>
                   <ItemTitle>{t("newRecipe")}</ItemTitle>
+                </ItemContent>
+              </Link>
+            </Item>
+          </DrawerClose>
+
+          <DrawerClose asChild>
+            <Item
+              variant="default"
+              size="sm"
+              className="cursor-pointer"
+              asChild
+            >
+              <Link href={isLoggedIn ? "/calendar" : "/login"}>
+                <ItemMedia>
+                  <CalendarDaysIcon className="size-5" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{t("calendar")}</ItemTitle>
+                </ItemContent>
+              </Link>
+            </Item>
+          </DrawerClose>
+
+          <DrawerClose asChild>
+            <Item
+              variant="default"
+              size="sm"
+              className="cursor-pointer"
+              asChild
+            >
+              <Link href={isLoggedIn ? "/household" : "/login"}>
+                <ItemMedia>
+                  <HouseIcon className="size-5" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{t("household")}</ItemTitle>
                 </ItemContent>
               </Link>
             </Item>

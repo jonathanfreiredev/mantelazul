@@ -29,6 +29,15 @@ model User {
   cookbooks     Cookbook[]
   chat          Chat[]
 
+  // The household this user belongs to. A user belongs to at most one (or none). Leaving a
+  // household is just setting this to null; the household only disappears when it has no members.
+  household      Household?        @relation("HouseholdMembers", fields: [householdId], references: [id], onDelete: SetNull)
+  householdId    String?
+  // Informational for now (no roles): who created the household.
+  ownedHousehold Household?        @relation("HouseholdOwner")
+  meals          MealPlanEntry[]
+  invitesSent    HouseholdInvite[]
+
   @@unique([email])
   @@map("user")
 }
@@ -120,12 +129,13 @@ model Recipe {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ingredients  Ingredient[]
-  steps        Step[]
-  tags         RecipeTag[]
-  likes        RecipeLike[]
-  cookbooks    CookbookRecipe[]
-  translations RecipeTranslation[]
+  ingredients     Ingredient[]
+  steps           Step[]
+  tags            RecipeTag[]
+  likes           RecipeLike[]
+  cookbooks       CookbookRecipe[]
+  translations    RecipeTranslation[]
+  mealPlanEntries MealPlanEntry[]
 
   author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId String?
@@ -259,6 +269,87 @@ model CookbookRecipe {
 
   @@id([cookbookId, recipeId])
   @@map("cookbook_recipe")
+}
+
+/**
+ * A group of people sharing a meal plan. A user belongs to at most one household at a time.
+ * Meals are shared with every member of the household they point to; meals without a household
+ * are private to their creator.
+ */
+model Household {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Who created the household. Informational for now (there are no roles); kept for future use.
+  ownerId String? @unique
+  owner   User?   @relation("HouseholdOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  members User[]            @relation("HouseholdMembers")
+  meals   MealPlanEntry[]
+  invites HouseholdInvite[]
+
+  @@index([name])
+  @@map("household")
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+/**
+ * An invitation to join a household, addressed to an email. It does not require the invitee to
+ * have an account yet: the token is what proves the invitation.
+ */
+model HouseholdInvite {
+  id        String       @id @default(cuid())
+  email     String
+  token     String       @unique
+  status    InviteStatus @default(PENDING)
+  expiresAt DateTime
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  householdId String
+  invitedBy   User      @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+  invitedById String
+
+  @@index([email])
+  @@index([householdId])
+  @@map("household_invite")
+}
+
+/**
+ * A recipe planned for a specific day. `householdId` is the sharing switch: with a household the
+ * meal is visible to every member, without it the meal is private to `createdBy`. It is stored on
+ * the row (not derived from the creator's current household) so that leaving a household does not
+ * drag the meal away from the other members.
+ */
+model MealPlanEntry {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  order     Int      @default(0)
+  servings  Int?
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  household   Household? @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  householdId String?
+  recipe      Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId    String
+  createdBy   User       @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdById String
+
+  @@index([householdId, date])
+  @@index([createdById, date])
+  @@index([recipeId])
+  @@map("meal_plan_entry")
 }
 
 // Models for AI Chat

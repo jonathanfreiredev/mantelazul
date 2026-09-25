@@ -64,6 +64,9 @@ export const ModelName = {
   RecipeLike: 'RecipeLike',
   Cookbook: 'Cookbook',
   CookbookRecipe: 'CookbookRecipe',
+  Household: 'Household',
+  HouseholdInvite: 'HouseholdInvite',
+  MealPlanEntry: 'MealPlanEntry',
   Chat: 'Chat',
   Message: 'Message'
 } as const
@@ -91,7 +94,8 @@ export const UserScalarFieldEnum = {
   emailVerified: 'emailVerified',
   image: 'image',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  householdId: 'householdId'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -257,6 +261,48 @@ export const CookbookRecipeScalarFieldEnum = {
 } as const
 
 export type CookbookRecipeScalarFieldEnum = (typeof CookbookRecipeScalarFieldEnum)[keyof typeof CookbookRecipeScalarFieldEnum]
+
+
+export const HouseholdScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  ownerId: 'ownerId'
+} as const
+
+export type HouseholdScalarFieldEnum = (typeof HouseholdScalarFieldEnum)[keyof typeof HouseholdScalarFieldEnum]
+
+
+export const HouseholdInviteScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  token: 'token',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  householdId: 'householdId',
+  invitedById: 'invitedById'
+} as const
+
+export type HouseholdInviteScalarFieldEnum = (typeof HouseholdInviteScalarFieldEnum)[keyof typeof HouseholdInviteScalarFieldEnum]
+
+
+export const MealPlanEntryScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  order: 'order',
+  servings: 'servings',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  householdId: 'householdId',
+  recipeId: 'recipeId',
+  createdById: 'createdById'
+} as const
+
+export type MealPlanEntryScalarFieldEnum = (typeof MealPlanEntryScalarFieldEnum)[keyof typeof MealPlanEntryScalarFieldEnum]
 
 
 export const ChatScalarFieldEnum = {

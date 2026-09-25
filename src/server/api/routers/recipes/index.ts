@@ -470,6 +470,11 @@ export const recipesRouter = createTRPCRouter({
         difficulty: z.enum(Difficulty).optional(),
         search: z.string().optional(),
         locale: optionalLocaleSchema,
+        /**
+         * Adds the caller's own unpublished recipes to a public listing, so a draft can be
+         * planned without publishing it first.
+         */
+        includeOwnUnpublished: z.boolean().optional(),
         skip: z.number(),
         take: z.number().optional(),
       }),
@@ -483,6 +488,7 @@ export const recipesRouter = createTRPCRouter({
         difficulty,
         search,
         locale,
+        includeOwnUnpublished,
         skip,
         take = 15,
       } = input;
@@ -493,8 +499,16 @@ export const recipesRouter = createTRPCRouter({
 
       if (authorId) {
         whereClause.authorId = authorId;
-      } else {
-        if (!cookbookId) {
+      } else if (!cookbookId) {
+        if (includeOwnUnpublished && ctx.session?.user) {
+          // Everything published, plus whatever the caller wrote themselves. Kept in `AND` so it
+          // combines with the search conditions instead of replacing them.
+          whereClause.AND = [
+            {
+              OR: [{ published: true }, { authorId: ctx.session.user.id }],
+            },
+          ];
+        } else {
           whereClause.published = true;
         }
       }

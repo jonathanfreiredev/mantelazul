@@ -16,6 +16,7 @@ import { authClient } from "~/server/better-auth/client";
 import { EditRecipeButton } from "../recipes/edit-recipe-button";
 import { TagsSection } from "./tags-section";
 import { SaveRecipeButton } from "../recipes/save-recipe-button";
+import { AddToCalendarButton } from "../recipes/add-to-calendar-button";
 
 interface RecipeProps {
   slug: string;
@@ -89,6 +90,14 @@ export function Recipe({ slug }: RecipeProps) {
             className="text-md text-gray-800"
             size="xl"
             positionIcon="top"
+            isLoggedIn={isLoggedIn}
+          />
+
+          <AddToCalendarButton
+            recipeId={recipe.id}
+            defaultServings={recipe.defaultServings}
+            className="text-md text-gray-800"
+            size="xl"
             isLoggedIn={isLoggedIn}
           />
 

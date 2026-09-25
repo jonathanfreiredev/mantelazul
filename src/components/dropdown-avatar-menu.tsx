@@ -41,6 +41,14 @@ export const DropdownAvatarMenu = ({ user }: DropdownAvatarMenuProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem asChild>
+          <Link href="/calendar">{t("calendar")}</Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href="/household">{t("household")}</Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
           <Link href="/profile">{t("profile")}</Link>
         </DropdownMenuItem>
 

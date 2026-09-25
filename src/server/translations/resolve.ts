@@ -27,14 +27,15 @@ type TranslationRow = {
 };
 
 /**
- * Picks the translation to show, falling back to the canonical language and then to the
- * source language, so a recipe is never rendered empty while its translations are missing.
+ * Picks the translation to show, falling back to the canonical language and then to the source
+ * language, so a recipe is never rendered empty while its translations are missing. Generic over
+ * the row shape so callers can select only the fields they need.
  */
-function selectTranslation(
-  translations: TranslationRow[],
+export function pickTranslation<T extends { locale: string }>(
+  translations: T[],
   locale: Locale,
   sourceLocale: string,
-): TranslationRow | undefined {
+): T | undefined {
   return (
     translations.find((row) => row.locale === locale) ??
     translations.find((row) => row.locale === DEFAULT_LOCALE) ??
@@ -61,7 +62,7 @@ export function toRecipeDto(
   recipe: RecipeWithTranslations,
   locale: Locale,
 ): RecipeDto {
-  const row = selectTranslation(recipe.translations, locale, recipe.sourceLocale);
+  const row = pickTranslation(recipe.translations, locale, recipe.sourceLocale);
 
   const content: RecipeTranslationContent = row
     ? toContent(row)

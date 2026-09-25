@@ -26,10 +26,16 @@ import {
 } from "../ui/field";
 import { Input } from "../ui/input";
 
+interface SignupFormProps extends React.ComponentProps<"div"> {
+  /** Where to land after signing up, e.g. an invitation page. Defaults to the home page. */
+  redirectTo?: string;
+}
+
 export function SignupForm({
   className,
+  redirectTo,
   ...props
-}: React.ComponentProps<"div">) {
+}: SignupFormProps) {
   const t = useTranslations("SignupForm");
   const tValidation = useTranslations("Validation");
   const router = useRouter();
@@ -78,7 +84,7 @@ export function SignupForm({
           });
           form.reset();
 
-          router.replace("/");
+          router.replace(redirectTo ?? "/");
           router.refresh();
         },
         onError(error) {
