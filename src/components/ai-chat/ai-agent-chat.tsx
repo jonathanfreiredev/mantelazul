@@ -47,15 +47,16 @@ function hasActivelyStreamingText(
 }
 
 interface AIAgentChatProps {
-  userId: string;
   chatId: string | null;
   messages: MyAgentUIMessage[];
+  /** Dictation is hidden when no transcription provider is configured. */
+  voiceEnabled: boolean;
 }
 
 export default function AIAgentChat({
-  userId,
   chatId,
   messages: savedMessages,
+  voiceEnabled,
 }: AIAgentChatProps) {
   const t = useTranslations("Chat");
   const [attachedImage, setAttachedImage] = useState<ImageWithPreview | null>(
@@ -86,9 +87,6 @@ export default function AIAgentChat({
     messages: savedMessages,
     transport: new DefaultChatTransport({
       api: "/api/chat",
-      headers: () => ({
-        "X-User-ID": userId,
-      }),
     }),
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
   });
@@ -269,6 +267,7 @@ export default function AIAgentChat({
               attachedImage={attachedImage}
               onAttachedImageChange={setAttachedImage}
               showAttachButton={false}
+              voiceEnabled={voiceEnabled}
             />
           </div>
         </div>
@@ -401,6 +400,7 @@ export default function AIAgentChat({
             attachedImage={attachedImage}
             onAttachedImageChange={setAttachedImage}
             showAttachButton
+            voiceEnabled={voiceEnabled}
           />
         </DrawerFooter>
       </DrawerContent>

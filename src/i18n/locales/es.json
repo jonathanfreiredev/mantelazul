@@ -438,6 +438,23 @@
     "attachTitle": "Adjuntar una imagen al chat",
     "attachDescription": "La imagen se enviará al asistente y podrá usarse en la conversación."
   },
+  "VoiceDictation": {
+    "open": "Dictar un mensaje",
+    "recording": "Grabando",
+    "transcribing": "Transcribiendo",
+    "cancel": "Descartar el dictado",
+    "accept": "Usar el texto dictado",
+    "retry": "Volver a transcribir",
+    "timeLabel": "Tiempo: {elapsed} de {total}",
+    "permissionDenied": "El micrófono está bloqueado. Actívalo en los ajustes del navegador y vuelve a intentarlo.",
+    "noMicrophone": "No se ha encontrado ningún micrófono.",
+    "microphoneLost": "El dictado se ha detenido. Se está transcribiendo lo que había.",
+    "unsupported": "Este navegador no puede grabar audio.",
+    "nothingRecorded": "No se ha grabado nada.",
+    "nothingHeard": "No he oído nada. Inténtalo de nuevo.",
+    "tooLong": "La grabación es demasiado larga para transcribirla.",
+    "transcriptionFailed": "No se ha podido transcribir el audio. Puedes intentarlo otra vez."
+  },
   "Household": {
     "title": "Hogar",
     "description": "Planificad las comidas juntos. Aquí todos ven las comidas compartidas.",

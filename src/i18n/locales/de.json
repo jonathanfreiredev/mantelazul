@@ -438,6 +438,23 @@
     "attachTitle": "Bild an den Chat anhängen",
     "attachDescription": "Das Bild wird an den Assistenten gesendet und kann im Gespräch verwendet werden."
   },
+  "VoiceDictation": {
+    "open": "Eine Nachricht diktieren",
+    "recording": "Aufnahme läuft",
+    "transcribing": "Wird umgeschrieben",
+    "cancel": "Diktat verwerfen",
+    "accept": "Diktierten Text übernehmen",
+    "retry": "Erneut verschriften",
+    "timeLabel": "Zeit: {elapsed} von {total}",
+    "permissionDenied": "Das Mikrofon ist blockiert. Erlaube es in den Browsereinstellungen und versuche es erneut.",
+    "noMicrophone": "Es wurde kein Mikrofon gefunden.",
+    "microphoneLost": "Das Diktat wurde beendet. Die Aufnahme wird verschriftet.",
+    "unsupported": "Dieser Browser kann kein Audio aufnehmen.",
+    "nothingRecorded": "Es wurde nichts aufgenommen.",
+    "nothingHeard": "Ich habe nichts gehört. Versuche es erneut.",
+    "tooLong": "Die Aufnahme ist zu lang zum Verschriften.",
+    "transcriptionFailed": "Das Audio konnte nicht verschriftet werden. Du kannst es erneut versuchen."
+  },
   "Household": {
     "title": "Haushalt",
     "description": "Plant gemeinsam Mahlzeiten. Alle hier sehen die geteilten Mahlzeiten.",

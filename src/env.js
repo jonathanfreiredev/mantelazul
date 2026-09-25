@@ -22,6 +22,9 @@ export const env = createEnv({
     // registered only when the pair is present. Create them in the Google Cloud console.
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
+    // Speech to text for the chat's dictation button. Optional: the button is hidden without it.
+    // Create a key in the Groq console.
+    GROQ_API_KEY: z.string().optional(),
     // Chroma. Local development talks to the server started with `pnpm chroma:dev`
     // (SQLite persistence in ./.chroma), addressed by CHROMA_URL. In production, set
     // CHROMA_API_KEY (plus CHROMA_HOST, CHROMA_TENANT and CHROMA_DATABASE) to use Chroma Cloud
@@ -59,6 +62,7 @@ export const env = createEnv({
     BFL_API_KEY: process.env.BFL_API_KEY,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    GROQ_API_KEY: process.env.GROQ_API_KEY,
     CHROMA_URL: process.env.CHROMA_URL,
     CHROMA_HOST: process.env.CHROMA_HOST,
     CHROMA_API_KEY: process.env.CHROMA_API_KEY,
