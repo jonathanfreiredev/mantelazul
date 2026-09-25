@@ -1,11 +1,12 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
-import { useMemo } from "react";
-import { useRouter } from "~/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
+import { Link } from "~/i18n/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { verificationCallbackUrl } from "~/lib/email-verification";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "../ui/button";
@@ -25,20 +26,33 @@ import {
   FieldSet,
 } from "../ui/field";
 import { Input } from "../ui/input";
+import { OAuthError } from "./oauth-error";
+import { ResendVerificationButton } from "./resend-verification-button";
+import { SocialSignIn } from "./social-sign-in";
 
 interface SignupFormProps extends React.ComponentProps<"div"> {
   /** Where to land after signing up, e.g. an invitation page. Defaults to the home page. */
   redirectTo?: string;
+  /** Error code the provider callback sent back, if the sign-up was not completed. */
+  authError?: string;
+  /** Whether Google sign-in is configured. */
+  googleEnabled?: boolean;
 }
 
 export function SignupForm({
   className,
   redirectTo,
+  authError,
+  googleEnabled,
   ...props
 }: SignupFormProps) {
   const t = useTranslations("SignupForm");
   const tValidation = useTranslations("Validation");
-  const router = useRouter();
+  const locale = useLocale();
+
+  // Set once the account is created: signing up no longer opens a session, so the form gives way
+  // to "go confirm your address".
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   const formSchema = useMemo(
     () =>
@@ -76,16 +90,17 @@ export function SignupForm({
 
     await authClient.signUp.email({
       ...signupData,
+      // Where the link in the verification email lands. The session does not exist yet, so the
+      // verification is what brings the user in.
+      callbackURL: verificationCallbackUrl(
+        window.location.origin,
+        locale,
+        redirectTo,
+      ),
       fetchOptions: {
         onSuccess() {
-          toast.success(t("successTitle"), {
-            description: t("successDescription"),
-            position: "bottom-right",
-          });
           form.reset();
-
-          router.replace(redirectTo ?? "/");
-          router.refresh();
+          setSubmittedEmail(signupData.email);
         },
         onError(error) {
           toast.error(t("errorTitle"), {
@@ -95,6 +110,43 @@ export function SignupForm({
         },
       },
     });
+  }
+
+  if (submittedEmail) {
+    return (
+      <div
+        className={cn("flex w-full max-w-125 flex-col gap-6", className)}
+        {...props}
+      >
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">{t("checkEmailTitle")}</CardTitle>
+            <CardDescription>
+              {t("checkEmailDescription", { email: submittedEmail })}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4">
+            <ResendVerificationButton
+              email={submittedEmail}
+              redirectTo={redirectTo}
+            />
+            <FieldDescription>
+              {t("alreadyHaveAccount")}{" "}
+              <Link
+                href={
+                  redirectTo
+                    ? `/login?next=${encodeURIComponent(redirectTo)}`
+                    : "/login"
+                }
+                className="underline"
+              >
+                {t("logIn")}
+              </Link>
+            </FieldDescription>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -107,7 +159,9 @@ export function SignupForm({
           <CardTitle className="text-xl">{t("title")}</CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-5">
+          <OAuthError code={authError} />
+          <SocialSignIn redirectTo={redirectTo} enabled={googleEnabled} />
           <form id="form-signup" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldSet className="mb-5 w-full">
               <FieldGroup>

@@ -1,4 +1,5 @@
 import { getSession } from "~/server/better-auth/server";
+import { voiceDictationEnabled } from "~/server/transcription";
 import { Link } from "~/i18n/navigation";
 import { DropdownAvatarMenu } from "./dropdown-avatar-menu";
 import { Logo } from "./logo";
@@ -57,9 +58,9 @@ export async function Header() {
 
           {!!isLoggedIn && (
             <AIAgentChat
-              userId={session.user.id}
               chatId={chatId || createId()}
               messages={messages}
+              voiceEnabled={voiceDictationEnabled}
             />
           )}
         </div>
