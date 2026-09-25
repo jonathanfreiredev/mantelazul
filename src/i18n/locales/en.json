@@ -9,6 +9,14 @@
   "Footer": {
     "rights": "© {year} Mantel Azul. All rights reserved."
   },
+  "Legal": {
+    "privacyLink": "Privacy",
+    "termsLink": "Terms",
+    "privacyTitle": "Privacy policy",
+    "privacyDescription": "What data Mantel Azul handles, why, who else sees it, and what you can do about it.",
+    "termsTitle": "Terms of use",
+    "termsDescription": "The rules for using Mantel Azul, including what the AI does and what it does not promise."
+  },
   "Nav": {
     "newRecipe": "New Recipe"
   },
@@ -414,6 +422,7 @@
     "placeholder": "How can I help you today?",
     "limitExceeded": "Message limit exceeded. Please delete the chat to start a new conversation.",
     "attachedImageAlt": "Attached image preview",
+    "generatedImage": "AI-generated image",
     "you": "YOU",
     "ai": "AI",
     "thinking": "Thinking",

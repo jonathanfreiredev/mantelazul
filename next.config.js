@@ -19,6 +19,11 @@ const config = {
       },
     ],
   },
+  // The legal pages read their markdown from `src/content/legal` while rendering, which the tracer
+  // cannot see through. Without this the deployed function would not carry the files.
+  outputFileTracingIncludes: {
+    "/*": ["src/content/legal/**/*.md"],
+  },
 };
 
 export default withNextIntl(config);

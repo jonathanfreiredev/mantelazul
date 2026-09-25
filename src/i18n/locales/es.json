@@ -9,6 +9,14 @@
   "Footer": {
     "rights": "© {year} Mantel Azul. Todos los derechos reservados."
   },
+  "Legal": {
+    "privacyLink": "Privacidad",
+    "termsLink": "Términos",
+    "privacyTitle": "Política de privacidad",
+    "privacyDescription": "Qué datos trata Mantel Azul, para qué, quién más los ve y qué puedes hacer al respecto.",
+    "termsTitle": "Términos de uso",
+    "termsDescription": "Las reglas de uso de Mantel Azul, incluido qué hace la IA y qué no promete."
+  },
   "Nav": {
     "newRecipe": "Nueva receta"
   },
@@ -414,6 +422,7 @@
     "placeholder": "¿Cómo puedo ayudarte hoy?",
     "limitExceeded": "Se superó el límite de mensajes. Elimina el chat para empezar una conversación nueva.",
     "attachedImageAlt": "Vista previa de la imagen adjunta",
+    "generatedImage": "Imagen generada por IA",
     "you": "TÚ",
     "ai": "IA",
     "thinking": "Pensando",
