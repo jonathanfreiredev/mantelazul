@@ -1,4 +1,5 @@
 import z from "zod";
+import { auth } from "~/server/better-auth";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -51,6 +52,12 @@ export const usersRouter = createTRPCRouter({
         }),
       ]);
 
+    // A Google-only account has no password to confirm the deletion with, so the dialog has to
+    // know whether to ask for one.
+    const credentialCount = await ctx.db.account.count({
+      where: { userId, providerId: "credential", password: { not: null } },
+    });
+
     let household: { name: string; memberCount: number } | null = null;
 
     if (current?.householdId) {
@@ -64,6 +71,41 @@ export const usersRouter = createTRPCRouter({
       }
     }
 
-    return { sharedMeals, privateMeals, unpublishedRecipes, household };
+    return {
+      sharedMeals,
+      privateMeals,
+      unpublishedRecipes,
+      household,
+      hasPassword: credentialCount > 0,
+    };
   }),
+
+  /** The sign-in methods linked to the account, for the "access accounts" card. */
+  getLinkedAccounts: protectedProcedure.query(async ({ ctx }) => {
+    const accounts = await ctx.db.account.findMany({
+      where: { userId: ctx.session.user.id },
+      select: { id: true, providerId: true },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return {
+      accounts,
+      hasPassword: accounts.some((account) => account.providerId === "credential"),
+    };
+  }),
+
+  /**
+   * Gives a password to an account that has none (one created with Google). Better Auth keeps
+   * `setPassword` off the HTTP surface, so the client reaches it through here.
+   */
+  setPassword: protectedProcedure
+    .input(z.object({ newPassword: z.string().min(8) }))
+    .mutation(async ({ ctx, input }) => {
+      await auth.api.setPassword({
+        body: { newPassword: input.newPassword },
+        headers: ctx.headers,
+      });
+
+      return { success: true };
+    }),
 });

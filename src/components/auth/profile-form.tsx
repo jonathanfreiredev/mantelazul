@@ -12,18 +12,9 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
 import {
   Field,
   FieldDescription,
@@ -33,7 +24,6 @@ import {
   FieldSet,
 } from "../ui/field";
 import { Input } from "../ui/input";
-import { ChangePasswordForm } from "./change-password-form";
 
 export const ProfileForm = ({
   user,
@@ -61,6 +51,8 @@ export const ProfileForm = ({
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
+    const emailChanged = data.email !== user.email;
+
     await authClient.updateUser({
       name: data.name,
       fetchOptions: {
@@ -78,6 +70,16 @@ export const ProfileForm = ({
               },
             },
           });
+
+          // Changing the address is confirmed from the new mailbox, so the change has not been
+          // applied yet when this succeeds.
+          if (emailChanged) {
+            toast.success(t("emailChangeTitle"), {
+              description: t("emailChangeDescription", { email: data.email }),
+              position: "bottom-right",
+            });
+            return;
+          }
 
           toast.success(t("successTitle"), {
             description: t("successDescription"),
@@ -164,26 +166,6 @@ export const ProfileForm = ({
             </Field>
           </form>
         </CardContent>
-
-        <CardFooter className="flex justify-end">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="link" disabled={form.formState.isSubmitting}>
-                {t("changePassword")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>{t("changePassword")}</DialogTitle>
-                <DialogDescription>
-                  {t("changePasswordDescription")}
-                </DialogDescription>
-              </DialogHeader>
-
-              <ChangePasswordForm />
-            </DialogContent>
-          </Dialog>
-        </CardFooter>
       </Card>
     </div>
   );

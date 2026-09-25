@@ -1,7 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useRouter } from "~/i18n/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -25,20 +25,30 @@ import {
   FieldSet,
 } from "../ui/field";
 import { Input } from "../ui/input";
+import { OAuthError } from "./oauth-error";
+import { SocialSignIn } from "./social-sign-in";
+import { UnverifiedEmailNotice } from "./unverified-email-notice";
 
 interface LoginFormProps extends React.ComponentProps<"div"> {
   /** Where to land after signing in, e.g. an invitation page. Defaults to the home page. */
   redirectTo?: string;
+  /** Error code the provider callback sent back, if the sign-in was not completed. */
+  authError?: string;
+  /** Whether Google sign-in is configured. */
+  googleEnabled?: boolean;
 }
 
 export const LoginForm = ({
   className,
   redirectTo,
+  authError,
+  googleEnabled,
   ...props
 }: LoginFormProps) => {
   const t = useTranslations("LoginForm");
   const tValidation = useTranslations("Validation");
   const router = useRouter();
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const formSchema = useMemo(
     () =>
@@ -58,6 +68,8 @@ export const LoginForm = ({
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
+    setUnverifiedEmail(null);
+
     await authClient.signIn.email({
       ...data,
       rememberMe: true,
@@ -73,6 +85,13 @@ export const LoginForm = ({
           router.refresh();
         },
         onError(error) {
+          // An unconfirmed address is not a failed credential: the form tells the user which
+          // mailbox to open instead of showing a password error.
+          if (error.error.code === "EMAIL_NOT_VERIFIED") {
+            setUnverifiedEmail(data.email);
+            return;
+          }
+
           toast.error(t("errorTitle"), {
             description: error.error.message,
             position: "bottom-right",
@@ -92,7 +111,15 @@ export const LoginForm = ({
           <CardTitle className="text-xl">{t("title")}</CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-5">
+          <OAuthError code={authError} />
+          <SocialSignIn redirectTo={redirectTo} enabled={googleEnabled} />
+          {unverifiedEmail && (
+            <UnverifiedEmailNotice
+              email={unverifiedEmail}
+              redirectTo={redirectTo}
+            />
+          )}
           <form id="form-login" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldSet className="mb-5 w-full">
               <FieldGroup>

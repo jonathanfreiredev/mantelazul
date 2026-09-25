@@ -39,6 +39,10 @@ export function DeleteAccountCard() {
   const [password, setPassword] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Until the impact query answers, assume a password is needed: it is the only way to delete an
+  // account that has one.
+  const requiresPassword = impact?.hasPassword ?? true;
+
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
 
@@ -49,7 +53,7 @@ export function DeleteAccountCard() {
     setIsDeleting(true);
 
     await authClient.deleteUser({
-      password,
+      ...(requiresPassword ? { password } : {}),
       fetchOptions: {
         async onSuccess() {
           // The server already cleared the session cookie; signing out keeps the client honest and
@@ -60,7 +64,10 @@ export function DeleteAccountCard() {
         onError(error) {
           setIsDeleting(false);
           toast.error(t("errorTitle"), {
-            description: error.error.message,
+            description:
+              error.error.code === "SESSION_EXPIRED"
+                ? t("sessionExpired")
+                : error.error.message,
             position: "bottom-right",
           });
         },
@@ -113,21 +120,25 @@ export function DeleteAccountCard() {
               <li>{t("publishedRecipes")}</li>
             </ul>
 
-            <Field>
-              <FieldLabel htmlFor="delete-account-password">
-                {t("password")}
-              </FieldLabel>
-              <Input
-                id="delete-account-password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                disabled={isDeleting}
-              />
-              <FieldDescription>{t("passwordHint")}</FieldDescription>
-            </Field>
+            {requiresPassword ? (
+              <Field>
+                <FieldLabel htmlFor="delete-account-password">
+                  {t("password")}
+                </FieldLabel>
+                <Input
+                  id="delete-account-password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  disabled={isDeleting}
+                />
+                <FieldDescription>{t("passwordHint")}</FieldDescription>
+              </Field>
+            ) : (
+              <FieldDescription>{t("noPasswordHint")}</FieldDescription>
+            )}
 
             <DialogFooter>
               <Button
@@ -140,7 +151,9 @@ export function DeleteAccountCard() {
               <Button
                 variant="destructive"
                 onClick={handleDelete}
-                disabled={isDeleting || password.length === 0}
+                disabled={
+                  isDeleting || (requiresPassword && password.length === 0)
+                }
               >
                 {t("confirm")}
               </Button>

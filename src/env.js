@@ -18,6 +18,10 @@ export const env = createEnv({
     RESEND_API_KEY: z.string(),
     CLOUDINARY_API_SECRET: z.string(),
     BFL_API_KEY: z.string(),
+    // Google sign-in. Both are optional so the app still boots without them; the provider is
+    // registered only when the pair is present. Create them in the Google Cloud console.
+    GOOGLE_CLIENT_ID: z.string().optional(),
+    GOOGLE_CLIENT_SECRET: z.string().optional(),
     // Chroma. Local development talks to the server started with `pnpm chroma:dev`
     // (SQLite persistence in ./.chroma), addressed by CHROMA_URL. In production, set
     // CHROMA_API_KEY (plus CHROMA_HOST, CHROMA_TENANT and CHROMA_DATABASE) to use Chroma Cloud
@@ -53,6 +57,8 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     NEXT_PUBLIC_CLOUDINARY_API_KEY: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
     BFL_API_KEY: process.env.BFL_API_KEY,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     CHROMA_URL: process.env.CHROMA_URL,
     CHROMA_HOST: process.env.CHROMA_HOST,
     CHROMA_API_KEY: process.env.CHROMA_API_KEY,
