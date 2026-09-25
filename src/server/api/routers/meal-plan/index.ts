@@ -23,6 +23,7 @@ import {
   mealPlanEntryCreateSchema,
   mealPlanEntryUpdateSchema,
   mealPlanRangeSchema,
+  mealPlanReorderSchema,
   mealPlanWeekSchema,
 } from "./validation";
 
@@ -290,6 +291,54 @@ export const mealPlanRouter = createTRPCRouter({
       return {
         entries: entries.map((entry) => toEntryDto(entry, userId, locale)),
       };
+    }),
+
+  /**
+   * Saves a new arrangement of the calendar: the client sends the days a drag touched, each with
+   * its meals in their final order. Only meals the caller can see can be moved, and `order` is
+   * simply the position in the list.
+   */
+  reorder: protectedProcedure
+    .input(mealPlanReorderSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const householdId = await getHouseholdId(ctx.db, userId);
+
+      const positions = input.days.flatMap((day) =>
+        day.entryIds.map((id, order) => ({ id, date: day.date, order })),
+      );
+      const entryIds = positions.map((position) => position.id);
+
+      const visibleEntries = await ctx.db.mealPlanEntry.findMany({
+        where: {
+          id: { in: entryIds },
+          ...visibilityFilter(userId, householdId),
+        },
+        select: { id: true },
+      });
+      const visibleIds = new Set(visibleEntries.map((entry) => entry.id));
+      const invalidEntryIds = [...new Set(entryIds)].filter(
+        (id) => !visibleIds.has(id),
+      );
+
+      if (invalidEntryIds.length > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: MEAL_PLAN_ERRORS.entriesNotVisible,
+          cause: { invalidEntryIds },
+        });
+      }
+
+      await ctx.db.$transaction(
+        positions.map((position) =>
+          ctx.db.mealPlanEntry.update({
+            where: { id: position.id },
+            data: { date: toDbDate(position.date), order: position.order },
+          }),
+        ),
+      );
+
+      return { success: true };
     }),
 
   update: protectedProcedure

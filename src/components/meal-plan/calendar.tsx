@@ -1,8 +1,15 @@
 "use client";
 
+import { move } from "@dnd-kit/helpers";
+import {
+  DragDropProvider,
+  type DragEndEvent,
+  type DragOverEvent,
+} from "@dnd-kit/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { addDays, DAYS_IN_WEEK, startOfWeek, todayIso } from "~/lib/dates";
 import { toLocale } from "~/lib/locales";
 import { api } from "~/trpc/react";
@@ -20,9 +27,15 @@ interface CalendarProps {
   initialDate: string;
 }
 
+/** The ids of a day, as a string, to tell whether a drag changed that day. */
+function idsOf(entries: MealPlanEntryDto[] | undefined): string {
+  return (entries ?? []).map((entry) => entry.id).join(",");
+}
+
 export function Calendar({ initialDate }: CalendarProps) {
   const t = useTranslations("Calendar");
   const locale = toLocale(useLocale());
+  const utils = api.useUtils();
 
   const [anchorDate, setAnchorDate] = useState(initialDate);
   const [today, setToday] = useState(initialDate);
@@ -33,6 +46,14 @@ export function Calendar({ initialDate }: CalendarProps) {
   const [removingEntry, setRemovingEntry] = useState<MealPlanEntryDto | null>(
     null,
   );
+  /** The arrangement while a drag is in progress. The query is the source of truth otherwise. */
+  const [dragOrder, setDragOrder] = useState<Record<
+    string,
+    MealPlanEntryDto[]
+  > | null>(null);
+  const dragStartRef = useRef<Record<string, MealPlanEntryDto[]> | null>(null);
+  /** Mirrors `dragOrder` for the drag handlers, which must not read deferred state. */
+  const dragOrderRef = useRef<Record<string, MealPlanEntryDto[]> | null>(null);
 
   // The server's "today" is only a placeholder: once mounted, trust the user's own clock. The
   // week only moves when the local date falls in a different week, to avoid a needless refetch.
@@ -60,23 +81,39 @@ export function Calendar({ initialDate }: CalendarProps) {
     [startDate],
   );
 
+  // Every day of the week is present, even the empty ones: the drag helper looks up the day a
+  // meal is dropped on by key, so a day that is missing from the record cannot receive one.
   const entriesByDate = useMemo(() => {
-    const grouped: Record<string, MealPlanEntryDto[]> = {};
+    const grouped = Object.fromEntries(
+      days.map((day) => [day, [] as MealPlanEntryDto[]]),
+    );
 
     for (const entry of weekQuery.data?.entries ?? []) {
       (grouped[entry.date] ??= []).push(entry);
     }
 
     return grouped;
-  }, [weekQuery.data]);
+  }, [days, weekQuery.data]);
+
+  const visibleByDate = dragOrder ?? entriesByDate;
 
   const counts = useMemo(
     () =>
       Object.fromEntries(
-        days.map((day) => [day, entriesByDate[day]?.length ?? 0]),
+        days.map((day) => [day, visibleByDate[day]?.length ?? 0]),
       ),
-    [days, entriesByDate],
+    [days, visibleByDate],
   );
+
+  const reorderMutation = api.mealPlan.reorder.useMutation({
+    onSuccess: () => {
+      void utils.mealPlan.getWeek.invalidate();
+    },
+    onError: () => {
+      toast.error(t("reorderError"));
+      void utils.mealPlan.getWeek.invalidate();
+    },
+  });
 
   function goToWeek(weeks: number) {
     setAnchorDate((current) => addDays(current, weeks * DAYS_IN_WEEK));
@@ -111,6 +148,64 @@ export function Calendar({ initialDate }: CalendarProps) {
   function handleRemoveFromForm(entry: MealPlanEntryDto) {
     setFormDate(null);
     setRemovingEntry(entry);
+  }
+
+  function handleDragStart() {
+    dragStartRef.current = entriesByDate;
+    dragOrderRef.current = entriesByDate;
+    setDragOrder(entriesByDate);
+  }
+
+  // dnd-kit reorders its own model during the drag; mirroring it in state is what moves a card
+  // into another day, and what lets a meal land on a day that is empty. `move` is computed right
+  // away, not inside the state updater: it reads the live drag operation, which moves on.
+  function handleDragOver(event: DragOverEvent) {
+    const base = dragOrderRef.current ?? entriesByDate;
+    const next = move(base, event);
+
+    if (next === base) return;
+
+    dragOrderRef.current = next;
+    setDragOrder(next);
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const before = dragStartRef.current ?? entriesByDate;
+    dragStartRef.current = null;
+    dragOrderRef.current = null;
+    setDragOrder(null);
+
+    if (event.canceled) return;
+
+    const after = move(before, event);
+    const changedDays = days.filter(
+      (day) => idsOf(before[day]) !== idsOf(after[day]),
+    );
+
+    if (changedDays.length === 0) return;
+
+    // Show the new arrangement immediately, then let the server confirm it.
+    utils.mealPlan.getWeek.setData({ date: anchorDate, locale }, (old) =>
+      old
+        ? {
+            ...old,
+            entries: days.flatMap((day) =>
+              (after[day] ?? []).map((entry, order) => ({
+                ...entry,
+                date: day,
+                order,
+              })),
+            ),
+          }
+        : old,
+    );
+
+    reorderMutation.mutate({
+      days: changedDays.map((day) => ({
+        date: day,
+        entryIds: (after[day] ?? []).map((entry) => entry.id),
+      })),
+    });
   }
 
   return (
@@ -171,19 +266,25 @@ export function Calendar({ initialDate }: CalendarProps) {
           {t("loadError")}
         </p>
       ) : (
-        <div className="grid gap-3 lg:grid-cols-7">
-          {days.map((day) => (
-            <DayColumn
-              key={day}
-              locale={locale}
-              date={day}
-              entries={entriesByDate[day] ?? []}
-              isToday={day === today}
-              onAdd={handleAdd}
-              onOpen={handleOpenEntry}
-            />
-          ))}
-        </div>
+        <DragDropProvider
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="grid gap-3 lg:grid-cols-7">
+            {days.map((day) => (
+              <DayColumn
+                key={day}
+                locale={locale}
+                date={day}
+                entries={visibleByDate[day] ?? []}
+                isToday={day === today}
+                onAdd={handleAdd}
+                onOpen={handleOpenEntry}
+              />
+            ))}
+          </div>
+        </DragDropProvider>
       )}
 
       <MealFormSheet

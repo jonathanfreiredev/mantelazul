@@ -426,6 +426,8 @@
     "servings": "{count, plural, one {# serving} other {# servings}}",
     "addedBy": "Added by {name}",
     "mealMenu": "Meal options",
+    "reorderMeal": "Move meal",
+    "reorderError": "The new order could not be saved",
     "edit": "Edit",
     "remove": "Remove",
     "removeTitle": "Remove this meal?",

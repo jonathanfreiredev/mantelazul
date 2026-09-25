@@ -426,6 +426,8 @@
     "servings": "{count, plural, one {# ración} other {# raciones}}",
     "addedBy": "Añadida por {name}",
     "mealMenu": "Opciones de la comida",
+    "reorderMeal": "Mover comida",
+    "reorderError": "No se pudo guardar el nuevo orden",
     "edit": "Editar",
     "remove": "Quitar",
     "removeTitle": "¿Quitar esta comida?",

@@ -1,11 +1,13 @@
 import z from "zod";
-import { daysBetween, isIsoDate } from "~/lib/dates";
+import { DAYS_IN_WEEK, daysBetween, isIsoDate } from "~/lib/dates";
 import { DEFAULT_LOCALE, LOCALES } from "~/lib/locales";
 
 export const MAX_SERVINGS = 99;
 export const MAX_NOTE_LENGTH = 500;
 /** The most meals a single batch call can plan. */
 export const MAX_MEALS_PER_BATCH = 50;
+/** The most meals a single day can hold, used to bound a reorder. */
+export const MAX_MEALS_PER_DAY = 50;
 /** The most days a single read can span. */
 export const MAX_RANGE_DAYS = 31;
 
@@ -47,6 +49,23 @@ export const mealPlanEntryBatchCreateSchema = z.object({
   meals: z.array(mealPlanEntryInputSchema).min(1).max(MAX_MEALS_PER_BATCH),
   /** Language the created entries are returned in. */
   locale: z.enum(LOCALES).default(DEFAULT_LOCALE),
+});
+
+/**
+ * The final arrangement of the days a drag touched. Each day carries its meals in the order they
+ * should be shown, so a move between days is expressed by listing the meal in its new day and
+ * leaving it out of the old one.
+ */
+export const mealPlanReorderSchema = z.object({
+  days: z
+    .array(
+      z.object({
+        date: isoDateSchema,
+        entryIds: z.array(z.string().min(1)).max(MAX_MEALS_PER_DAY),
+      }),
+    )
+    .min(1)
+    .max(DAYS_IN_WEEK),
 });
 
 export const mealPlanEntryUpdateSchema = z.object({

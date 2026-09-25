@@ -6,4 +6,6 @@
 export const MEAL_PLAN_ERRORS = {
   /** At least one recipe does not exist, or is not visible to the caller. */
   recipesNotVisible: "recipes-not-visible",
+  /** At least one meal does not exist, or is not visible to the caller. */
+  entriesNotVisible: "entries-not-visible",
 } as const;
