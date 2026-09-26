@@ -445,7 +445,9 @@
     "planMealsShared": "Mit dem Haushalt geteilt",
     "viewCalendar": "Kalender ansehen",
     "attachTitle": "Bild an den Chat anhängen",
-    "attachDescription": "Das Bild wird an den Assistenten gesendet und kann im Gespräch verwendet werden."
+    "attachDescription": "Sende dem Assistenten ein Foto eines Gerichts, eines handgeschriebenen Rezepts oder deiner Zutaten. Er kann es lesen, und ein Foto des Gerichts kann das Rezeptbild werden.",
+    "imageTooLarge": "Das Bild ist zu groß. Bitte verwende eines unter 10 MB.",
+    "imageUploadFailed": "Das Bild konnte nicht hochgeladen werden. Bitte versuche es erneut."
   },
   "VoiceDictation": {
     "open": "Eine Nachricht diktieren",

@@ -31,6 +31,7 @@ export async function POST(req: Request) {
   const agent = createAgent({
     today: todayIso(),
     householdName: user?.household?.name ?? null,
+    attachedImageUrl: latestAttachedImageUrl(messages),
   });
 
   return createAgentUIStreamResponse({
@@ -41,4 +42,25 @@ export async function POST(req: Request) {
       await saveChat(messages, id, userId);
     },
   });
+}
+
+/**
+ * URL of the image the user attached, taken from the most recent message that carries one. The
+ * image is uploaded to Cloudinary before the message is sent, so this is a plain https URL the
+ * recipe tools can use as a cover. The search walks the whole conversation, not just the last
+ * message: the user often attaches the photo first and asks to use it a message later.
+ */
+function latestAttachedImageUrl(messages: UIMessage[]): string | null {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message?.role !== "user") continue;
+
+    for (const part of message.parts) {
+      if (part.type === "file" && part.mediaType.startsWith("image/")) {
+        return part.url;
+      }
+    }
+  }
+
+  return null;
 }

@@ -11,6 +11,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useMediaQuery } from "~/hooks/use-media-query";
 import type { MyAgentUIMessage } from "~/lib/agent";
 import { api } from "~/trpc/react";
@@ -177,7 +178,7 @@ export default function AIAgentChat({
     let imageUrl: string | null = null;
 
     if (attachedImage && attachedImage.file.size > MAX_ATTACHED_IMAGE_BYTES) {
-      console.error("Attached image exceeds the 10MB limit");
+      toast.error(t("imageTooLarge"));
       return;
     }
 
@@ -194,12 +195,15 @@ export default function AIAgentChat({
         });
 
         if (!response.ok) {
-          console.error("Image upload failed");
+          toast.error(t("imageUploadFailed"));
           return;
         }
 
         const resImage: { url: string } = await response.json();
         imageUrl = resImage.url;
+      } catch {
+        toast.error(t("imageUploadFailed"));
+        return;
       } finally {
         setUploadingImage(false);
       }
@@ -213,7 +217,9 @@ export default function AIAgentChat({
           ? [
               {
                 type: "file" as const,
-                mediaType: "image/png",
+                // The real type of the processed file (WebP, or JPEG when the conversion
+                // failed). A hardcoded one makes the model read the image as something it is not.
+                mediaType: attachedImage?.file.type || "image/jpeg",
                 url: imageUrl,
               },
             ]

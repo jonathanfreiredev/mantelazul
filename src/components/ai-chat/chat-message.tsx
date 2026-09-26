@@ -12,6 +12,7 @@ import { DeleteRecipeTool } from "./tools/delete-recipe-tool";
 import { GeneratedImagePart } from "./tools/generated-image-part";
 import { PlannedMealsTool } from "./tools/planned-meals-tool";
 import { RecipeApprovalTool } from "./tools/recipe-approval-tool";
+import { RecipeListTool } from "./tools/recipe-list-tool";
 import { ToolErrorCard } from "./tools/tool-error-card";
 import { isToolErrorPart, isToolPart } from "./tools/tool-part";
 
@@ -106,11 +107,21 @@ export function ChatMessage({
               );
             }
 
+            if (isToolPart(part, ["searchRecipes", "getFavouriteRecipes"])) {
+              return (
+                <RecipeListTool
+                  key={part.toolCallId}
+                  part={part}
+                  onNavigate={onNavigate}
+                />
+              );
+            }
+
             if (part.type === "text" || part.type === "file") {
               return <MessagePart key={key} part={part} partIndex={index} />;
             }
 
-            // Other tool parts (search, favourites, getOne, tags) have no bespoke UI.
+            // Other tool parts (getOneRecipe, getTags) have no bespoke UI.
             return null;
           })}
         </div>

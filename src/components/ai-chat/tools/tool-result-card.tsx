@@ -9,9 +9,11 @@ interface ToolResultCardProps {
 }
 
 const toneClasses = {
-  success: "border-slate-300 bg-slate-100",
-  denied: "border-red-300 bg-red-100",
-  error: "border-amber-300 bg-amber-100",
+  success:
+    "border-slate-300 bg-slate-100 dark:border-slate-600 dark:bg-slate-800",
+  denied: "border-red-300 bg-red-100 dark:border-red-800 dark:bg-red-950",
+  error:
+    "border-amber-300 bg-amber-100 dark:border-amber-700 dark:bg-amber-950",
 } as const;
 
 /** Card that wraps the outcome of a tool call inside the chat. */
