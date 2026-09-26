@@ -134,4 +134,19 @@
   html {
     @apply font-sans;
   }
+
+  /*
+   * The assistant composer floats over the bottom of every page, so the document keeps room for it
+   * and the footer (with the legal links) stays reachable. `:has()` ties the reserved space to the
+   * composer actually being mounted, which avoids threading the session through the layout for it.
+   */
+  body:has([data-chat-composer]) {
+    padding-bottom: 10rem;
+  }
+
+  @media (width >= 48rem) {
+    body:has([data-chat-composer]) {
+      padding-bottom: 9.5rem;
+    }
+  }
 }

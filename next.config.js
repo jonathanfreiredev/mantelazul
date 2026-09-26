@@ -24,6 +24,12 @@ const config = {
   outputFileTracingIncludes: {
     "/*": ["src/content/legal/**/*.md"],
   },
+  allowedDevOrigins: [
+    "*.ngrok-free.dev",
+    "*.ngrok-free.app",
+    "*.ngrok.app",
+    "*.ngrok.io",
+  ],
 };
 
 export default withNextIntl(config);

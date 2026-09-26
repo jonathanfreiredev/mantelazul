@@ -89,9 +89,9 @@ export function MealRow({ entry, index, date, onOpen }: MealRowProps) {
         ref={handleRef}
         type="button"
         aria-label={t("reorderMeal")}
-        className="bg-background/80 text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 absolute top-2 left-2 flex size-6 cursor-grab touch-none items-center justify-center rounded-full shadow-sm backdrop-blur-sm transition-colors focus-visible:ring-[3px] focus-visible:outline-none active:cursor-grabbing"
+        className="bg-background/80 text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 absolute top-2 left-2 flex size-8 cursor-grab touch-none items-center justify-center rounded-full shadow-sm backdrop-blur-sm transition-colors focus-visible:ring-[3px] focus-visible:outline-none active:cursor-grabbing md:size-6"
       >
-        <GripVerticalIcon className="size-3.5" />
+        <GripVerticalIcon className="size-4 md:size-3.5" />
       </button>
     </Item>
   );
