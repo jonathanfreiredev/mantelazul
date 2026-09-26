@@ -35,7 +35,15 @@ const recipeInputSchema = z.object({
   imageUrl: z
     .url()
     .optional()
-    .describe("URL of the recipe image, or omit it to keep the current one."),
+    .describe(
+      "URL of the recipe image, when it does not come from the image the user attached. Omit it to keep the image the recipe already has. To use the attached image, set 'useAttachedImage' instead of writing its URL here.",
+    ),
+  useAttachedImage: z
+    .boolean()
+    .optional()
+    .describe(
+      "Set it to true to replace the recipe's cover photo with the image the user attached to the conversation. The app already knows that image's URL: never write the URL yourself. Only set it when the attached image is a photo of the dish itself; never for a recipe card, a menu, a poster or any other image that is not the dish.",
+    ),
   difficulty: z
     .enum(Difficulty)
     .describe(
@@ -100,8 +108,19 @@ const recipeInputSchema = z.object({
     ),
 });
 
-export const toolUpdateRecipe = tool({
-  description: `
+/**
+ * Builds the update-recipe tool for one request. Like the create tool, it is a factory because
+ * the image the user attached lives in the request: the agent asks for it with
+ * `useAttachedImage` and the tool resolves the URL.
+ */
+export function createToolUpdateRecipe({
+  attachedImageUrl,
+}: {
+  /** URL of the image the user attached to the conversation, already uploaded, or null. */
+  attachedImageUrl: string | null;
+}) {
+  return tool({
+    description: `
 Updates an existing recipe. Use it when the user wants to change a recipe that already exists.
 
 The input carries the recipe id plus the full recipe (title, description, ingredients,
@@ -114,61 +133,72 @@ IMPORTANT:
 - Call 'getOneRecipe' first to read the recipe, then send it back with only the requested change.
 - To change the language the recipe is written in, set 'sourceLocale' and send the title,
   description, ingredients and steps in that language.
+- Leave 'imageUrl' out to keep the image the recipe already has, and set 'useAttachedImage'
+  to true when the user wants the photo they attached to become the recipe's cover.
 - This tool requires user approval before it runs.
   `,
-  inputSchema: zodSchema(recipeInputSchema),
-  execute: async (recipe) => {
-    const newRecipe = await api.recipes.update({
-      id: recipe.id,
-      sourceLocale: recipe.sourceLocale,
-      recipe: {
-        title: recipe.title,
-        description: recipe.description,
-        category: recipe.category,
-        difficulty: recipe.difficulty,
-        defaultServings: recipe.defaultServings,
-        preparationTime: recipe.preparationTime,
-        cookingTime: recipe.cookingTime,
-        restingTime: recipe.restingTime,
-        calories: recipe.calories,
-        carbohydrates: recipe.carbohydrates,
-        protein: recipe.protein,
-        fat: recipe.fat,
-        imageUrl: recipe.imageUrl || null,
+    inputSchema: zodSchema(recipeInputSchema),
+    execute: async (recipe) => {
+      // Omitting the image must keep the one the recipe already has: the agent is never asked to
+      // send it back, and passing null would delete it from Cloudinary.
+      const imageUrl =
+        (recipe.useAttachedImage ? attachedImageUrl : null) ??
+        recipe.imageUrl ??
+        (await api.recipes.getOne({ id: recipe.id, locale: "source" }))
+          .imageUrl;
+
+      const newRecipe = await api.recipes.update({
+        id: recipe.id,
+        sourceLocale: recipe.sourceLocale,
+        recipe: {
+          title: recipe.title,
+          description: recipe.description,
+          category: recipe.category,
+          difficulty: recipe.difficulty,
+          defaultServings: recipe.defaultServings,
+          preparationTime: recipe.preparationTime,
+          cookingTime: recipe.cookingTime,
+          restingTime: recipe.restingTime,
+          calories: recipe.calories,
+          carbohydrates: recipe.carbohydrates,
+          protein: recipe.protein,
+          fat: recipe.fat,
+          imageUrl,
+          tags: recipe.tags,
+        },
+      });
+
+      await api.recipes.updateIngredients({
+        recipeId: newRecipe.id,
+        ingredients: recipe.ingredients.map((ingredient, index) => ({
+          name: ingredient.name,
+          quantity: ingredient.quantity.toFixed(3),
+          unit: ingredient.unit,
+          order: index,
+        })),
+      });
+
+      await api.recipes.updateSteps({
+        recipeId: newRecipe.id,
+        steps: recipe.steps.map((step, index) => ({
+          description: step,
+          imageUrl: null,
+          order: index,
+        })),
+      });
+
+      await api.recipes.updateTags({
+        recipeId: newRecipe.id,
         tags: recipe.tags,
-      },
-    });
+      });
 
-    await api.recipes.updateIngredients({
-      recipeId: newRecipe.id,
-      ingredients: recipe.ingredients.map((ingredient, index) => ({
-        name: ingredient.name,
-        quantity: ingredient.quantity.toFixed(3),
-        unit: ingredient.unit,
-        order: index,
-      })),
-    });
+      const updatedRecipe = await api.recipes.getOne({ id: newRecipe.id });
 
-    await api.recipes.updateSteps({
-      recipeId: newRecipe.id,
-      steps: recipe.steps.map((step, index) => ({
-        description: step,
-        imageUrl: null,
-        order: index,
-      })),
-    });
-
-    await api.recipes.updateTags({
-      recipeId: newRecipe.id,
-      tags: recipe.tags,
-    });
-
-    const updatedRecipe = await api.recipes.getOne({ id: newRecipe.id });
-
-    return {
-      success: true,
-      message: "Recipe updated successfully",
-      recipe: updatedRecipe,
-    };
-  },
-});
+      return {
+        success: true,
+        message: "Recipe updated successfully",
+        recipe: updatedRecipe,
+      };
+    },
+  });
+}

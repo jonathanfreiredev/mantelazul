@@ -40,6 +40,8 @@ export function AttachImageInput({
           size="icon"
           disabled={disabled}
           className="rounded-full"
+          aria-label={t("attachTitle")}
+          title={t("attachTitle")}
         >
           <PaperclipIcon />
         </Button>

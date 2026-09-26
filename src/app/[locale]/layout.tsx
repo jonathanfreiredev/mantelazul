@@ -20,7 +20,7 @@ const fontNext = Instrument_Sans({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // Zoom stays available: locking it out blocks pinch-to-zoom, which is a WCAG 1.4.4 failure.
 };
 
 export function generateStaticParams() {

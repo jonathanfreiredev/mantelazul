@@ -8,7 +8,7 @@ export async function Footer() {
 
   return (
     <footer className="border-t">
-      <div className="flex h-full w-full flex-wrap items-center justify-between gap-4 px-20 py-12 text-sm text-gray-500">
+      <div className="flex h-full w-full flex-col items-center justify-between gap-6 px-6 py-8 text-sm text-gray-500 sm:flex-row sm:gap-4 sm:px-20 sm:py-12">
         <p>{t("rights", { year: new Date().getFullYear() })}</p>
         <div className="flex items-center gap-6">
           <nav className="flex items-center gap-4">

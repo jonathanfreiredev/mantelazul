@@ -32,6 +32,18 @@ const google = googleCredentials();
 /** Whether the credentials are in place, so the sign-in pages can hide the button otherwise. */
 export const googleSignInEnabled = google !== undefined;
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
+/**
+ * Tunnel hostnames, for reaching the dev server from a phone or over https. ngrok hands out a new
+ * subdomain on every restart, so the exact host cannot be listed. Development only: in production
+ * anyone can claim a matching ngrok subdomain, and being in the allowlist is enough to derive a
+ * base URL from it.
+ */
+const tunnelHosts = isDevelopment
+  ? ["*.ngrok-free.dev", "*.ngrok-free.app", "*.ngrok.app", "*.ngrok.io"]
+  : [];
+
 export const auth = betterAuth({
   baseURL: {
     allowedHosts: [
@@ -40,8 +52,16 @@ export const auth = betterAuth({
       "mantelazul.com",
       "www.mantelazul.com",
       "*.vercel.app",
+      ...tunnelHosts,
     ],
-    protocol: process.env.NODE_ENV === "development" ? "http" : "https",
+    // The tunnel terminates TLS in front of us and forwards plain http, so the scheme has to come
+    // from `x-forwarded-proto`. Locally that still resolves to http; in production it is https.
+    protocol: isDevelopment ? "auto" : "https",
+  },
+  advanced: {
+    // What makes Better Auth read `x-forwarded-host` and `x-forwarded-proto` instead of the
+    // internal `localhost:3000`. Off in production, where the host header is already the public one.
+    trustedProxyHeaders: isDevelopment,
   },
   database: prismaAdapter(db, {
     provider: "postgresql", // or "sqlite" or "mysql"

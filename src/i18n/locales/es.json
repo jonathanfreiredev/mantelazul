@@ -445,7 +445,9 @@
     "planMealsShared": "Compartida con el hogar",
     "viewCalendar": "Ver calendario",
     "attachTitle": "Adjuntar una imagen al chat",
-    "attachDescription": "La imagen se enviará al asistente y podrá usarse en la conversación."
+    "attachDescription": "Envía al asistente una foto de un plato, de una receta escrita a mano o de tus ingredientes. Puede leerla, y la foto de un plato puede ser la imagen de la receta.",
+    "imageTooLarge": "Esa imagen es demasiado grande. Usa una de menos de 10 MB.",
+    "imageUploadFailed": "No se pudo subir la imagen. Inténtalo de nuevo."
   },
   "VoiceDictation": {
     "open": "Dictar un mensaje",

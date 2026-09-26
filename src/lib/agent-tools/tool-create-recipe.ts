@@ -33,7 +33,13 @@ const recipeInputSchema = z.object({
     .url()
     .optional()
     .describe(
-      "URL of the recipe image. Omit it to let the app generate one automatically.",
+      "URL of the recipe image, when it does not come from the image the user attached. Omit it to let the app generate one automatically. To use the attached image, set 'useAttachedImage' instead of writing its URL here.",
+    ),
+  useAttachedImage: z
+    .boolean()
+    .optional()
+    .describe(
+      "Set it to true to use the image the user attached to the conversation as the recipe's cover photo. The app already knows that image's URL: never write the URL yourself. Only set it when the attached image is a photo of the dish itself; never for a recipe card, a menu, a poster or any other image that is not the dish.",
     ),
   defaultServings: intSchema
     .min(1, "It must be at least 1")
@@ -99,8 +105,19 @@ const recipeInputSchema = z.object({
     ),
 });
 
-export const toolCreateRecipe = tool({
-  description: `
+/**
+ * Builds the create-recipe tool for one request. It is a factory because the image the user
+ * attached lives in the request, not in the tool: the agent only has to ask for it with
+ * `useAttachedImage`, and the tool resolves the URL itself instead of the model copying it.
+ */
+export function createToolCreateRecipe({
+  attachedImageUrl,
+}: {
+  /** URL of the image the user attached to the conversation, already uploaded, or null. */
+  attachedImageUrl: string | null;
+}) {
+  return tool({
+    description: `
 Creates and stores a finalized cooking recipe.
 
 The recipe must already be fully defined and agreed upon, with a title, an ingredients
@@ -111,11 +128,16 @@ IMPORTANT:
 - Do NOT call it during brainstorming or suggestion phases.
 - This tool requires user approval before it runs.
   `,
-  inputSchema: zodSchema(recipeInputSchema),
-  execute: async (recipe) => {
-    const image = recipe.imageUrl
-      ? recipe.imageUrl
-      : await generateImageForRecipe({
+    inputSchema: zodSchema(recipeInputSchema),
+    execute: async (recipe) => {
+      // The agent asks for the attached image with a flag, so the URL never travels through the
+      // model. An explicit URL and the automatic image are the fallbacks.
+      const attachedImage = recipe.useAttachedImage ? attachedImageUrl : null;
+
+      const image =
+        attachedImage ??
+        recipe.imageUrl ??
+        (await generateImageForRecipe({
           title: recipe.title,
           description: recipe.description,
           category: recipe.category,
@@ -128,58 +150,59 @@ IMPORTANT:
           carbohydrates: recipe.carbohydrates,
           protein: recipe.protein,
           fat: recipe.fat,
-        });
+        }));
 
-    const newRecipe = await api.recipes.create({
-      title: recipe.title,
-      description: recipe.description,
-      category: recipe.category,
-      difficulty: recipe.difficulty,
-      defaultServings: recipe.defaultServings,
-      preparationTime: recipe.preparationTime,
-      cookingTime: recipe.cookingTime,
-      restingTime: recipe.restingTime,
-      calories: recipe.calories,
-      carbohydrates: recipe.carbohydrates,
-      protein: recipe.protein,
-      fat: recipe.fat,
-      imageUrl: image || null,
-      locale: recipe.locale,
-    });
+      const newRecipe = await api.recipes.create({
+        title: recipe.title,
+        description: recipe.description,
+        category: recipe.category,
+        difficulty: recipe.difficulty,
+        defaultServings: recipe.defaultServings,
+        preparationTime: recipe.preparationTime,
+        cookingTime: recipe.cookingTime,
+        restingTime: recipe.restingTime,
+        calories: recipe.calories,
+        carbohydrates: recipe.carbohydrates,
+        protein: recipe.protein,
+        fat: recipe.fat,
+        imageUrl: image || null,
+        locale: recipe.locale,
+      });
 
-    await api.recipes.updateIngredients({
-      recipeId: newRecipe.id,
-      ingredients: recipe.ingredients.map((ingredient, index) => ({
-        name: ingredient.name,
-        quantity: ingredient.quantity.toFixed(3),
-        unit: ingredient.unit,
-        order: index,
-      })),
-    });
+      await api.recipes.updateIngredients({
+        recipeId: newRecipe.id,
+        ingredients: recipe.ingredients.map((ingredient, index) => ({
+          name: ingredient.name,
+          quantity: ingredient.quantity.toFixed(3),
+          unit: ingredient.unit,
+          order: index,
+        })),
+      });
 
-    await api.recipes.updateSteps({
-      recipeId: newRecipe.id,
-      steps: recipe.steps.map((step, index) => ({
-        description: step,
-        imageUrl: null,
-        order: index,
-      })),
-    });
+      await api.recipes.updateSteps({
+        recipeId: newRecipe.id,
+        steps: recipe.steps.map((step, index) => ({
+          description: step,
+          imageUrl: null,
+          order: index,
+        })),
+      });
 
-    await api.recipes.updateTags({
-      recipeId: newRecipe.id,
-      tags: recipe.tags,
-    });
+      await api.recipes.updateTags({
+        recipeId: newRecipe.id,
+        tags: recipe.tags,
+      });
 
-    const createdRecipe = await api.recipes.getOne({ id: newRecipe.id });
+      const createdRecipe = await api.recipes.getOne({ id: newRecipe.id });
 
-    return {
-      success: true,
-      message: "Recipe created successfully",
-      recipe: createdRecipe,
-    };
-  },
-});
+      return {
+        success: true,
+        message: "Recipe created successfully",
+        recipe: createdRecipe,
+      };
+    },
+  });
+}
 
 const generateImageForRecipe = async (recipe: {
   title: string;

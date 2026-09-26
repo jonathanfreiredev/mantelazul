@@ -77,7 +77,7 @@ export function ChatInput({
   const isRetry = dictation.status === "failed";
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-zinc-300 bg-white/80 px-4 py-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col gap-2 rounded-lg border border-zinc-300 bg-white/80 px-3 py-2 shadow-xl md:px-4 dark:border-zinc-800 dark:bg-zinc-900">
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -85,7 +85,7 @@ export function ChatInput({
         }}
       >
         <Textarea
-          className="w-full resize-none border-none py-2 focus-visible:ring-0"
+          className="w-full resize-none border-none focus-visible:ring-0"
           value={value}
           rows={1}
           placeholder={t("placeholder")}
@@ -106,19 +106,19 @@ export function ChatInput({
         />
 
         {isDictating ? (
-          <div className="mt-1 flex items-center gap-2">
+          <div className="mt-2 flex items-center gap-2 md:mt-1">
             <span className="sr-only" aria-live="polite">
               {isTranscribing ? tVoice("transcribing") : tVoice("recording")}
             </span>
 
             <VoiceWaveform
               levels={dictation.levels}
-              className="h-8 min-w-0 flex-1 text-zinc-500 dark:text-zinc-400"
+              className="h-10 min-w-0 flex-1 text-zinc-500 md:h-8 dark:text-zinc-400"
             />
 
             <span
               aria-hidden
-              className="shrink-0 text-[11px] tabular-nums text-muted-foreground"
+              className="text-muted-foreground shrink-0 text-xs tabular-nums md:text-[11px]"
             >
               {formatTime(dictation.elapsedMs)} / {formatTime(MAX_DICTATION_MS)}
             </span>
@@ -159,8 +159,8 @@ export function ChatInput({
             </Button>
           </div>
         ) : (
-          <div className="mt-1 flex items-center justify-between">
-            <div className="flex items-center gap-1">
+          <div className="mt-2 flex items-center justify-between md:mt-1">
+            <div className="flex items-center gap-2 md:gap-1">
               {showAttachButton && (
                 <AttachImageInput
                   value={attachedImage}
@@ -168,7 +168,9 @@ export function ChatInput({
                   disabled={disabled}
                 />
               )}
+            </div>
 
+            <div className="flex items-center gap-2 md:gap-1">
               {voiceEnabled && (
                 <Button
                   type="button"
@@ -183,29 +185,29 @@ export function ChatInput({
                   <MicIcon />
                 </Button>
               )}
-            </div>
 
-            {isBusy ? (
-              <Button
-                type="button"
-                variant="default"
-                size="icon"
-                className="rounded-full"
-                onClick={onStop}
-              >
-                <SquareIcon fill="white" />
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                variant="default"
-                size="icon"
-                className="rounded-full"
-                disabled={disabled || value.trim() === ""}
-              >
-                <ArrowUpIcon />
-              </Button>
-            )}
+              {isBusy ? (
+                <Button
+                  type="button"
+                  variant="default"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={onStop}
+                >
+                  <SquareIcon fill="white" />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  variant="default"
+                  size="icon"
+                  className="rounded-full"
+                  disabled={disabled || value.trim() === ""}
+                >
+                  <ArrowUpIcon />
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </form>

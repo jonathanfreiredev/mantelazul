@@ -1,7 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { isStepCount, ToolLoopAgent, type InferAgentUIMessage } from "ai";
 import { MAX_MEALS_PER_BATCH } from "~/server/api/routers/meal-plan/validation";
-import { toolCreateRecipe } from "./agent-tools/tool-create-recipe";
+import { createToolCreateRecipe } from "./agent-tools/tool-create-recipe";
 import { toolDeleteRecipe } from "./agent-tools/tool-delete-recipe";
 import { toolGenerateRecipeImage } from "./agent-tools/tool-generate-recipe-image";
 import { toolGetFavouriteRecipes } from "./agent-tools/tool-get-favourite-recipes";
@@ -10,7 +10,7 @@ import { toolGetOneRecipe } from "./agent-tools/tool-get-one-recipe";
 import { toolGetTags } from "./agent-tools/tool-get-tags";
 import { toolPlanMeals } from "./agent-tools/tool-plan-meals";
 import { toolSearchRecipes } from "./agent-tools/tool-search-recipes";
-import { toolUpdateRecipe } from "./agent-tools/tool-update-recipe";
+import { createToolUpdateRecipe } from "./agent-tools/tool-update-recipe";
 
 /** What the agent needs to know about the current request. */
 export interface AgentContext {
@@ -18,15 +18,29 @@ export interface AgentContext {
   today: string;
   /** Name of the household the user belongs to, or null when they belong to none. */
   householdName: string | null;
+  /**
+   * URL of the image the user attached to the conversation, already uploaded to Cloudinary, or
+   * null when they attached none. The recipe tools take it from here, so the model never has to
+   * copy the URL.
+   */
+  attachedImageUrl: string | null;
 }
 
 /** Tool-loop steps allowed per user message. Planning a week takes a few reads and one write. */
 const MAX_AGENT_STEPS = 15;
 
-function buildInstructions({ today, householdName }: AgentContext): string {
+function buildInstructions({
+  today,
+  householdName,
+  attachedImageUrl,
+}: AgentContext): string {
   const household = householdName
     ? `The user belongs to the household "${householdName}", so meals can be shared with it.`
     : "The user does not belong to a household, so every meal they plan is private to them. Do not offer to share meals with a household.";
+
+  const attachedImage = attachedImageUrl
+    ? `The user attached an image to this conversation. It is already uploaded and its URL is ${attachedImageUrl}.`
+    : "The user has not attached any image to this conversation.";
 
   return `
     You are "Recipe Assistant", a specialized AI expert for a recipe application.
@@ -57,7 +71,7 @@ function buildInstructions({ today, householdName }: AgentContext): string {
     - Use 'getFavouriteRecipes' when the user asks about the recipes they liked ("my favourites").
     - Use 'getOneRecipe' to read a full recipe (ingredients, steps, nutrition). ALWAYS do this before updating a recipe, and whenever the user asks for the details of one.
     - Use 'getTags' to see how recipes are categorized before creating or updating one, and reuse the existing tags when they fit.
-    - Use 'createRecipe' only after the user explicitly confirms they want to save a new recipe, and only with complete data. The app generates an image automatically if you do not pass one.
+    - Use 'createRecipe' only after the user explicitly confirms they want to save a new recipe, and only with complete data. The app generates an image automatically if you do not pass one; set 'useAttachedImage': true when the user wants the photo they attached as the recipe's image.
     - Use 'updateRecipe' only after the user explicitly confirms the change. Call 'getOneRecipe' first and include all existing fields, changing only what the user asked for.
     - If the user asks to change the language a recipe is written in, set 'sourceLocale' in 'updateRecipe' and send the title, description, ingredients and steps in that language.
     - Use 'deleteRecipe' only after the user explicitly confirms they want to delete a recipe. It requires approval, like 'createRecipe' and 'updateRecipe'.
@@ -80,16 +94,21 @@ function buildInstructions({ today, householdName }: AgentContext): string {
     - If the user asks to see ALL of their recipes, request the maximum page ('take': 20) and tell them there may be more, offering to show the next block.
 
     RESULTS FORMAT:
-    - Never output raw JSON. Present recipes as a short readable list: title, category, difficulty, total time, and tags.
+    - Never output raw JSON, and never repeat what the UI already shows.
     - Do not include image urls or recipe ids in the response to the user. Use them only as input when calling the tools.
     - The chat renders your reply as markdown, so keep the formatting light: short paragraphs, bold for key terms and bullet lists for options. Avoid headings (#, ##) inside the conversation, and do not prefix tags with '#' (write "vegan", not "#vegan"), since '#' is reserved for markdown headings.
-    - When you already showed something in the UI, do not repeat it as text. The chat renders generated images, recipe cards (create/update) and approval prompts on its own: add at most a short sentence, never the url, the raw tool output or a paraphrase of what is already on screen.
+    - The recipe lists from 'searchRecipes' and 'getFavouriteRecipes' are rendered as cards with the title, category, difficulty, time and tags of each recipe. Introduce them in one short sentence and, at most, say which one you would pick and why; never write the recipes out again.
+    - Recipe cards from 'createRecipe'/'updateRecipe', generated images and approval prompts are rendered on their own too: add at most a short sentence, never the url, the raw tool output or a paraphrase of what is already on screen.
     - Do not invent recipes or details that were not returned by the tools.
 
     OTHER ACTIONS:
-    - Identify a dish: If the user shares an image of a dish and asks for help identifying it or wants to create a recipe based on it, you can use the image as part of the input when creating or updating recipes with the respective tools if user asks for it.
-    - Identify pantry ingredients: If the user shares an image of a set of ingredients they have on hand and asks for recipe suggestions, you can use that information to find or create recipes that match those ingredients.
-    - Identify a recipe: If the user shares an image of a handwritten or printed recipe and asks for help digitizing it, you can use the image to extract information and create a new recipe in the app.
+    - ${attachedImage}
+    - You can see the images the user sends. Read the attached one before answering: it may be a plated dish, a handwritten or printed recipe card, a menu, or ingredients on a counter.
+    - Digitizing a recipe from a photo: transcribe what the photo actually says, in the user's language: the title, every ingredient with its quantity and unit, and the steps in order. If something is illegible or cut off, say which part you could not read and ask for it; never invent it. Once the recipe is complete, present it briefly and offer to save it with 'createRecipe'.
+    - Identifying a dish or a set of ingredients: use what you see to suggest, find or create recipes that fit.
+    - Using the photo as a recipe's cover: set 'useAttachedImage': true in 'createRecipe' or 'updateRecipe'. Never type the image's URL into 'imageUrl', not even the one above: the app resolves it from the flag.
+    - Only set 'useAttachedImage' when the photo is of the dish itself and works as an appetizing cover. If it is a recipe card, a menu, a poster, a screenshot, a person or anything that is not the dish, do NOT use it as the cover: tell the user that photo cannot be the recipe's image and offer to generate one with 'generateRecipeImage' instead.
+    - If the image has nothing to do with cooking, decline as usual and steer the conversation back to the culinary world.
 
     TONAL GUIDELINES:
     - Be helpful, professional, and inspiring. Act like a knowledgeable sous-chef.
@@ -98,9 +117,12 @@ function buildInstructions({ today, householdName }: AgentContext): string {
 
 /**
  * Builds the agent for one request. It is a factory because the instructions carry data that
- * changes per request: today's date and whether the user has a household to share meals with.
+ * changes per request — today's date, whether the user has a household to share meals with and
+ * the image they attached — and because the recipe tools need that image to resolve its URL.
  */
 export function createAgent(context: AgentContext) {
+  const { attachedImageUrl } = context;
+
   return new ToolLoopAgent({
     model: openai("gpt-6-luna"),
     tools: {
@@ -109,8 +131,8 @@ export function createAgent(context: AgentContext) {
       getFavouriteRecipes: toolGetFavouriteRecipes,
       getOneRecipe: toolGetOneRecipe,
       getMealPlan: toolGetMealPlan,
-      createRecipe: toolCreateRecipe,
-      updateRecipe: toolUpdateRecipe,
+      createRecipe: createToolCreateRecipe({ attachedImageUrl }),
+      updateRecipe: createToolUpdateRecipe({ attachedImageUrl }),
       deleteRecipe: toolDeleteRecipe,
       planMeals: toolPlanMeals,
       generateRecipeImage: toolGenerateRecipeImage,

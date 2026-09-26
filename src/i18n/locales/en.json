@@ -445,7 +445,9 @@
     "planMealsShared": "Shared with the household",
     "viewCalendar": "View Calendar",
     "attachTitle": "Attach an image to the chat",
-    "attachDescription": "The image will be sent to the AI assistant and can be used in the conversation."
+    "attachDescription": "Send the assistant a photo of a dish, a handwritten recipe or your ingredients. It can read it, and a photo of the dish can become the recipe's image.",
+    "imageTooLarge": "That image is too large. Please use one under 10 MB.",
+    "imageUploadFailed": "The image could not be uploaded. Please try again."
   },
   "VoiceDictation": {
     "open": "Dictate a message",

@@ -11,6 +11,7 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useMediaQuery } from "~/hooks/use-media-query";
 import type { MyAgentUIMessage } from "~/lib/agent";
 import { api } from "~/trpc/react";
@@ -177,7 +178,7 @@ export default function AIAgentChat({
     let imageUrl: string | null = null;
 
     if (attachedImage && attachedImage.file.size > MAX_ATTACHED_IMAGE_BYTES) {
-      console.error("Attached image exceeds the 10MB limit");
+      toast.error(t("imageTooLarge"));
       return;
     }
 
@@ -194,12 +195,15 @@ export default function AIAgentChat({
         });
 
         if (!response.ok) {
-          console.error("Image upload failed");
+          toast.error(t("imageUploadFailed"));
           return;
         }
 
         const resImage: { url: string } = await response.json();
         imageUrl = resImage.url;
+      } catch {
+        toast.error(t("imageUploadFailed"));
+        return;
       } finally {
         setUploadingImage(false);
       }
@@ -213,7 +217,9 @@ export default function AIAgentChat({
           ? [
               {
                 type: "file" as const,
-                mediaType: "image/png",
+                // The real type of the processed file (WebP, or JPEG when the conversion
+                // failed). A hardcoded one makes the model read the image as something it is not.
+                mediaType: attachedImage?.file.type || "image/jpeg",
                 url: imageUrl,
               },
             ]
@@ -243,12 +249,16 @@ export default function AIAgentChat({
           variant="outline"
           size="icon-lg"
           className="rounded-sm border-slate-400"
+          aria-label={t("title")}
           onClick={() => setOpened(true)}
         >
           <SparklesIcon className="text-2xl text-slate-500" />
         </Button>
 
-        <div className="fixed right-0 bottom-0 left-0 z-50 mx-auto w-full max-w-2xl px-4 py-6">
+        <div
+          data-chat-composer
+          className="fixed right-0 bottom-0 left-0 z-50 mx-auto w-full max-w-2xl px-3 pt-6 pb-5 md:px-4 md:py-6"
+        >
           <div
             onFocus={() => {
               if (messages.length > 0) setOpened(true);
@@ -281,7 +291,7 @@ export default function AIAgentChat({
       open={opened}
       onOpenChange={setOpened}
     >
-      <DrawerContent className="w-full">
+      <DrawerContent data-chat-composer className="w-full">
         <DrawerHeader>
           <DrawerTitle>
             <div className="flex items-center justify-between">
@@ -306,10 +316,10 @@ export default function AIAgentChat({
           {t("description")}
         </DrawerDescription>
 
-        <div className="relative flex min-h-40 flex-col px-4">
+        <div className="relative flex min-h-[55dvh] flex-col px-4 md:min-h-40">
           <div
             ref={containerRef}
-            className="no-scrollbar flex h-full flex-col gap-4 overflow-y-auto"
+            className="no-scrollbar flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto"
           >
             {messages.length > 0 ? (
               messages.map((message) => (
@@ -323,7 +333,7 @@ export default function AIAgentChat({
                 />
               ))
             ) : (
-              <div className="flex flex-col items-center gap-4 pt-10">
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 px-2">
                 <p className="text-center text-sm text-neutral-500">
                   {t("description")}
                 </p>
