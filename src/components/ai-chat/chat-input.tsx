@@ -168,7 +168,9 @@ export function ChatInput({
                   disabled={disabled}
                 />
               )}
+            </div>
 
+            <div className="flex items-center gap-2 md:gap-1">
               {voiceEnabled && (
                 <Button
                   type="button"
@@ -183,29 +185,29 @@ export function ChatInput({
                   <MicIcon />
                 </Button>
               )}
-            </div>
 
-            {isBusy ? (
-              <Button
-                type="button"
-                variant="default"
-                size="icon"
-                className="rounded-full"
-                onClick={onStop}
-              >
-                <SquareIcon fill="white" />
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                variant="default"
-                size="icon"
-                className="rounded-full"
-                disabled={disabled || value.trim() === ""}
-              >
-                <ArrowUpIcon />
-              </Button>
-            )}
+              {isBusy ? (
+                <Button
+                  type="button"
+                  variant="default"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={onStop}
+                >
+                  <SquareIcon fill="white" />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  variant="default"
+                  size="icon"
+                  className="rounded-full"
+                  disabled={disabled || value.trim() === ""}
+                >
+                  <ArrowUpIcon />
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </form>
