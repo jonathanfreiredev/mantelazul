@@ -9,6 +9,7 @@ import { Footer } from "~/components/footer";
 import { Header } from "~/components/header";
 import { ThemeProvider } from "~/components/providers/theme-provider";
 import { routing } from "~/i18n/routing";
+import { SITE_NAME, SITE_URL } from "~/lib/seo/site";
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "sonner";
 
@@ -36,9 +37,30 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "Metadata" });
 
   return {
-    title: t("title"),
+    // Every relative URL in the metadata of any page resolves against this.
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: t("title"),
+      // Sub-pages read as "Saffron and Parmesan Risotto · Mantel Azul".
+      template: `%s · ${SITE_NAME}`,
+    },
     description: t("description"),
-    icons: [{ rel: "icon", url: "/favicon.ico" }],
+    applicationName: SITE_NAME,
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "any" },
+        { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+        { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      ],
+      apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
+    },
+    // Pages that build their own metadata replace these two wholesale, so they carry a full
+    // Open Graph block of their own; these are the defaults for the ones that do not.
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 

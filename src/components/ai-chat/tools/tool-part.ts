@@ -36,3 +36,31 @@ export function isToolErrorPart(
     part.state === "output-error"
   );
 }
+
+/**
+ * Name of the tool a part calls, or null when the part is not a tool call. The cast is safe in
+ * practice because the parts come from this agent's own tools; a name that is not one of them is
+ * handled by the caller's fallback.
+ */
+export function toolNameOf(
+  part: MyAgentUIMessage["parts"][number],
+): ToolName | null {
+  if (!part.type.startsWith("tool-")) return null;
+
+  return part.type.slice("tool-".length) as ToolName;
+}
+
+/**
+ * True while a tool is still running: its arguments are ready (or still being written) and there
+ * is no result yet. This is what the chat turns into "Searching for recipes", "Saving the
+ * recipe" and so on.
+ */
+export function isRunningToolPart(
+  part: MyAgentUIMessage["parts"][number],
+): boolean {
+  return (
+    part.type.startsWith("tool-") &&
+    "state" in part &&
+    (part.state === "input-streaming" || part.state === "input-available")
+  );
+}

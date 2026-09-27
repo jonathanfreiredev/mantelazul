@@ -54,8 +54,6 @@ export function ChatMessage({
             {isUser ? t("you") : t("ai")}
           </p>
 
-          {activity && <AssistantActivityIndicator activity={activity} />}
-
           {message.parts.map((part, index) => {
             const key = `${message.id}-${index}`;
 
@@ -124,6 +122,8 @@ export function ChatMessage({
             // Other tool parts (getOneRecipe, getTags) have no bespoke UI.
             return null;
           })}
+
+          {activity && <AssistantActivityIndicator activity={activity} />}
         </div>
       </div>
     </motion.div>

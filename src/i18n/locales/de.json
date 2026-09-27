@@ -1,7 +1,9 @@
 {
   "Metadata": {
     "title": "Mantel Azul",
-    "description": "Full-Stack-Rezept-App mit Next.js, tRPC, Prisma und Tailwind."
+    "tagline": "Rezepte, Essensplanung und ein Kochassistent",
+    "description": "Rezepte aus der eigenen Küche entdecken und speichern, die Woche planen und den Assistenten aus einem Foto oder einer handgeschriebenen Karte ein Rezept machen lassen.",
+    "recipeFallbackDescription": "{title}: Zutaten, Zubereitung und Nährwerte."
   },
   "Header": {
     "language": "Sprache"
@@ -425,9 +427,19 @@
     "generatedImage": "KI-generiertes Bild",
     "you": "DU",
     "ai": "KI",
-    "thinking": "Denkt nach",
-    "typing": "Schreibt",
-    "working": "Arbeitet",
+    "activity": {
+      "thinking": "Denkt nach",
+      "getTags": "Verfügbare Tags werden geprüft",
+      "searchRecipes": "Rezepte werden gesucht",
+      "getFavouriteRecipes": "Favoriten werden durchgesehen",
+      "getOneRecipe": "Rezept wird gelesen",
+      "getMealPlan": "Kalender wird gelesen",
+      "createRecipe": "Rezept wird gespeichert",
+      "updateRecipe": "Rezept wird aktualisiert",
+      "deleteRecipe": "Rezept wird gelöscht",
+      "planMeals": "Mahlzeiten werden geplant",
+      "generateRecipeImage": "Bild wird erstellt"
+    },
     "approve": "Bestätigen",
     "deny": "Ablehnen",
     "approveCreateRecipe": "Bestätigst du das Erstellen des folgenden Rezepts: {title}?",

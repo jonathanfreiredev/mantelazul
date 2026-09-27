@@ -19,10 +19,11 @@ const config = {
       },
     ],
   },
-  // The legal pages read their markdown from `src/content/legal` while rendering, which the tracer
-  // cannot see through. Without this the deployed function would not carry the files.
+  // The legal pages read their markdown from `src/content/legal` while rendering, and the social
+  // card reads the logo, which the tracer cannot see through either. Without these the deployed
+  // function would not carry the files.
   outputFileTracingIncludes: {
-    "/*": ["src/content/legal/**/*.md"],
+    "/*": ["src/content/legal/**/*.md", "public/logo-dark.png"],
   },
   allowedDevOrigins: [
     "*.ngrok-free.dev",

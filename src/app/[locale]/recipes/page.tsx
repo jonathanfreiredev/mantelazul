@@ -20,7 +20,9 @@ export default async function RecipesPage() {
 
   const locale = await getLocale();
 
-  void api.recipes.getAll.prefetch({
+  // Awaited, like the category pages: it has to be in the query cache before the page renders, or
+  // the HTML arrives empty and the list only appears once the browser has fetched it.
+  await api.recipes.getAll.prefetch({
     authorId: session.user.id,
     orderBy: "createdAt",
     skip: 0,

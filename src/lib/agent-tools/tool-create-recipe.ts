@@ -4,9 +4,7 @@ import z from "zod";
 import { LOCALES } from "~/lib/locales";
 import { intSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/server";
-import { generateAndUpload } from "../cloudinary";
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import type { GeneratedImage } from "./generated-image";
 
 const recipeInputSchema = z.object({
   title: z
@@ -33,13 +31,19 @@ const recipeInputSchema = z.object({
     .url()
     .optional()
     .describe(
-      "URL of the recipe image, when it does not come from the image the user attached. Omit it to let the app generate one automatically. To use the attached image, set 'useAttachedImage' instead of writing its URL here.",
+      "URL of the recipe image, only when it comes from neither the image the user attached nor one generated in this conversation. To use the attached image, set 'useAttachedImage' instead of writing its URL here.",
     ),
   useAttachedImage: z
     .boolean()
     .optional()
     .describe(
       "Set it to true to use the image the user attached to the conversation as the recipe's cover photo. The app already knows that image's URL: never write the URL yourself. Only set it when the attached image is a photo of the dish itself; never for a recipe card, a menu, a poster or any other image that is not the dish.",
+    ),
+  reuseGeneratedImage: z
+    .boolean()
+    .optional()
+    .describe(
+      "Set it to true to reuse the image generated earlier in this conversation instead of generating a new one. Use it when the user asks to save a recipe with the image you already showed them. Leave it out when the recipe you are saving is a different dish: it would get the wrong photo.",
     ),
   defaultServings: intSchema
     .min(1, "It must be at least 1")
@@ -106,15 +110,21 @@ const recipeInputSchema = z.object({
 });
 
 /**
- * Builds the create-recipe tool for one request. It is a factory because the image the user
- * attached lives in the request, not in the tool: the agent only has to ask for it with
- * `useAttachedImage`, and the tool resolves the URL itself instead of the model copying it.
+ * Builds the create-recipe tool for one request. It is a factory because the image lives in the
+ * request, not in the tool: the agent asks for the attached photo with `useAttachedImage` and for
+ * a generated one with the image tool, and this resolves the URL itself.
  */
 export function createToolCreateRecipe({
   attachedImageUrl,
+  generatedImage,
+  previousImageUrl,
 }: {
   /** URL of the image the user attached to the conversation, already uploaded, or null. */
   attachedImageUrl: string | null;
+  /** Image generated during this request, written by the image tool as soon as it runs. */
+  generatedImage: GeneratedImage;
+  /** Image generated in an earlier message of this conversation, or null. */
+  previousImageUrl: string | null;
 }) {
   return tool({
     description: `
@@ -126,32 +136,31 @@ list, step-by-step instructions and its metadata (category, difficulty, nutritio
 IMPORTANT:
 - Only call this tool once the user has explicitly confirmed they want to save the recipe.
 - Do NOT call it during brainstorming or suggestion phases.
-- This tool requires user approval before it runs.
+- The recipe needs a cover image. If the user attached a photo of the dish, set
+  'useAttachedImage': true; otherwise call 'generateRecipeImage' first. This tool refuses to
+  save a recipe without an image.
   `,
     inputSchema: zodSchema(recipeInputSchema),
     execute: async (recipe) => {
-      // The agent asks for the attached image with a flag, so the URL never travels through the
-      // model. An explicit URL and the automatic image are the fallbacks.
-      const attachedImage = recipe.useAttachedImage ? attachedImageUrl : null;
-
+      // The image never travels through the model: the attached one arrives as a flag, the one
+      // generated during this request is left in the holder by the image tool, and an image from
+      // an earlier message is reused only when the agent explicitly asks for it, because by then
+      // it may well be talking about a different dish.
       const image =
-        attachedImage ??
+        (recipe.useAttachedImage ? attachedImageUrl : null) ??
         recipe.imageUrl ??
-        (await generateImageForRecipe({
-          title: recipe.title,
-          description: recipe.description,
-          category: recipe.category,
-          difficulty: recipe.difficulty,
-          defaultServings: recipe.defaultServings,
-          preparationTime: recipe.preparationTime,
-          cookingTime: recipe.cookingTime,
-          restingTime: recipe.restingTime,
-          calories: recipe.calories,
-          carbohydrates: recipe.carbohydrates,
-          protein: recipe.protein,
-          fat: recipe.fat,
-        }));
+        generatedImage.url ??
+        (recipe.reuseGeneratedImage ? previousImageUrl : null);
 
+      if (!image) {
+        return {
+          success: false as const,
+          message:
+            "The recipe was not saved because it has no image. Call 'generateRecipeImage' with the recipe title and save it again: the generated image is used as the cover automatically. If the user attached a photo of the dish, set 'useAttachedImage': true instead.",
+        };
+      }
+
+      // Everything goes in one write, so the recipe is translated once instead of once per part.
       const newRecipe = await api.recipes.create({
         title: recipe.title,
         description: recipe.description,
@@ -165,79 +174,35 @@ IMPORTANT:
         carbohydrates: recipe.carbohydrates,
         protein: recipe.protein,
         fat: recipe.fat,
-        imageUrl: image || null,
+        imageUrl: image,
         locale: recipe.locale,
-      });
-
-      await api.recipes.updateIngredients({
-        recipeId: newRecipe.id,
-        ingredients: recipe.ingredients.map((ingredient, index) => ({
-          name: ingredient.name,
-          quantity: ingredient.quantity.toFixed(3),
-          unit: ingredient.unit,
-          order: index,
-        })),
-      });
-
-      await api.recipes.updateSteps({
-        recipeId: newRecipe.id,
-        steps: recipe.steps.map((step, index) => ({
-          description: step,
-          imageUrl: null,
-          order: index,
-        })),
-      });
-
-      await api.recipes.updateTags({
-        recipeId: newRecipe.id,
-        tags: recipe.tags,
+        content: {
+          ingredients: recipe.ingredients.map((ingredient, index) => ({
+            name: ingredient.name,
+            quantity: ingredient.quantity.toFixed(3),
+            unit: ingredient.unit,
+            order: index,
+          })),
+          steps: recipe.steps,
+          tags: recipe.tags,
+        },
       });
 
       const createdRecipe = await api.recipes.getOne({ id: newRecipe.id });
 
       return {
-        success: true,
+        success: true as const,
         message: "Recipe created successfully",
         recipe: createdRecipe,
       };
     },
+    toModelOutput: ({ output }) => ({
+      type: "text",
+      // The chat renders the card itself, so the model gets a short line instead of the whole
+      // recipe back, which it does not need and would only be tempted to repeat.
+      value: output.success
+        ? `Recipe "${output.recipe.title}" was created. It is already shown in the chat: do not repeat it, just add a short sentence.`
+        : output.message,
+    }),
   });
 }
-
-const generateImageForRecipe = async (recipe: {
-  title: string;
-  description: string;
-  category: Category;
-  difficulty: Difficulty;
-  defaultServings: number;
-  preparationTime: number;
-  cookingTime: number;
-  restingTime: number;
-  calories: number;
-  carbohydrates: number;
-  protein: number;
-  fat: number;
-}) => {
-  const styleHint = await generateText({
-    model: openai("gpt-6-luna"),
-    prompt: `Given the following recipe details, generate a concise visual style hint for an AI image generator. The hint should describe the desired visual style, lighting, and presentation of the dish in a few words. Avoid mentioning specific camera settings or technical photography terms. Focus on the overall aesthetic and mood that would make the dish look appealing and appetizing.
-    Recipe Details:
-    Title: ${recipe.title}
-    Description: ${recipe.description}
-    Category: ${recipe.category}
-    Difficulty: ${recipe.difficulty}
-    Default Servings: ${recipe.defaultServings}
-    Preparation Time: ${recipe.preparationTime} minutes
-    Cooking Time: ${recipe.cookingTime} minutes
-    Resting Time: ${recipe.restingTime} minutes
-    Calories: ${recipe.calories} kcal
-    Carbohydrates: ${recipe.carbohydrates} g
-    Protein: ${recipe.protein} g
-    Fat: ${recipe.fat} g
-
-    Please provide the visual style hint in a single sentence.`,
-  });
-
-  const imageUrl = await generateAndUpload(recipe.title, styleHint.text);
-  return imageUrl;
-};
