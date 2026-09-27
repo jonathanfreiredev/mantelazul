@@ -28,6 +28,7 @@ import {
 import { ChatInput } from "./chat-input";
 import { ChatMessage } from "./chat-message";
 import { type AssistantActivity } from "./assistant-activity-indicator";
+import { isRunningToolPart, toolNameOf } from "./tools/tool-part";
 
 const MAX_MESSAGES = 50;
 /** Distance from the bottom within which the user is considered "at the bottom". */
@@ -103,18 +104,25 @@ export default function AIAgentChat({
   const lastMessage = messages[messages.length - 1];
 
   /**
-   * What the assistant is doing right now, so the last message can show a status chip.
-   * The last message is always an assistant message while the agent is busy, including
-   * every intermediate step of a tool loop, so the chip stays visible across steps.
+   * What the assistant is doing right now, so the last message can say it in one line. While a
+   * tool runs the line names that tool; the rest of the time the model is the one working, either
+   * writing its answer (nothing to announce, the words themselves are the feedback) or deciding
+   * what to do next. The last message is an assistant message while the agent is busy, including
+   * every intermediate step of a tool loop, so the line stays visible across steps.
    */
   let activity: AssistantActivity | null = null;
   if (isBusy) {
-    if (status === "submitted") {
+    const lastPart = lastMessage?.parts[lastMessage.parts.length - 1];
+    const runningTool =
+      lastPart && isRunningToolPart(lastPart) ? toolNameOf(lastPart) : null;
+    const assistantIsTyping =
+      lastMessage?.role === "assistant" &&
+      hasActivelyStreamingText(lastMessage);
+
+    if (runningTool) {
+      activity = { kind: "tool", tool: runningTool };
+    } else if (!assistantIsTyping) {
       activity = { kind: "thinking" };
-    } else if (hasActivelyStreamingText(lastMessage)) {
-      activity = { kind: "typing" };
-    } else {
-      activity = { kind: "working" };
     }
   }
 

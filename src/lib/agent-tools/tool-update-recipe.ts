@@ -147,7 +147,8 @@ IMPORTANT:
         (await api.recipes.getOne({ id: recipe.id, locale: "source" }))
           .imageUrl;
 
-      const newRecipe = await api.recipes.update({
+      // Everything goes in one write, so the recipe is translated once instead of once per part.
+      const updatedRecipe = await api.recipes.update({
         id: recipe.id,
         sourceLocale: recipe.sourceLocale,
         recipe: {
@@ -166,39 +167,31 @@ IMPORTANT:
           imageUrl,
           tags: recipe.tags,
         },
+        content: {
+          ingredients: recipe.ingredients.map((ingredient, index) => ({
+            name: ingredient.name,
+            quantity: ingredient.quantity.toFixed(3),
+            unit: ingredient.unit,
+            order: index,
+          })),
+          steps: recipe.steps,
+          tags: recipe.tags,
+        },
       });
 
-      await api.recipes.updateIngredients({
-        recipeId: newRecipe.id,
-        ingredients: recipe.ingredients.map((ingredient, index) => ({
-          name: ingredient.name,
-          quantity: ingredient.quantity.toFixed(3),
-          unit: ingredient.unit,
-          order: index,
-        })),
-      });
-
-      await api.recipes.updateSteps({
-        recipeId: newRecipe.id,
-        steps: recipe.steps.map((step, index) => ({
-          description: step,
-          imageUrl: null,
-          order: index,
-        })),
-      });
-
-      await api.recipes.updateTags({
-        recipeId: newRecipe.id,
-        tags: recipe.tags,
-      });
-
-      const updatedRecipe = await api.recipes.getOne({ id: newRecipe.id });
+      const savedRecipe = await api.recipes.getOne({ id: updatedRecipe.id });
 
       return {
         success: true,
         message: "Recipe updated successfully",
-        recipe: updatedRecipe,
+        recipe: savedRecipe,
       };
     },
+    toModelOutput: ({ output }) => ({
+      type: "text",
+      // The chat renders the card itself, so the model gets a short line instead of the whole
+      // recipe back, which it does not need and would only be tempted to repeat.
+      value: `Recipe "${output.recipe.title}" was updated. It is already shown in the chat: do not repeat it, just add a short sentence.`,
+    }),
   });
 }

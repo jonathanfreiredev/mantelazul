@@ -61,3 +61,18 @@ export const recipeStepsSchema = z.object({
 export const recipeTagsSchema = z.object({
   tags: z.array(z.string().min(1, "Tag cannot be empty").trim()),
 });
+
+/**
+ * The whole recipe in one payload: ingredients, steps and tags.
+ *
+ * The agent always has the complete recipe when it writes, so it sends everything at once and the
+ * recipe is translated once. The web form leaves this out and fills each part in through its own
+ * page, which is why every field of `recipeSchema` stays independent.
+ */
+export const recipeContentSchema = z.object({
+  ingredients: recipeIngredientsSchema.shape.ingredients,
+  steps: z
+    .array(z.string().trim().min(1, "Step description is required"))
+    .min(1, "At least one step is required"),
+  tags: z.array(z.string().min(1, "Tag cannot be empty").trim()),
+});

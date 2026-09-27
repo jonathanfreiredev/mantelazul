@@ -20,10 +20,17 @@ import {
 } from "~/server/translations/resolve";
 import { readSourceContent } from "~/server/translations/source";
 import { replaceRecipeTranslations } from "~/server/translations/store";
-import type { RecipeTranslationContent } from "~/server/translations/types";
+import type {
+  RecipeTranslationContent,
+  RecipeTranslations,
+} from "~/server/translations/types";
 import type { RecipeDto } from "~/types/recipe";
 import { deleteImageByUrl } from "../images/service";
-import { recipeIngredientsSchema, recipeSchema } from "./validation";
+import {
+  recipeContentSchema,
+  recipeIngredientsSchema,
+  recipeSchema,
+} from "./validation";
 import type { Prisma } from "generated/prisma/client";
 
 const reservedSlugs = ["new"];
@@ -47,6 +54,83 @@ function buildSlug(title: string): string {
   });
 }
 
+/*
+ * Ingredients, steps and tags are written by two very different callers: the editor, one field at
+ * a time, and the agent, which has the whole recipe in hand. Both go through these helpers so the
+ * rows and the translations cannot drift apart.
+ */
+
+/** Replaces the ingredient rows. Their names live in the translations, not in these rows. */
+async function replaceIngredientRows(
+  tx: Prisma.TransactionClient,
+  recipeId: string,
+  ingredients: { quantity: string; unit: Unit; order: number }[],
+): Promise<void> {
+  await tx.ingredient.deleteMany({ where: { recipeId } });
+
+  await tx.ingredient.createMany({
+    data: ingredients.map((ingredient) => ({
+      quantity: ingredient.quantity,
+      unit: ingredient.unit,
+      order: ingredient.order,
+      recipeId,
+    })),
+  });
+}
+
+/** Replaces the step rows. Their descriptions live in the translations, not in these rows. */
+async function replaceStepRows(
+  tx: Prisma.TransactionClient,
+  recipeId: string,
+  steps: { order: number; imageUrl: string | null }[],
+): Promise<void> {
+  await tx.step.deleteMany({ where: { recipeId } });
+
+  await tx.step.createMany({
+    data: steps.map((step) => ({
+      order: step.order,
+      imageUrl: step.imageUrl,
+      recipeId,
+    })),
+  });
+}
+
+/** Replaces the tags of a recipe, creating the ones that do not exist yet. */
+async function replaceRecipeTags(
+  tx: Prisma.TransactionClient,
+  recipeId: string,
+  tags: string[],
+): Promise<void> {
+  await tx.recipeTag.deleteMany({ where: { recipeId } });
+
+  for (const tagName of new Set(tags)) {
+    const slug = buildSlug(tagName);
+
+    const tag =
+      (await tx.tag.findUnique({ where: { slug } })) ??
+      (await tx.tag.create({ data: { name: tagName, slug } }));
+
+    await tx.recipeTag.create({ data: { recipeId, tagId: tag.id } });
+  }
+}
+
+/**
+ * Removes from Cloudinary the step images that the new steps no longer reference. An image that
+ * is still in place must be left alone: deleting it would leave the recipe with a broken picture.
+ */
+async function deleteDroppedStepImages(
+  currentSteps: { imageUrl: string | null }[],
+  nextImageUrls: (string | null)[],
+): Promise<void> {
+  const kept = new Set(nextImageUrls.filter((url) => url !== null));
+
+  for (const step of currentSteps) {
+    if (step.imageUrl && !kept.has(step.imageUrl)) {
+      await deleteImageByUrl(step.imageUrl);
+    }
+  }
+}
+
 export const recipesRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
@@ -54,6 +138,7 @@ export const recipesRouter = createTRPCRouter({
         .extend({
           imageUrl: z.url().trim().nullable(),
           locale: z.enum(LOCALES).default(DEFAULT_LOCALE),
+          content: recipeContentSchema.optional(),
         })
         .omit({ image: true, tags: true }),
     )
@@ -76,14 +161,31 @@ export const recipesRouter = createTRPCRouter({
         );
       }
 
-      // The source text is written now; the other locales are generated once the ingredients
-      // and steps are set, so `create` does not pay for a translation that is about to change.
+      const { content } = input;
+
       const sourceContent: RecipeTranslationContent = {
         title: input.title,
         description: input.description,
-        ingredients: [{ order: 0, name: PLACEHOLDER_INGREDIENT }],
-        steps: [{ order: 0, description: PLACEHOLDER_STEP }],
+        ingredients: content
+          ? content.ingredients.map((ingredient) => ({
+              order: ingredient.order,
+              name: ingredient.name,
+            }))
+          : [{ order: 0, name: PLACEHOLDER_INGREDIENT }],
+        steps: content
+          ? content.steps.map((description, order) => ({ order, description }))
+          : [{ order: 0, description: PLACEHOLDER_STEP }],
       };
+
+      // A complete recipe is translated here and now: nothing is left that could invalidate the
+      // translation. The incremental flow waits instead, because the next page would pay for a
+      // translation that its own change is about to replace.
+      const translations: RecipeTranslations = content
+        ? await generateRecipeTranslations({
+            sourceLocale: input.locale,
+            content: sourceContent,
+          })
+        : { [input.locale]: sourceContent };
 
       const newRecipe = await ctx.db.$transaction(async (tx) => {
         const recipe = await tx.recipe.create({
@@ -102,18 +204,28 @@ export const recipesRouter = createTRPCRouter({
             fat: input.fat,
             sourceLocale: input.locale,
             ingredients: {
-              create: { quantity: "0", unit: Unit.GRAM, order: 0 },
+              create: content
+                ? content.ingredients.map((ingredient) => ({
+                    quantity: ingredient.quantity,
+                    unit: ingredient.unit,
+                    order: ingredient.order,
+                  }))
+                : { quantity: "0", unit: Unit.GRAM, order: 0 },
             },
-            steps: { create: { order: 0 } },
+            steps: {
+              create: content
+                ? content.steps.map((_, order) => ({ order }))
+                : { order: 0 },
+            },
             author: { connect: { id: ctx.session.user.id } },
           },
         });
 
-        await replaceRecipeTranslations(
-          recipe.id,
-          { [input.locale]: sourceContent },
-          tx,
-        );
+        if (content) {
+          await replaceRecipeTags(tx, recipe.id, content.tags);
+        }
+
+        await replaceRecipeTranslations(recipe.id, translations, tx);
 
         return recipe;
       });
@@ -135,10 +247,11 @@ export const recipesRouter = createTRPCRouter({
             imageUrl: z.url().trim().nullable(),
           })
           .omit({ image: true }),
+        content: recipeContentSchema.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, recipe, sourceLocale } = input;
+      const { id, recipe, sourceLocale, content } = input;
 
       const slug = buildSlug(recipe.title);
 
@@ -182,8 +295,32 @@ export const recipesRouter = createTRPCRouter({
           ...source.content,
           title: recipe.title,
           description: recipe.description,
+          ...(content
+            ? {
+                ingredients: content.ingredients.map((ingredient) => ({
+                  order: ingredient.order,
+                  name: ingredient.name,
+                })),
+                steps: content.steps.map((description, order) => ({
+                  order,
+                  description,
+                })),
+              }
+            : {}),
         },
       });
+
+      // An atomic write replaces the whole recipe, so the step photos that stay in the same
+      // position are carried over: an update that only touches other fields must not drop them.
+      const currentSteps = content
+        ? await ctx.db.step.findMany({ where: { recipeId: id } })
+        : [];
+      const stepImageByOrder = new Map(
+        currentSteps.map((step) => [step.order, step.imageUrl]),
+      );
+      const nextStepImages = content
+        ? content.steps.map((_, order) => stepImageByOrder.get(order) ?? null)
+        : [];
 
       const updatedRecipe = await ctx.db.$transaction(async (tx) => {
         const updated = await tx.recipe.update({
@@ -205,10 +342,24 @@ export const recipesRouter = createTRPCRouter({
           },
         });
 
+        if (content) {
+          await replaceIngredientRows(tx, id, content.ingredients);
+          await replaceStepRows(
+            tx,
+            id,
+            nextStepImages.map((imageUrl, order) => ({ order, imageUrl })),
+          );
+          await replaceRecipeTags(tx, id, content.tags);
+        }
+
         await replaceRecipeTranslations(id, translations, tx);
 
         return updated;
       });
+
+      if (content) {
+        await deleteDroppedStepImages(currentSteps, nextStepImages);
+      }
 
       if (
         currentRecipe.imageUrl &&
@@ -250,16 +401,7 @@ export const recipesRouter = createTRPCRouter({
       });
 
       await ctx.db.$transaction(async (tx) => {
-        await tx.ingredient.deleteMany({ where: { recipeId } });
-
-        await tx.ingredient.createMany({
-          data: ingredients.map((ingredient) => ({
-            quantity: ingredient.quantity,
-            unit: ingredient.unit,
-            order: ingredient.order,
-            recipeId,
-          })),
-        });
+        await replaceIngredientRows(tx, recipeId, ingredients);
 
         await replaceRecipeTranslations(recipeId, translations, tx);
       });
@@ -314,22 +456,15 @@ export const recipesRouter = createTRPCRouter({
         where: { recipeId },
       });
 
-      for (const step of currentSteps) {
-        if (step.imageUrl) {
-          await deleteImageByUrl(step.imageUrl);
-        }
-      }
+      // The editor sends back the images it kept, so only the ones the new steps dropped are
+      // removed: deleting a kept image would leave the recipe with a broken picture.
+      await deleteDroppedStepImages(
+        currentSteps,
+        steps.map((step) => step.imageUrl),
+      );
 
       await ctx.db.$transaction(async (tx) => {
-        await tx.step.deleteMany({ where: { recipeId } });
-
-        await tx.step.createMany({
-          data: steps.map((step) => ({
-            imageUrl: step.imageUrl,
-            order: step.order,
-            recipeId,
-          })),
-        });
+        await replaceStepRows(tx, recipeId, steps);
 
         await replaceRecipeTranslations(recipeId, translations, tx);
       });
@@ -349,35 +484,9 @@ export const recipesRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { recipeId, tags } = input;
 
-      await ctx.db.recipeTag.deleteMany({
-        where: { recipeId },
+      await ctx.db.$transaction(async (tx) => {
+        await replaceRecipeTags(tx, recipeId, tags);
       });
-
-      const uniqueTags = Array.from(new Set(tags));
-
-      for (const tagName of uniqueTags) {
-        const slug = buildSlug(tagName);
-
-        let tag = await ctx.db.tag.findUnique({
-          where: { slug: slug },
-        });
-
-        if (!tag) {
-          tag = await ctx.db.tag.create({
-            data: {
-              name: tagName,
-              slug,
-            },
-          });
-        }
-
-        await ctx.db.recipeTag.create({
-          data: {
-            recipeId,
-            tagId: tag.id,
-          },
-        });
-      }
 
       await syncRecipeIndex(recipeId);
 

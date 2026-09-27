@@ -44,6 +44,10 @@ export function RecipeApprovalTool({
       );
 
     case "output-available": {
+      // The create tool refuses to save a recipe with no image and reports it here; the agent
+      // reads the message and calls the image tool, so there is nothing to show for that attempt.
+      if (!part.output.success) return null;
+
       const recipe = part.output.recipe;
 
       return (

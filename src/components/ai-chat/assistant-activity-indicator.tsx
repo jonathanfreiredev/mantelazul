@@ -1,16 +1,35 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Loader2Icon, SparklesIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { type ToolName } from "./tools/tool-part";
 
 export type AssistantActivity =
-  { kind: "thinking" } | { kind: "typing" } | { kind: "working" };
+  { kind: "thinking" } | { kind: "tool"; tool: ToolName };
 
 /**
- * Small status chip shown while the assistant is busy. It replaces the plain label with
- * something that reflects what is actually happening: waiting on the model, streaming text,
- * or running a tool.
+ * Message key for each tool, so the status line can say what the assistant is doing instead of a
+ * generic "Working". Typed as a complete record on purpose: adding a tool without a phrase is a
+ * compile error, not a silent "Working".
+ */
+const ACTIVITY_KEYS: Record<ToolName, string> = {
+  getTags: "activity.getTags",
+  searchRecipes: "activity.searchRecipes",
+  getFavouriteRecipes: "activity.getFavouriteRecipes",
+  getOneRecipe: "activity.getOneRecipe",
+  getMealPlan: "activity.getMealPlan",
+  createRecipe: "activity.createRecipe",
+  updateRecipe: "activity.updateRecipe",
+  deleteRecipe: "activity.deleteRecipe",
+  planMeals: "activity.planMeals",
+  generateRecipeImage: "activity.generateRecipeImage",
+};
+
+/**
+ * The one line that says what the assistant is doing right now.
+ *
+ * It is a sentence, not a badge: the user is waiting and wants to know on what, and naming the
+ * step also makes the agent's run readable from the outside.
  */
 export function AssistantActivityIndicator({
   activity,
@@ -18,33 +37,18 @@ export function AssistantActivityIndicator({
   activity: AssistantActivity;
 }) {
   const t = useTranslations("Chat");
-  const label =
+  const key =
     activity.kind === "thinking"
-      ? t("thinking")
-      : activity.kind === "typing"
-        ? t("typing")
-        : t("working");
+      ? "activity.thinking"
+      : ACTIVITY_KEYS[activity.tool];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-2 flex"
+    <motion.p
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="status-shimmer mt-2 text-sm font-light"
     >
-      <div className="flex items-center gap-2 rounded-full bg-neutral-300/60 px-3 py-1.5 dark:bg-neutral-700/60">
-        {activity.kind === "typing" ? (
-          <span className="flex gap-1">
-            <span className="h-1 w-1 animate-bounce rounded-full bg-neutral-500 [animation-delay:-0.3s]" />
-            <span className="h-1 w-1 animate-bounce rounded-full bg-neutral-500 [animation-delay:-0.15s]" />
-            <span className="h-1 w-1 animate-bounce rounded-full bg-neutral-500" />
-          </span>
-        ) : activity.kind === "working" ? (
-          <Loader2Icon className="size-3 animate-spin text-neutral-500" />
-        ) : (
-          <SparklesIcon className="size-3 animate-pulse text-neutral-500" />
-        )}
-        <span className="text-xs font-medium text-neutral-500">{label}</span>
-      </div>
-    </motion.div>
+      {t(key)}
+    </motion.p>
   );
 }
