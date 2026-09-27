@@ -32,11 +32,17 @@ interface SidebarDrawerProps {
 export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
   const t = await getTranslations("Menu");
   const tCategories = await getTranslations("CategoryPages");
+  const tUi = await getTranslations("Ui");
 
   return (
     <Drawer direction="right">
       <DrawerTrigger asChild>
-        <Button variant="outline" size="icon-lg" className="rounded-sm">
+        <Button
+          variant="outline"
+          size="icon-lg"
+          className="rounded-sm"
+          aria-label={t("menu")}
+        >
           <MenuIcon />
         </Button>
       </DrawerTrigger>
@@ -46,6 +52,7 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
           <DrawerClose asChild>
             <Button variant="outline" size="icon-sm" className="rounded-full">
               <XIcon />
+              <span className="sr-only">{tUi("close")}</span>
             </Button>
           </DrawerClose>
         </DrawerHeader>

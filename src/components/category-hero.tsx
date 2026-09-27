@@ -29,6 +29,8 @@ export async function CategoryHero({ currentCategory }: CategoryHeroProps) {
         src={category.imageUrl}
         alt={t(`${category.name}.name`)}
         fill
+        sizes="100vw"
+        preload
         className="absolute -z-10 object-cover"
       />
 

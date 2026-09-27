@@ -52,7 +52,7 @@ export async function generateAndUpload(
   styleHint?: string,
 ): Promise<string> {
   const { image } = await generateImage({
-    model: openai.image("gpt-image-2.5-sunburst"),
+    model: openai.image("gpt-image-2.5-flare"),
     prompt: `Professional gourmet food photography of ${title}${
       styleHint ? `, ${styleHint} style` : ""
     }, high resolution, 8K, appetizing lighting, beautifully plated, macro photography.`,

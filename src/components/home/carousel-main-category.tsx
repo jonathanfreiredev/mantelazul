@@ -38,6 +38,7 @@ export function CarouselMainCategory() {
                   src={dish.image}
                   alt={dish.name}
                   fill
+                  sizes="(min-width: 1024px) 22vw, (min-width: 640px) 33vw, 50vw"
                   className="rounded-sm object-cover"
                 />
               </div>

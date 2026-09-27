@@ -29,7 +29,8 @@ export function ShareButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <motion.div
+        <motion.button
+          type="button"
           key="share-button"
           initial={{ scale: 1 }}
           transition={{
@@ -68,7 +69,7 @@ export function ShareButton({
                       : "size-5"
             }
           />
-        </motion.div>
+        </motion.button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuGroup>

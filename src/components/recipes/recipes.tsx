@@ -130,6 +130,7 @@ export function Recipes({
               id="inline-start-input"
               value={draftSearch}
               autoComplete="off"
+              aria-label={t("search")}
               className="focus:outline-none"
               onChange={(e) => {
                 setDraftSearch(e.target.value);

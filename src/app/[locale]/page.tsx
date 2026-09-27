@@ -62,6 +62,8 @@ export default async function Home() {
             src="/images/lime-and-green-leaves.webp"
             alt={t("limeAndGreenLeaves")}
             fill
+            sizes="100vw"
+            preload
             className="absolute -z-10 object-cover"
           />
 
@@ -99,6 +101,7 @@ export default async function Home() {
               src="/images/aperol-drink.webp"
               alt={t("aperolDrink")}
               fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
               className="absolute -z-10 object-cover"
             />
 
@@ -124,6 +127,7 @@ export default async function Home() {
               src="/images/macarons.webp"
               alt={t("macarons")}
               fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
               className="absolute -z-10 object-cover"
             />
 
@@ -151,6 +155,7 @@ export default async function Home() {
             src={breakfast?.imageUrl || ""}
             alt={t("picnic")}
             fill
+            sizes="100vw"
             className="absolute -z-10 object-cover"
           />
 
