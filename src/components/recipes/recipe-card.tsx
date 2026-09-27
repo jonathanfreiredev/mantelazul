@@ -41,7 +41,7 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteRecipe = api.recipes.delete.useMutation();
   const router = useRouter();
-  const { data, isPending } = authClient.useSession();
+  const { data } = authClient.useSession();
 
   const handleDelete = async () => {
     if (!isEditable) return;
@@ -58,8 +58,9 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
     setIsDeleting(false);
   };
 
-  if (isPending) return null;
-
+  // The card is public content, so it renders before the session is known: only the like button
+  // depends on it, and it fills in once the session arrives. Bailing out here would leave the
+  // category pages without a single card in the HTML.
   const isLoggedIn = !!data?.session;
 
   return (

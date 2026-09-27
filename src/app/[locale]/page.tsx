@@ -1,14 +1,40 @@
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
 import { Link } from "~/i18n/navigation";
 import { CarouselMainCategory } from "~/components/home/carousel-main-category";
 import { CategoriesNavbar } from "~/components/home/categories-navbar";
+import { JsonLd } from "~/components/seo/json-ld";
 import { Button } from "~/components/ui/button";
 import { categories } from "~/lib/categories-list";
+import { toLocale } from "~/lib/locales";
+import { websiteJsonLd } from "~/lib/seo/json-ld";
+import { buildPageMetadata } from "~/lib/seo/metadata";
+import { SITE_NAME } from "~/lib/seo/site";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+
+  return buildPageMetadata({
+    // The home page is the one title with room to explain what the site is, instead of only
+    // repeating its name.
+    title: { absolute: `${SITE_NAME} — ${t("tagline")}` },
+    description: t("description"),
+    path: "/",
+    locale: toLocale(locale),
+  });
+}
 
 export default async function Home() {
   const t = await getTranslations("Pages");
   const tCategories = await getTranslations("CategoryPages");
+  const tMetadata = await getTranslations("Metadata");
+  const locale = toLocale(await getLocale());
 
   const [
     explore,
@@ -23,6 +49,12 @@ export default async function Home() {
 
   return (
     <>
+      <JsonLd
+        data={websiteJsonLd({
+          locale,
+          description: tMetadata("description"),
+        })}
+      />
       <CategoriesNavbar currentCategory="explore" />
       <div className="flex flex-col gap-5">
         <div className="relative flex h-[calc(100svh-12rem)] max-h-250 w-full items-center justify-center gap-4 px-10 py-16">

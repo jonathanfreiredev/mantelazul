@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "~/i18n/navigation";
 import { safeInternalPath } from "~/lib/safe-redirect";
+import { PRIVATE_PAGE_METADATA } from "~/lib/seo/metadata";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -13,6 +14,9 @@ import {
 interface VerifyEmailPageProps {
   searchParams: Promise<{ error?: string; next?: string }>;
 }
+
+// The landing page of a verification link carries a one-time token: it must never be indexed.
+export const metadata = PRIVATE_PAGE_METADATA;
 
 /**
  * Where the link in the verification email lands. On success Better Auth has already signed the

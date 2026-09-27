@@ -44,6 +44,10 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string(),
     NEXT_PUBLIC_CLOUDINARY_API_KEY: z.string(),
+    // Canonical origin of the site. Every absolute URL the SEO surface emits (canonicals,
+    // hreflang, sitemap, robots, Open Graph) is built from it, so a preview deployment still
+    // points search engines at production. The default is the live domain.
+    NEXT_PUBLIC_SITE_URL: z.url().default("https://mantelazul.com"),
   },
 
   /**
@@ -59,6 +63,7 @@ export const env = createEnv({
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:
       process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     NEXT_PUBLIC_CLOUDINARY_API_KEY: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     BFL_API_KEY: process.env.BFL_API_KEY,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,

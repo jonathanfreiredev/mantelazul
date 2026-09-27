@@ -94,7 +94,7 @@ export function Recipes({
     skip,
   });
 
-  if (isFetching && skip === 0) {
+  if (isFetching && skip === 0 && resRecipes.recipes.length === 0) {
     return (
       <p className="text-muted-foreground mt-4 text-center">{t("loading")}</p>
     );

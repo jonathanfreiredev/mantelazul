@@ -1,7 +1,9 @@
 {
   "Metadata": {
     "title": "Mantel Azul",
-    "description": "Aplicación full-stack de recetas con Next.js, tRPC, Prisma y Tailwind."
+    "tagline": "Recetas, planificación de comidas y asistente de cocina",
+    "description": "Explora y guarda recetas de tu propia cocina, planifica las comidas de la semana y deja que el asistente convierta una foto o una tarjeta escrita a mano en una receta.",
+    "recipeFallbackDescription": "{title}: ingredientes, pasos y valores nutricionales."
   },
   "Header": {
     "language": "Idioma"

@@ -30,9 +30,10 @@ export function Recipe({ slug }: RecipeProps) {
     locale: toLocale(locale),
   });
 
-  const { data, isPending } = authClient.useSession();
-
-  if (isPending) return null;
+  // The recipe itself is public, so it renders before the session is known: the session only
+  // decides which actions are offered, and it is still loading when the server renders this.
+  // Bailing out here would leave the HTML empty and a crawler with nothing to read.
+  const { data } = authClient.useSession();
 
   const isLoggedIn = !!data?.session;
   const isOriginalLanguage =
@@ -46,6 +47,9 @@ export function Recipe({ slug }: RecipeProps) {
             src={recipe.imageUrl}
             alt={recipe.title}
             fill
+            // The photo is the largest thing on the page, so it is the element the browser
+            // measures for LCP: preloading it is worth more than a lazy load here.
+            priority
             className="object-cover"
           />
         </div>

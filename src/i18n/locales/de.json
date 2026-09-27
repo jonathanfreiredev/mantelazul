@@ -1,7 +1,9 @@
 {
   "Metadata": {
     "title": "Mantel Azul",
-    "description": "Full-Stack-Rezept-App mit Next.js, tRPC, Prisma und Tailwind."
+    "tagline": "Rezepte, Essensplanung und ein Kochassistent",
+    "description": "Rezepte aus der eigenen Küche entdecken und speichern, die Woche planen und den Assistenten aus einem Foto oder einer handgeschriebenen Karte ein Rezept machen lassen.",
+    "recipeFallbackDescription": "{title}: Zutaten, Zubereitung und Nährwerte."
   },
   "Header": {
     "language": "Sprache"

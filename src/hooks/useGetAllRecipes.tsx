@@ -25,8 +25,6 @@ export function useGetAllRecipes({
   search,
   skip = 0,
 }: UseGetAllRecipesParams) {
-  const [allRecipes, setAllRecipes] = useState<RecipeDto[]>([]);
-  const [lastSkip, setLastSkip] = useState(skip);
   const locale = useLocale();
 
   const { data: resRecipes, ...resQuery } = api.recipes.getAll.useQuery({
@@ -39,6 +37,14 @@ export function useGetAllRecipes({
     locale: toLocale(locale),
     skip,
   });
+
+  // The list is accumulated because "load more" appends a page to it, but it starts from the
+  // query instead of from an empty array: the first render is the one the server does, and an
+  // empty list there leaves the HTML without a single recipe in it.
+  const [allRecipes, setAllRecipes] = useState<RecipeDto[]>(
+    () => resRecipes?.recipes ?? [],
+  );
+  const [lastSkip, setLastSkip] = useState(skip);
 
   useEffect(() => {
     if (!resRecipes) return;
