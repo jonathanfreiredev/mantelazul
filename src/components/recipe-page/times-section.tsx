@@ -22,14 +22,14 @@ export function TimesSection({
       <div className="flex gap-4 sm:gap-8">
         <div className="flex flex-col gap-1">
           <span className="font-medium">{t("difficulty")}</span>
-          <span className="text-muted-foreground text-xs">
+          <span className="text-xs text-gray-600">
             {difficultyLabels(difficulty)}
           </span>
         </div>
 
         <div className="flex flex-col gap-1">
           <span className="font-medium">{t("preparation")}</span>
-          <span className="text-muted-foreground text-xs">
+          <span className="text-xs text-gray-600">
             {t("minutes", { count: preparationTime })}
           </span>
         </div>
@@ -38,14 +38,14 @@ export function TimesSection({
       <div className="flex gap-4 sm:gap-8">
         <div className="flex flex-col gap-1">
           <span className="font-medium">{t("cooking")}</span>
-          <span className="text-muted-foreground text-xs">
+          <span className="text-xs text-gray-600">
             {t("minutes", { count: cookingTime })}
           </span>
         </div>
 
         <div className="flex flex-col gap-1">
           <span className="font-medium">{t("resting")}</span>
-          <span className="text-muted-foreground text-xs">
+          <span className="text-xs text-gray-600">
             {t("minutes", { count: restingTime })}
           </span>
         </div>

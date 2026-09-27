@@ -22,26 +22,24 @@ export function NutritionalInfoSection({
         <div className="flex gap-4 sm:gap-8">
           <div className="flex flex-col gap-1">
             <span className="font-medium">{t("kcal")}</span>
-            <span className="text-muted-foreground text-xs">{calories}</span>
+            <span className="text-xs text-gray-600">{calories}</span>
           </div>
 
           <div className="flex flex-col gap-1">
             <span className="font-medium">{t("carbs")}</span>
-            <span className="text-muted-foreground text-xs">
-              {carbohydrates} g
-            </span>
+            <span className="text-xs text-gray-600">{carbohydrates} g</span>
           </div>
         </div>
 
         <div className="flex gap-4 sm:gap-8">
           <div className="flex flex-col gap-1">
             <span className="font-medium">{t("protein")}</span>
-            <span className="text-muted-foreground text-xs">{protein} g</span>
+            <span className="text-xs text-gray-600">{protein} g</span>
           </div>
 
           <div className="flex flex-col gap-1">
             <span className="font-medium">{t("fat")}</span>
-            <span className="text-muted-foreground text-xs">{fat} g</span>
+            <span className="text-xs text-gray-600">{fat} g</span>
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ import { Logo } from "./logo";
 import { SidebarDrawer } from "./sidebar-drawer";
 import { SignInOrSignUpButton } from "./auth/sign-in-or-sign-up-button";
 import { LocaleSwitcher } from "./locale-switcher";
-import AIAgentChat from "./ai-chat/ai-agent-chat";
+import { ChatLauncher } from "./ai-chat/chat-launcher";
 import { api } from "~/trpc/server";
 import { createId } from "@paralleldrive/cuid2";
 import type { MyAgentUIMessage } from "~/lib/agent";
@@ -57,7 +57,7 @@ export async function Header() {
           </div>
 
           {!!isLoggedIn && (
-            <AIAgentChat
+            <ChatLauncher
               chatId={chatId || createId()}
               messages={messages}
               voiceEnabled={voiceDictationEnabled}

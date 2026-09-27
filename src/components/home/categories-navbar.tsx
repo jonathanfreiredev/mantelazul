@@ -30,7 +30,7 @@ export async function CategoriesNavbar({
               className={`flex h-full items-center px-4 text-sm whitespace-nowrap sm:text-base ${
                 isActive
                   ? "border-b-3 border-black font-semibold dark:border-white dark:text-shadow-xs"
-                  : "text-gray-500 hover:text-black"
+                  : "text-gray-700 hover:text-black dark:text-gray-900 dark:hover:text-white"
               }`}
             >
               <p className="text-center">{tCategories(`${cat.name}.name`)}</p>
@@ -38,7 +38,7 @@ export async function CategoriesNavbar({
           );
         })}
 
-        <Button variant="default" className="ml-auto hidden sm:flex">
+        <Button asChild variant="default" className="ml-auto hidden sm:flex">
           <Link href={isLoggedIn ? "/recipes/new" : "/login"}>
             {t("newRecipe")}
           </Link>
