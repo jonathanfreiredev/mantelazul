@@ -1,12 +1,21 @@
 import type { Ingredient, Recipe, Step, Tag } from "generated/prisma/client";
 import type { Locale } from "~/lib/locales";
+import type { IngredientUsage } from "~/lib/step-ingredients";
 import type { DecimalToString } from "./decimal-to-string";
 
 /** An ingredient with its localized name resolved for the requested language. */
-export type LocalizedIngredient = DecimalToString<Ingredient> & { name: string };
+export type LocalizedIngredient = DecimalToString<Ingredient> & {
+  name: string;
+};
 
-/** A step with its localized description resolved for the requested language. */
-export type LocalizedStep = Step & { description: string };
+/**
+ * A step with its localized description resolved for the requested language, and its ingredient
+ * usages parsed out of the JSON column into the shape the UI works with.
+ */
+export type LocalizedStep = Omit<Step, "ingredientUsages"> & {
+  description: string;
+  ingredientUsages: IngredientUsage[];
+};
 
 /**
  * A recipe ready to be rendered, already resolved to one language. `title`, `description`,

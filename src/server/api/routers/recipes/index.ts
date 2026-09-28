@@ -3,10 +3,19 @@ import slugify from "slugify";
 import z from "zod";
 import { DEFAULT_LOCALE, LOCALES, toLocale } from "~/lib/locales";
 import {
+  parseIngredientUsages,
+  remapUsagesByName,
+  resolveUsagesByName,
+  type IngredientUsage,
+  type UsageInput,
+} from "~/lib/step-ingredients";
+import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { inferStepIngredients } from "~/server/recipes/infer-step-ingredients";
+import type { StepIngredientSuggestion } from "~/server/recipes/infer-step-ingredients";
 import {
   DEFAULT_SEARCH_LIMIT,
   MAX_SEARCH_LIMIT,
@@ -30,6 +39,7 @@ import {
   recipeContentSchema,
   recipeIngredientsSchema,
   recipeSchema,
+  stepUsageSchema,
 } from "./validation";
 import type { Prisma } from "generated/prisma/client";
 
@@ -60,6 +70,11 @@ function buildSlug(title: string): string {
  * rows and the translations cannot drift apart.
  */
 
+/** Prisma's JSON input type does not describe an array of objects, so usages need the cast. */
+function toUsagesJson(usages: IngredientUsage[]): Prisma.InputJsonValue {
+  return usages as unknown as Prisma.InputJsonValue;
+}
+
 /** Replaces the ingredient rows. Their names live in the translations, not in these rows. */
 async function replaceIngredientRows(
   tx: Prisma.TransactionClient,
@@ -82,7 +97,11 @@ async function replaceIngredientRows(
 async function replaceStepRows(
   tx: Prisma.TransactionClient,
   recipeId: string,
-  steps: { order: number; imageUrl: string | null }[],
+  steps: {
+    order: number;
+    imageUrl: string | null;
+    ingredientUsages: IngredientUsage[];
+  }[],
 ): Promise<void> {
   await tx.step.deleteMany({ where: { recipeId } });
 
@@ -90,9 +109,63 @@ async function replaceStepRows(
     data: steps.map((step) => ({
       order: step.order,
       imageUrl: step.imageUrl,
+      ingredientUsages: toUsagesJson(step.ingredientUsages),
       recipeId,
     })),
   });
+}
+
+/**
+ * Follows every usage to wherever its ingredient moved when the list was rewritten, dropping the
+ * ones whose ingredient no longer exists.
+ *
+ * Without this, reordering the ingredients would silently re-point every step at whatever took
+ * that slot: orders are positional and the rows are recreated on every save.
+ */
+async function remapStepUsages(
+  tx: Prisma.TransactionClient,
+  recipeId: string,
+  previousIngredients: { order: number; name: string }[],
+  nextIngredients: { order: number; name: string }[],
+): Promise<void> {
+  const steps = await tx.step.findMany({ where: { recipeId } });
+
+  for (const step of steps) {
+    const usages = parseIngredientUsages(step.ingredientUsages);
+
+    await tx.step.update({
+      where: { id: step.id },
+      data: {
+        ingredientUsages: toUsagesJson(
+          remapUsagesByName(usages, previousIngredients, nextIngredients),
+        ),
+      },
+    });
+  }
+}
+
+/**
+ * Turns the steps the agent sends into the rows the recipe stores.
+ *
+ * The agent writes usages by ingredient name because it has just written the ingredient list in
+ * the same call; the recipe stores them by order, so the names are resolved here. It throws on a
+ * name that is not in the list, before the recipe is translated: a usage that matches nothing is
+ * a mistake to report, not an assignment to drop silently.
+ */
+function buildStepRows(
+  steps: { ingredients?: UsageInput[] }[],
+  ingredients: { order: number; name: string }[],
+  imageUrlByOrder: Map<number, string | null>,
+): {
+  order: number;
+  imageUrl: string | null;
+  ingredientUsages: IngredientUsage[];
+}[] {
+  return steps.map((step, order) => ({
+    order,
+    imageUrl: imageUrlByOrder.get(order) ?? null,
+    ingredientUsages: resolveUsagesByName(step.ingredients ?? [], ingredients),
+  }));
 }
 
 /** Replaces the tags of a recipe, creating the ones that do not exist yet. */
@@ -163,6 +236,12 @@ export const recipesRouter = createTRPCRouter({
 
       const { content } = input;
 
+      // Resolved before the translation call, so a step that names an ingredient the recipe does
+      // not have fails fast instead of paying for a translation that will not be written.
+      const stepRows = content
+        ? buildStepRows(content.steps, content.ingredients, new Map())
+        : [{ order: 0, imageUrl: null, ingredientUsages: [] }];
+
       const sourceContent: RecipeTranslationContent = {
         title: input.title,
         description: input.description,
@@ -173,7 +252,10 @@ export const recipesRouter = createTRPCRouter({
             }))
           : [{ order: 0, name: PLACEHOLDER_INGREDIENT }],
         steps: content
-          ? content.steps.map((description, order) => ({ order, description }))
+          ? content.steps.map((step, order) => ({
+              order,
+              description: step.description,
+            }))
           : [{ order: 0, description: PLACEHOLDER_STEP }],
       };
 
@@ -213,9 +295,11 @@ export const recipesRouter = createTRPCRouter({
                 : { quantity: "0", unit: Unit.GRAM, order: 0 },
             },
             steps: {
-              create: content
-                ? content.steps.map((_, order) => ({ order }))
-                : { order: 0 },
+              create: stepRows.map((step) => ({
+                order: step.order,
+                imageUrl: step.imageUrl,
+                ingredientUsages: toUsagesJson(step.ingredientUsages),
+              })),
             },
             author: { connect: { id: ctx.session.user.id } },
           },
@@ -289,6 +373,20 @@ export const recipesRouter = createTRPCRouter({
       // re-labels the text and regenerates every other locale from it.
       const nextSourceLocale = sourceLocale ?? source.sourceLocale;
 
+      // An atomic write replaces the whole recipe, so the step photos that stay in the same
+      // position are carried over: an update that only touches other fields must not drop them.
+      // The rows are built before the translation call, so a step that names an ingredient the
+      // recipe does not have fails fast instead of paying for a translation never written.
+      const currentSteps = content
+        ? await ctx.db.step.findMany({ where: { recipeId: id } })
+        : [];
+      const stepImageByOrder = new Map(
+        currentSteps.map((step) => [step.order, step.imageUrl]),
+      );
+      const stepRows = content
+        ? buildStepRows(content.steps, content.ingredients, stepImageByOrder)
+        : [];
+
       const translations = await generateRecipeTranslations({
         sourceLocale: nextSourceLocale,
         content: {
@@ -301,26 +399,16 @@ export const recipesRouter = createTRPCRouter({
                   order: ingredient.order,
                   name: ingredient.name,
                 })),
-                steps: content.steps.map((description, order) => ({
+                steps: content.steps.map((step, order) => ({
                   order,
-                  description,
+                  description: step.description,
                 })),
               }
             : {}),
         },
       });
 
-      // An atomic write replaces the whole recipe, so the step photos that stay in the same
-      // position are carried over: an update that only touches other fields must not drop them.
-      const currentSteps = content
-        ? await ctx.db.step.findMany({ where: { recipeId: id } })
-        : [];
-      const stepImageByOrder = new Map(
-        currentSteps.map((step) => [step.order, step.imageUrl]),
-      );
-      const nextStepImages = content
-        ? content.steps.map((_, order) => stepImageByOrder.get(order) ?? null)
-        : [];
+      const nextStepImages = stepRows.map((row) => row.imageUrl);
 
       const updatedRecipe = await ctx.db.$transaction(async (tx) => {
         const updated = await tx.recipe.update({
@@ -344,11 +432,7 @@ export const recipesRouter = createTRPCRouter({
 
         if (content) {
           await replaceIngredientRows(tx, id, content.ingredients);
-          await replaceStepRows(
-            tx,
-            id,
-            nextStepImages.map((imageUrl, order) => ({ order, imageUrl })),
-          );
+          await replaceStepRows(tx, id, stepRows);
           await replaceRecipeTags(tx, id, content.tags);
         }
 
@@ -404,6 +488,13 @@ export const recipesRouter = createTRPCRouter({
         await replaceIngredientRows(tx, recipeId, ingredients);
 
         await replaceRecipeTranslations(recipeId, translations, tx);
+
+        await remapStepUsages(
+          tx,
+          recipeId,
+          source.content.ingredients,
+          ingredients,
+        );
       });
 
       await syncRecipeIndex(recipeId);
@@ -427,6 +518,7 @@ export const recipesRouter = createTRPCRouter({
                 .url("Step image URL must be a valid URL")
                 .trim()
                 .nullable(),
+              ingredientUsages: z.array(stepUsageSchema),
             }),
           )
           .min(1, "At least one step is required"),
@@ -472,6 +564,53 @@ export const recipesRouter = createTRPCRouter({
       await syncRecipeIndex(recipeId);
 
       return { success: true };
+    }),
+
+  /**
+   * Proposes which ingredients each step consumes, so the author does not have to assign every
+   * one by hand. It writes nothing: the editor fills its form with the proposal and the author
+   * reviews it before saving.
+   */
+  inferStepIngredients: protectedProcedure
+    .input(z.object({ recipeId: z.string() }))
+    .mutation(async ({ ctx, input }): Promise<StepIngredientSuggestion[]> => {
+      const recipe = await ctx.db.recipe.findUnique({
+        where: { id: input.recipeId },
+        select: { authorId: true },
+      });
+
+      if (!recipe) {
+        throw new Error("Recipe not found");
+      }
+
+      if (recipe.authorId !== ctx.session.user.id) {
+        throw new Error(
+          "Only the author can change the ingredients of a recipe",
+        );
+      }
+
+      const source = await readSourceContent(input.recipeId);
+
+      if (!source) {
+        throw new Error("Recipe translation not found");
+      }
+
+      const steps = await ctx.db.step.findMany({
+        where: { recipeId: input.recipeId },
+        orderBy: { order: "asc" },
+      });
+
+      const descriptionByOrder = new Map(
+        source.content.steps.map((step) => [step.order, step.description]),
+      );
+
+      return inferStepIngredients({
+        ingredients: source.content.ingredients,
+        steps: steps.map((step) => ({
+          order: step.order,
+          description: descriptionByOrder.get(step.order) ?? "",
+        })),
+      });
     }),
 
   updateTags: protectedProcedure
@@ -707,6 +846,9 @@ export const recipesRouter = createTRPCRouter({
           .min(1)
           .max(MAX_SEARCH_LIMIT)
           .default(DEFAULT_SEARCH_LIMIT),
+        // Relevance floor. The agent's search tool decides it from the request (see
+        // SPECIFIC_REQUEST_MIN_SIMILARITY); omitted, the permissive default applies.
+        minSimilarity: z.number().min(0).max(1).optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -717,6 +859,7 @@ export const recipesRouter = createTRPCRouter({
         filters: { maxTotalTime: input.maxTotalTime },
         excludeIds: input.excludeIds,
         limit: input.take,
+        minSimilarity: input.minSimilarity,
       });
 
       return {

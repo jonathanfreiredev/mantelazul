@@ -2,7 +2,10 @@ import { tool, zodSchema } from "ai";
 import { Category, Difficulty, Unit } from "generated/prisma/enums";
 import z from "zod";
 import { LOCALES } from "~/lib/locales";
-import { intSchema } from "~/server/api/routers/recipes/validation";
+import {
+  intSchema,
+  recipeStepInputSchema,
+} from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/server";
 
 const recipeInputSchema = z.object({
@@ -76,7 +79,7 @@ const recipeInputSchema = z.object({
         quantity: z.coerce
           .number()
           .describe(
-            "Quantity of the ingredient as a number (e.g. 1, 0.5, 2.75), using a dot as the decimal separator. Up to 3 decimals are kept. It does not need to include the unit, just the numeric value. It is required.",
+            "Quantity of the ingredient as a number (e.g. 1, 0.5, 2.75), using a dot as the decimal separator. Up to 3 decimals are kept. It does not need to include the unit, just the numeric value. Use 0 for an ingredient with no amount of its own, like salt, pepper or anything that goes 'to taste': the app then shows its name alone. It is required.",
           ),
         unit: z
           .enum(Unit)
@@ -90,16 +93,10 @@ const recipeInputSchema = z.object({
       "Ingredients for the recipe, one entry each, in the order they are used. Each ingredient has a name, a numeric quantity and a unit of measurement.",
     ),
   steps: z
-    .array(
-      z
-        .string()
-        .trim()
-        .min(1, "Step description is required")
-        .describe("Description of the preparation step. It is required."),
-    )
+    .array(recipeStepInputSchema)
     .min(1, "At least one step is required")
     .describe(
-      "Preparation steps for the recipe, listed in the order they should be performed. Each step is a clear, concise instruction for the user to follow.",
+      "Preparation steps for the recipe, listed in the order they should be performed. Each step carries its instruction and the ingredients it consumes.",
     ),
   tags: z
     .array(z.string().trim().min(1, "Tag cannot be empty"))
@@ -131,6 +128,9 @@ IMPORTANT:
 - Only call this tool once the user has explicitly confirmed they want the change.
 - Do NOT call it during brainstorming or suggestion phases.
 - Call 'getOneRecipe' first to read the recipe, then send it back with only the requested change.
+- Each step carries the ingredients it consumes, as 'getOneRecipe' returned them. Send those back
+  unchanged unless the user asked to change the split, and keep the shares consistent: what the
+  steps take from one ingredient must not add up to more than the whole.
 - To change the language the recipe is written in, set 'sourceLocale' and send the title,
   description, ingredients and steps in that language.
 - Leave 'imageUrl' out to keep the image the recipe already has, and set 'useAttachedImage'

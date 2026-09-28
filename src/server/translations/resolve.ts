@@ -1,5 +1,6 @@
 import type { Prisma } from "generated/prisma/client";
 import { DEFAULT_LOCALE, toLocale, type Locale } from "~/lib/locales";
+import { parseIngredientUsages } from "~/lib/step-ingredients";
 import type { RecipeDto } from "~/types/recipe";
 import type {
   RecipeTranslationContent,
@@ -73,7 +74,10 @@ export function toRecipeDto(
   const resolvedLocale = row ? toLocale(row.locale) : locale;
 
   const ingredientNames = new Map(
-    content.ingredients.map((ingredient) => [ingredient.order, ingredient.name]),
+    content.ingredients.map((ingredient) => [
+      ingredient.order,
+      ingredient.name,
+    ]),
   );
   const stepDescriptions = new Map(
     content.steps.map((step) => [step.order, step.description]),
@@ -95,6 +99,7 @@ export function toRecipeDto(
     steps: recipe.steps.map((step) => ({
       ...step,
       description: stepDescriptions.get(step.order) ?? "",
+      ingredientUsages: parseIngredientUsages(step.ingredientUsages),
     })),
     tags: recipe.tags,
   };

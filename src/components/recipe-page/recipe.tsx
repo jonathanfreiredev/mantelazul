@@ -1,6 +1,7 @@
 "use client";
 import { LanguagesIcon, SparklesIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
 import { toLocale } from "~/lib/locales";
 import { api } from "~/trpc/react";
 import Image from "next/image";
@@ -38,6 +39,10 @@ export function Recipe({ slug }: RecipeProps) {
   const isLoggedIn = !!data?.session;
   const isOriginalLanguage =
     recipe.resolvedLocale === toLocale(recipe.sourceLocale);
+
+  // The servings live here rather than inside the ingredient list, because the steps show the
+  // amount each of them consumes and both have to scale by the same factor.
+  const [servings, setServings] = useState(recipe.defaultServings);
 
   return (
     <div className="mx-auto flex w-full max-w-230 flex-col items-center sm:px-10">
@@ -135,6 +140,8 @@ export function Recipe({ slug }: RecipeProps) {
 
         <IngredientsSection
           defaultServings={recipe.defaultServings}
+          servings={servings}
+          onServingsChange={setServings}
           ingredients={recipe.ingredients}
         />
 
@@ -149,7 +156,12 @@ export function Recipe({ slug }: RecipeProps) {
 
         <Separator className="my-6 w-full" />
 
-        <StepsSection steps={recipe.steps} />
+        <StepsSection
+          steps={recipe.steps}
+          ingredients={recipe.ingredients}
+          servings={servings}
+          defaultServings={recipe.defaultServings}
+        />
 
         {recipe.tags.length > 0 && (
           <>

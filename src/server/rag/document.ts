@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { hasAmount } from "~/lib/ingredients";
 import type { RecipeIndexSource, RecipeMetadata } from "./types";
 
 /**
@@ -25,10 +26,13 @@ export function buildRecipeDocument(source: RecipeIndexSource): string {
   }
 
   if (source.ingredients.length > 0) {
+    // An ingredient with no amount is embedded by name alone: "sal (0 GRAM)" would only teach
+    // the index that salt comes in grams.
     const ingredients = source.ingredients
-      .map(
-        (ingredient) =>
-          `${ingredient.name} (${ingredient.quantity} ${ingredient.unit})`,
+      .map((ingredient) =>
+        hasAmount(ingredient.quantity)
+          ? `${ingredient.name} (${ingredient.quantity} ${ingredient.unit})`
+          : ingredient.name,
       )
       .join(", ");
     lines.push(`Ingredients: ${ingredients}`);

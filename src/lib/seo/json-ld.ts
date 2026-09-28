@@ -1,7 +1,6 @@
 import { categoryPathFor } from "~/lib/categories";
+import { formatIngredient } from "~/lib/ingredients";
 import type { Locale } from "~/lib/locales";
-import { formatUnit } from "~/lib/units";
-import { formatQuantity } from "~/lib/utils";
 import type { RecipeDto } from "~/types/recipe";
 import { SITE_NAME, localizedUrl } from "./site";
 
@@ -18,22 +17,6 @@ export function jsonLd(data: Record<string, unknown>): string {
 /** Minutes as the ISO 8601 duration schema.org expects. */
 function isoDuration(minutes: number): string {
   return `PT${minutes}M`;
-}
-
-/**
- * An ingredient as one line of text, written the way the page writes it: `"180.000"` in a rich
- * result would read as a machine talking.
- */
-function formatIngredient(
-  ingredient: RecipeDto["ingredients"][number],
-  locale: Locale,
-): string {
-  const quantity = Number.parseFloat(ingredient.quantity);
-  const amount = Number.isFinite(quantity)
-    ? formatQuantity(quantity)
-    : ingredient.quantity;
-
-  return `${amount} ${formatUnit(ingredient.unit, locale)} ${ingredient.name}`;
 }
 
 /** The site itself: name, description and canonical URL, for the home page. */
@@ -97,7 +80,12 @@ export function recipeJsonLd({
       name: authorName ?? SITE_NAME,
     },
     recipeIngredient: recipe.ingredients.map((ingredient) =>
-      formatIngredient(ingredient, locale),
+      formatIngredient(
+        ingredient.quantity,
+        ingredient.unit,
+        ingredient.name,
+        locale,
+      ),
     ),
     recipeInstructions: recipe.steps.map((step) => ({
       "@type": "HowToStep",

@@ -1,8 +1,11 @@
+import { propagateAttributes } from "@langfuse/tracing";
 import { createId } from "@paralleldrive/cuid2";
 import { createAgentUIStreamResponse } from "ai";
+import { after } from "next/server";
 import { createAgent, type MyAgentUIMessage } from "~/lib/agent";
 import { todayIso } from "~/lib/dates";
 import { saveChat } from "~/lib/save-chat";
+import { flushTelemetry } from "~/instrumentation";
 import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
 
@@ -35,14 +38,31 @@ export async function POST(req: Request) {
     generatedImageUrl: latestGeneratedImageUrl(messages),
   });
 
-  return createAgentUIStreamResponse({
-    agent,
-    uiMessages: messages,
-    generateMessageId: () => createId(),
-    onEnd: async ({ messages }) => {
-      await saveChat(messages, id, userId);
+  // Next runs this once the response has finished. It is the only window left to flush: the
+  // processor batches spans, and a serverless function freezes the moment the stream ends, so
+  // without it the last turn of every conversation would be traced nowhere.
+  after(() => flushTelemetry());
+
+  // Tags the whole turn with who asked and which conversation it belongs to, so the dashboard can
+  // be filtered by person and by session. The spans themselves are emitted by the AI SDK on their
+  // own, including the ones nested inside the tools.
+  return propagateAttributes(
+    {
+      traceName: "chat-message",
+      userId,
+      sessionId: id,
+      tags: [process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? "development"],
     },
-  });
+    () =>
+      createAgentUIStreamResponse({
+        agent,
+        uiMessages: messages,
+        generateMessageId: () => createId(),
+        onEnd: async ({ messages }) => {
+          await saveChat(messages, id, userId);
+        },
+      }),
+  );
 }
 
 /**

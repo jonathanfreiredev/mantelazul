@@ -1,7 +1,8 @@
 import type { Unit } from "generated/prisma/enums";
+import { formatIngredient } from "~/lib/ingredients";
+import { DEFAULT_LOCALE } from "~/lib/locales";
 import type { MealPlanEntryDto } from "~/types/meal-plan";
 import type { RecipeSearchHit } from "~/server/rag/types";
-import { formatUnit } from "~/lib/units";
 
 /** A recipe summary as returned by the favourites tool (not a search hit). */
 export interface RecipeSummary {
@@ -39,7 +40,11 @@ export interface RecipeDetail {
     unit: Unit;
     order: number;
   }[];
-  steps: { description: string; order: number }[];
+  steps: {
+    description: string;
+    order: number;
+    ingredientUsages: { order: number; part: number; of: number }[];
+  }[];
   tags: { tag: { name: string } }[];
 }
 
@@ -111,12 +116,30 @@ export function formatRecipeDetailForModel(recipe: RecipeDetail): string {
   const ingredients = recipe.ingredients
     .map(
       (ingredient) =>
-        `- ${ingredient.quantity} ${formatUnit(ingredient.unit)} ${ingredient.name}`,
+        `- ${formatIngredient(ingredient.quantity, ingredient.unit, ingredient.name, DEFAULT_LOCALE)}`,
     )
     .join("\n");
 
+  // Steps name the ingredients they consume, because that is how the tools take them back: the
+  // model has just read this list and copying a name is more reliable than counting orders.
+  const nameByOrder = new Map(
+    recipe.ingredients.map((ingredient) => [ingredient.order, ingredient.name]),
+  );
+
   const steps = recipe.steps
-    .map((step, index) => `${index + 1}. ${step.description}`)
+    .map((step, index) => {
+      const usages = step.ingredientUsages
+        .map((usage) => {
+          const name = nameByOrder.get(usage.order) ?? "";
+          const share =
+            usage.part === usage.of ? "all" : `${usage.part}/${usage.of}`;
+
+          return `${name} (${share})`;
+        })
+        .join("; ");
+
+      return `${index + 1}. ${step.description}${usages ? ` [uses: ${usages}]` : ""}`;
+    })
     .join("\n");
 
   const tags = recipe.tags.map((recipeTag) => recipeTag.tag.name).join(", ");

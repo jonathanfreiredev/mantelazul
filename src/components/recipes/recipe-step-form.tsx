@@ -2,6 +2,8 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
+import type { Share } from "~/lib/step-ingredients";
+import type { LocalizedIngredient } from "~/types/recipe";
 import { ImageUpload } from "../image-uploader/image-upload";
 import {
   Dialog,
@@ -15,18 +17,25 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { TrashIcon } from "lucide-react";
+import { RecipeStepIngredientsForm } from "./recipe-step-ingredients-form";
 
 interface RecipeStepFormProps {
   index: number;
   fieldId: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the form values type lives with the caller; this component only wires fields through to react-hook-form.
   control: any;
+  /** The recipe's ingredients, so the step can be told which of them it consumes. */
+  ingredients: LocalizedIngredient[];
+  /** What every step takes from each ingredient, keyed by ingredient order. */
+  assignedByOrder: Map<number, Share>;
 }
 
 export function RecipeStepForm({
   index,
   fieldId,
   control,
+  ingredients,
+  assignedByOrder,
 }: RecipeStepFormProps) {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const t = useTranslations("RecipeForm");
@@ -117,6 +126,13 @@ export function RecipeStepForm({
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
+        />
+
+        <RecipeStepIngredientsForm
+          index={index}
+          control={control}
+          ingredients={ingredients}
+          assignedByOrder={assignedByOrder}
         />
       </FieldGroup>
     </FieldGroup>

@@ -15,8 +15,11 @@ The recipe is returned in the language it was originally written in, so you can 
 change only what the user asked for and send it back with 'updateRecipe' without altering the
 other languages. Present it to the user in the language of the conversation.
 
-Use it to show a recipe in detail, before updating or deleting one, or when you only have
-an id from a previous tool result and need the rest of the recipe.
+Use it before updating or deleting a recipe, to answer a concrete question about one, or when you
+only have an id from a previous tool result and need the rest of the recipe.
+
+Do not use it to answer "give me a recipe": a recipe the app already has is shown to the user as a
+card, so reading it back to them only repeats what is on screen.
   `,
   inputSchema: z.object({
     id: z

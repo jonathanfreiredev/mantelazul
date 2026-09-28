@@ -8,41 +8,49 @@ export function cn(...inputs: ClassValue[]) {
 export const capitalize = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1);
 
+/**
+ * Fractions people actually recognise in a kitchen. Anything past eighths ("66 667/1000") is a
+ * number the formatter produced, not one a cook wrote, and reads better as a decimal.
+ */
+const MAX_FRACTION_DENOMINATOR = 8;
+
+/** How close a value has to be to a fraction to count as that fraction. */
+const FRACTION_TOLERANCE = 1.0e-6;
+
 export function formatQuantity(value: number): string {
   // Si es entero → sin decimales
   if (Number.isInteger(value)) {
     return value.toString();
   }
 
-  // Convertir a fracción con máximo 3 decimales
-  const tolerance = 1.0e-6;
-  let numerator = value;
-  let denominator = 1;
-
-  while (
-    Math.abs(Math.round(numerator) - numerator) > tolerance &&
-    denominator <= 1000
+  // The simplest fraction that matches: halves, thirds, quarters and eighths. A third of 200 g
+  // matches 2/3 and shows as "66 2/3"; an amount that is none of them falls through to a decimal.
+  for (
+    let denominator = 2;
+    denominator <= MAX_FRACTION_DENOMINATOR;
+    denominator++
   ) {
-    numerator *= 10;
-    denominator *= 10;
+    const numerator = Math.round(value * denominator);
+
+    if (
+      numerator < 1 ||
+      Math.abs(value - numerator / denominator) > FRACTION_TOLERANCE
+    ) {
+      continue;
+    }
+
+    // Si es tipo 3/2 → mostrar "1 1/2"
+    if (numerator > denominator) {
+      const whole = Math.floor(numerator / denominator);
+      const remainder = numerator % denominator;
+
+      return remainder === 0
+        ? whole.toString()
+        : `${whole} ${remainder}/${denominator}`;
+    }
+
+    return `${numerator}/${denominator}`;
   }
 
-  numerator = Math.round(numerator);
-
-  // Simplificar fracción
-  const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
-  const divisor = gcd(numerator, denominator);
-
-  numerator /= divisor;
-  denominator /= divisor;
-
-  // Si es tipo 3/2 → mostrar "1 1/2"
-  if (numerator > denominator) {
-    const whole = Math.floor(numerator / denominator);
-    const remainder = numerator % denominator;
-    if (remainder === 0) return whole.toString();
-    return `${whole} ${remainder}/${denominator}`;
-  }
-
-  return `${numerator}/${denominator}`;
+  return value.toFixed(3).replace(/\.?0+$/, "");
 }
