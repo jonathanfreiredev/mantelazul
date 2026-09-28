@@ -34,6 +34,13 @@ export const env = createEnv({
     CHROMA_API_KEY: z.string().optional(),
     CHROMA_TENANT: z.string().optional(),
     CHROMA_DATABASE: z.string().optional(),
+    // Langfuse tracing. Every one is optional: without the keys the instrumentation does nothing
+    // and the app boots exactly as before. The base URL is only needed to point at another
+    // region or a self-hosted instance, since the SDK already defaults to the EU cloud, which is
+    // where these traces should live.
+    LANGFUSE_PUBLIC_KEY: z.string().optional(),
+    LANGFUSE_SECRET_KEY: z.string().optional(),
+    LANGFUSE_BASE_URL: z.string().url().optional(),
   },
 
   /**
@@ -73,6 +80,12 @@ export const env = createEnv({
     CHROMA_API_KEY: process.env.CHROMA_API_KEY,
     CHROMA_TENANT: process.env.CHROMA_TENANT,
     CHROMA_DATABASE: process.env.CHROMA_DATABASE,
+    LANGFUSE_PUBLIC_KEY: process.env.LANGFUSE_PUBLIC_KEY,
+    LANGFUSE_SECRET_KEY: process.env.LANGFUSE_SECRET_KEY,
+    // The Langfuse SDK reads LANGFUSE_BASE_URL. Both spellings are accepted because
+    // LANGFUSE_BASEURL is common in the wild and a mismatch would silently change the region.
+    LANGFUSE_BASE_URL:
+      process.env.LANGFUSE_BASE_URL ?? process.env.LANGFUSE_BASEURL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
