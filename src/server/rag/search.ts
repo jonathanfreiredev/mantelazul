@@ -11,7 +11,23 @@ import type {
 
 export const DEFAULT_SEARCH_LIMIT = 5;
 export const MAX_SEARCH_LIMIT = 20;
+
+/**
+ * Cosine similarity floor for an open request ("ideas for dinner", "something quick"). There the
+ * search doubles as a way to browse, so a loose match is still a valid answer.
+ */
 export const DEFAULT_MIN_SIMILARITY = 0.15;
+
+/**
+ * Cosine similarity floor when the user named something in particular ("a bibimbap recipe",
+ * "chocolate desserts"). A nearest-neighbour search always has neighbours, so without a floor a
+ * dish the app does not have still returns five recipes that have nothing to do with it.
+ *
+ * 0.45 comes from measuring the live index. Recipes that really are what was asked for score
+ * 0.55–0.70; the closest neighbours of a dish the app lacks stay at or below 0.40. The floor
+ * sits in that gap.
+ */
+export const SPECIFIC_REQUEST_MIN_SIMILARITY = 0.45;
 
 /** Over-fetch headroom so exclusions and the similarity floor don't starve a page. */
 const MAX_VECTOR_CANDIDATES = 100;

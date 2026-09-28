@@ -58,6 +58,7 @@ export type StepCountAggregateOutputType = {
   imageUrl: number
   createdAt: number
   updatedAt: number
+  ingredientUsages: number
   recipeId: number
   _all: number
 }
@@ -95,6 +96,7 @@ export type StepCountAggregateInputType = {
   imageUrl?: true
   createdAt?: true
   updatedAt?: true
+  ingredientUsages?: true
   recipeId?: true
   _all?: true
 }
@@ -191,6 +193,7 @@ export type StepGroupByOutputType = {
   imageUrl: string | null
   createdAt: Date
   updatedAt: Date
+  ingredientUsages: runtime.JsonValue | null
   recipeId: string
   _count: StepCountAggregateOutputType | null
   _avg: StepAvgAggregateOutputType | null
@@ -223,6 +226,7 @@ export type StepWhereInput = {
   imageUrl?: Prisma.StringNullableFilter<"Step"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Step"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Step"> | Date | string
+  ingredientUsages?: Prisma.JsonNullableFilter<"Step">
   recipeId?: Prisma.StringFilter<"Step"> | string
   recipe?: Prisma.XOR<Prisma.RecipeScalarRelationFilter, Prisma.RecipeWhereInput>
 }
@@ -233,6 +237,7 @@ export type StepOrderByWithRelationInput = {
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  ingredientUsages?: Prisma.SortOrderInput | Prisma.SortOrder
   recipeId?: Prisma.SortOrder
   recipe?: Prisma.RecipeOrderByWithRelationInput
 }
@@ -246,6 +251,7 @@ export type StepWhereUniqueInput = Prisma.AtLeast<{
   imageUrl?: Prisma.StringNullableFilter<"Step"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Step"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Step"> | Date | string
+  ingredientUsages?: Prisma.JsonNullableFilter<"Step">
   recipeId?: Prisma.StringFilter<"Step"> | string
   recipe?: Prisma.XOR<Prisma.RecipeScalarRelationFilter, Prisma.RecipeWhereInput>
 }, "id">
@@ -256,6 +262,7 @@ export type StepOrderByWithAggregationInput = {
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  ingredientUsages?: Prisma.SortOrderInput | Prisma.SortOrder
   recipeId?: Prisma.SortOrder
   _count?: Prisma.StepCountOrderByAggregateInput
   _avg?: Prisma.StepAvgOrderByAggregateInput
@@ -273,6 +280,7 @@ export type StepScalarWhereWithAggregatesInput = {
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Step"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Step"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Step"> | Date | string
+  ingredientUsages?: Prisma.JsonNullableWithAggregatesFilter<"Step">
   recipeId?: Prisma.StringWithAggregatesFilter<"Step"> | string
 }
 
@@ -282,6 +290,7 @@ export type StepCreateInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recipe: Prisma.RecipeCreateNestedOneWithoutStepsInput
 }
 
@@ -291,6 +300,7 @@ export type StepUncheckedCreateInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recipeId: string
 }
 
@@ -300,6 +310,7 @@ export type StepUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recipe?: Prisma.RecipeUpdateOneRequiredWithoutStepsNestedInput
 }
 
@@ -309,6 +320,7 @@ export type StepUncheckedUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recipeId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -318,6 +330,7 @@ export type StepCreateManyInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recipeId: string
 }
 
@@ -327,6 +340,7 @@ export type StepUpdateManyMutationInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type StepUncheckedUpdateManyInput = {
@@ -335,6 +349,7 @@ export type StepUncheckedUpdateManyInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recipeId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -354,6 +369,7 @@ export type StepCountOrderByAggregateInput = {
   imageUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  ingredientUsages?: Prisma.SortOrder
   recipeId?: Prisma.SortOrder
 }
 
@@ -431,6 +447,7 @@ export type StepCreateWithoutRecipeInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type StepUncheckedCreateWithoutRecipeInput = {
@@ -439,6 +456,7 @@ export type StepUncheckedCreateWithoutRecipeInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type StepCreateOrConnectWithoutRecipeInput = {
@@ -476,6 +494,7 @@ export type StepScalarWhereInput = {
   imageUrl?: Prisma.StringNullableFilter<"Step"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Step"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Step"> | Date | string
+  ingredientUsages?: Prisma.JsonNullableFilter<"Step">
   recipeId?: Prisma.StringFilter<"Step"> | string
 }
 
@@ -485,6 +504,7 @@ export type StepCreateManyRecipeInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type StepUpdateWithoutRecipeInput = {
@@ -493,6 +513,7 @@ export type StepUpdateWithoutRecipeInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type StepUncheckedUpdateWithoutRecipeInput = {
@@ -501,6 +522,7 @@ export type StepUncheckedUpdateWithoutRecipeInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type StepUncheckedUpdateManyWithoutRecipeInput = {
@@ -509,6 +531,7 @@ export type StepUncheckedUpdateManyWithoutRecipeInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ingredientUsages?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -519,6 +542,7 @@ export type StepSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   imageUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ingredientUsages?: boolean
   recipeId?: boolean
   recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["step"]>
@@ -529,6 +553,7 @@ export type StepSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   imageUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ingredientUsages?: boolean
   recipeId?: boolean
   recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["step"]>
@@ -539,6 +564,7 @@ export type StepSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   imageUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ingredientUsages?: boolean
   recipeId?: boolean
   recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["step"]>
@@ -549,10 +575,11 @@ export type StepSelectScalar = {
   imageUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ingredientUsages?: boolean
   recipeId?: boolean
 }
 
-export type StepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "order" | "imageUrl" | "createdAt" | "updatedAt" | "recipeId", ExtArgs["result"]["step"]>
+export type StepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "order" | "imageUrl" | "createdAt" | "updatedAt" | "ingredientUsages" | "recipeId", ExtArgs["result"]["step"]>
 export type StepInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   recipe?: boolean | Prisma.RecipeDefaultArgs<ExtArgs>
 }
@@ -574,6 +601,18 @@ export type $StepPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     imageUrl: string | null
     createdAt: Date
     updatedAt: Date
+    /**
+     * *
+     *    * How much of each ingredient this step consumes: `[{ order, part, of }]`, where `order` points
+     *    * at the ingredient row of the same recipe and the step uses `part/of` of it (1/1 when the
+     *    * whole amount goes in here). Null and an empty array mean the same thing: no ingredient is
+     *    * assigned to this step.
+     *    *
+     *    * It lives here rather than in `RecipeTranslation` because the split is the same in every
+     *    * language: keeping it out of the translation JSON means the translator never sees it and
+     *    * cannot alter it.
+     */
+    ingredientUsages: runtime.JsonValue | null
     recipeId: string
   }, ExtArgs["result"]["step"]>
   composites: {}
@@ -1004,6 +1043,7 @@ export interface StepFieldRefs {
   readonly imageUrl: Prisma.FieldRef<"Step", 'String'>
   readonly createdAt: Prisma.FieldRef<"Step", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Step", 'DateTime'>
+  readonly ingredientUsages: Prisma.FieldRef<"Step", 'Json'>
   readonly recipeId: Prisma.FieldRef<"Step", 'String'>
 }
     

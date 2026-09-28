@@ -6,11 +6,16 @@ import { useRouter } from "~/i18n/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 import { type z } from "zod";
 import { breakpoints, useMediaQuery } from "~/hooks/use-media-query";
+import {
+  assignmentByIngredient,
+  type IngredientUsage,
+} from "~/lib/step-ingredients";
 import { cn } from "~/lib/utils";
 import { recipeStepsSchema } from "~/server/api/routers/recipes/validation";
 import { api } from "~/trpc/react";
 import type { RecipeDto } from "~/types/recipe";
 import { RecipeStepForm } from "./recipe-step-form";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import {
   Card,
@@ -47,6 +52,8 @@ export const RecipeStepsForm = ({
   const router = useRouter();
 
   const updateStepsMutation = api.recipes.updateSteps.useMutation();
+  const inferIngredientsMutation =
+    api.recipes.inferStepIngredients.useMutation();
 
   const form = useForm<z.infer<typeof recipeStepsSchema>>({
     resolver: zodResolver(recipeStepsSchema),
@@ -56,6 +63,7 @@ export const RecipeStepsForm = ({
         description: step.description,
         imageUrl: step.imageUrl,
         order: step.order,
+        ingredientUsages: step.ingredientUsages,
         image: step.imageUrl
           ? { file: new File([], "image.jpg"), preview: step.imageUrl }
           : null,
@@ -76,11 +84,47 @@ export const RecipeStepsForm = ({
     };
   });
 
+  // What every step takes from each ingredient so far. Watched, not read once, so the "usado X de
+  // Y" hint keeps up while the author edits.
+  const assignedByOrder = assignmentByIngredient(
+    controlledFields.map((field) => field.ingredientUsages ?? []),
+  );
+
+  const ingredientNameByOrder = new Map(
+    recipe.ingredients.map((ingredient) => [ingredient.order, ingredient.name]),
+  );
+
+  /** Fills every step with a proposal from the model, for the author to review and correct. */
+  async function suggestIngredients() {
+    try {
+      const suggestions = await inferIngredientsMutation.mutateAsync({
+        recipeId: recipe.id,
+      });
+
+      const usageByStepOrder = new Map(
+        suggestions.map((suggestion) => [
+          suggestion.stepOrder,
+          suggestion.ingredientUsages,
+        ]),
+      );
+
+      replace(
+        controlledFields.map((field) => ({
+          ...field,
+          ingredientUsages: usageByStepOrder.get(field.order) ?? [],
+        })),
+      );
+    } catch {
+      toast.error(t("suggestIngredientsFailed"));
+    }
+  }
+
   async function onSubmit(data: z.infer<typeof recipeStepsSchema>) {
     const steps: {
       description: string;
       order: number;
       imageUrl: string | null;
+      ingredientUsages: IngredientUsage[];
     }[] = [];
 
     for (const step of data.steps) {
@@ -111,6 +155,7 @@ export const RecipeStepsForm = ({
         description: step.description,
         order: step.order,
         imageUrl,
+        ingredientUsages: step.ingredientUsages,
       });
     }
 
@@ -133,6 +178,18 @@ export const RecipeStepsForm = ({
         <CardHeader className="text-center">
           <CardTitle className="text-xl">{t("stepsTitle")}</CardTitle>
           <CardDescription>{t("stepsDescription")}</CardDescription>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mx-auto mt-2"
+            disabled={inferIngredientsMutation.isPending}
+            onClick={suggestIngredients}
+          >
+            {inferIngredientsMutation.isPending
+              ? t("suggestingIngredients")
+              : t("suggestIngredients")}
+          </Button>
         </CardHeader>
         <CardContent>
           <form id="form-steps" onSubmit={form.handleSubmit(onSubmit)}>
@@ -168,6 +225,17 @@ export const RecipeStepsForm = ({
                             )}
                             <p>{field.description}</p>
                           </div>
+
+                          {field.ingredientUsages.length > 0 && (
+                            <p className="text-muted-foreground text-xs">
+                              {field.ingredientUsages
+                                .map((usage) =>
+                                  ingredientNameByOrder.get(usage.order),
+                                )
+                                .filter((name) => name !== undefined)
+                                .join(" · ")}
+                            </p>
+                          )}
                         </DrawerTrigger>
                         <DrawerContent>
                           <DrawerHeader>
@@ -181,6 +249,8 @@ export const RecipeStepsForm = ({
                             index={index}
                             fieldId={field.id}
                             control={form.control}
+                            ingredients={recipe.ingredients}
+                            assignedByOrder={assignedByOrder}
                           />
 
                           <DrawerFooter className="mt-4">
@@ -217,6 +287,7 @@ export const RecipeStepsForm = ({
                       description: t("newStep"),
                       imageUrl: null,
                       order: fields.length,
+                      ingredientUsages: [],
                       image: null,
                     })
                   }

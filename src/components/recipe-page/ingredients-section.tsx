@@ -1,24 +1,28 @@
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import type { LocalizedIngredient } from "~/types/recipe";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "../ui/button";
-import { formatQuantity } from "~/lib/utils";
-import { formatUnit } from "~/lib/units";
-import { useLocale } from "next-intl";
+import { formatIngredientAmount } from "~/lib/ingredients";
 import { type Locale } from "~/lib/locales";
+import { servingsRatio } from "~/lib/step-ingredients";
+import type { LocalizedIngredient } from "~/types/recipe";
 
 interface IngredientsSectionProps {
   defaultServings: number;
+  /** Servings the cook has dialled in. Shared with the steps, so both scale together. */
+  servings: number;
+  onServingsChange: (servings: number) => void;
   ingredients: LocalizedIngredient[];
 }
 
 export function IngredientsSection({
   defaultServings,
+  servings,
+  onServingsChange,
   ingredients,
 }: IngredientsSectionProps) {
-  const [servings, setServings] = useState(defaultServings);
   const t = useTranslations("Recipe");
   const locale = useLocale() as Locale;
+
+  const ratio = servingsRatio(servings, defaultServings);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -28,7 +32,7 @@ export function IngredientsSection({
         <Button
           variant="outline"
           size="icon-lg"
-          onClick={() => setServings((prev) => Math.max(prev - 1, 1))}
+          onClick={() => onServingsChange(Math.max(servings - 1, 1))}
         >
           -
         </Button>
@@ -36,7 +40,7 @@ export function IngredientsSection({
         <Button
           variant="outline"
           size="icon-lg"
-          onClick={() => setServings((prev) => prev + 1)}
+          onClick={() => onServingsChange(servings + 1)}
         >
           +
         </Button>
@@ -44,18 +48,24 @@ export function IngredientsSection({
       </div>
 
       <ul className="list-none space-y-1">
-        {ingredients.map((ingredient) => (
-          <li key={ingredient.id} className="flex gap-5 text-gray-700">
-            <span className="text-right font-medium">
-              {formatQuantity(
-                parseFloat(ingredient.quantity) * (servings / defaultServings),
-              )}{" "}
-              {formatUnit(ingredient.unit, locale)}
-            </span>
+        {ingredients.map((ingredient) => {
+          // An ingredient with no amount of its own (salt, pepper, "to taste") shows its name
+          // alone: there is nothing to scale and "0 g" is not something anyone wants to read.
+          const amount = formatIngredientAmount(
+            Number.parseFloat(ingredient.quantity) * ratio,
+            ingredient.unit,
+            locale,
+          );
 
-            <span className="flex-1">{ingredient.name}</span>
-          </li>
-        ))}
+          return (
+            <li key={ingredient.id} className="flex gap-5 text-gray-700">
+              {amount && (
+                <span className="text-right font-medium">{amount}</span>
+              )}
+              <span className="flex-1">{ingredient.name}</span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

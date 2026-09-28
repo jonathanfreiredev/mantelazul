@@ -198,6 +198,18 @@ model Step {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  /**
+   * How much of each ingredient this step consumes: `[{ order, part, of }]`, where `order` points
+   * at the ingredient row of the same recipe and the step uses `part/of` of it (1/1 when the
+   * whole amount goes in here). Null and an empty array mean the same thing: no ingredient is
+   * assigned to this step.
+   *
+   * It lives here rather than in `RecipeTranslation` because the split is the same in every
+   * language: keeping it out of the translation JSON means the translator never sees it and
+   * cannot alter it.
+   */
+  ingredientUsages Json?
+
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId String
 

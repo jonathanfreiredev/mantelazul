@@ -12,6 +12,7 @@
     "db:studio": "prisma studio",
     "chroma:dev": "chroma run --path ./.chroma --port 8000",
     "rag:index": "tsx src/scripts/index-recipes.ts",
+    "steps:backfill": "tsx src/scripts/backfill-step-ingredients.ts",
     "translations:backfill": "tsx src/scripts/backfill-translations.ts",
     "dev": "next dev --turbo",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",

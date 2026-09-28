@@ -1,0 +1,46 @@
+name: Step Ingredients Backfill (manual)
+
+# Manual only: works out which ingredients each step of every recipe consumes, one model call per
+# recipe, for the steps that have no assignment yet. An assignment made by hand is never touched.
+#
+# Run it once after applying the ingredient-usages migration, so production recipes get their
+# per-step amounts. Run it with the dry-run input first: it prints what it would write, plus the
+# steps it could not find any ingredient for and the ingredients whose steps add up to more than
+# the whole, which are the two places a proposal can be wrong.
+#
+# Required repository secrets: DATABASE_URL, OPENAI_API_KEY
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Print what it would write without writing anything"
+        type: boolean
+        default: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Backfill step ingredients
+        run: pnpm steps:backfill ${{ inputs.dry_run && '-- --dry-run' || '' }}
+        env:
+          # Only a subset of the app's env is needed here, so validation is skipped instead of
+          # wiring every secret (Resend, Cloudinary, Chroma, ...) into this job.
+          SKIP_ENV_VALIDATION: "1"
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
