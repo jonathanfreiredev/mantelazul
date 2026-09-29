@@ -3,6 +3,7 @@ import { formatIngredient } from "~/lib/ingredients";
 import type { Locale } from "~/lib/locales";
 import type { RecipeDto } from "~/types/recipe";
 import { SITE_NAME, localizedUrl } from "./site";
+import { stepAnchorId } from "./step-anchor";
 
 /**
  * Serializes structured data for a `<script type="application/ld+json">` tag.
@@ -87,9 +88,17 @@ export function recipeJsonLd({
         locale,
       ),
     ),
-    recipeInstructions: recipe.steps.map((step) => ({
+    recipeInstructions: recipe.steps.map((step, index) => ({
       "@type": "HowToStep",
       text: step.description,
+      // An anchor that exists on the page: the steps section gives every step this id.
+      url: localizedUrl(
+        locale,
+        `/recipes/${recipe.slug}#${stepAnchorId(index)}`,
+      ),
+      // Google recommends a photo per step and the app has none of its own, so the dish photo
+      // stands in. A step that does carry one shows its own instead.
+      image: step.imageUrl ?? recipe.imageUrl ?? undefined,
     })),
     nutrition: {
       "@type": "NutritionInformation",
