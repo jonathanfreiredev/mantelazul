@@ -2,6 +2,7 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { formatIngredient } from "~/lib/ingredients";
 import { type Locale } from "~/lib/locales";
+import { stepAnchorId } from "~/lib/seo/step-anchor";
 import { scaledUsageAmount } from "~/lib/step-ingredients";
 import type { LocalizedIngredient, LocalizedStep } from "~/types/recipe";
 
@@ -62,7 +63,11 @@ export function StepsSection({
             .filter((amount) => amount !== null);
 
           return (
-            <div key={step.id} className="flex w-full flex-col gap-4">
+            <div
+              key={step.id}
+              id={stepAnchorId(index)}
+              className="flex w-full flex-col gap-4"
+            >
               <h4 className="text-lg font-medium">
                 {t("step", { current: index + 1 })}
               </h4>
