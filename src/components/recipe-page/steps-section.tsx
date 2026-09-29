@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { formatIngredientAmount } from "~/lib/ingredients";
+import { formatIngredient } from "~/lib/ingredients";
 import { type Locale } from "~/lib/locales";
 import { scaledUsageAmount } from "~/lib/step-ingredients";
 import type { LocalizedIngredient, LocalizedStep } from "~/types/recipe";
@@ -37,6 +37,30 @@ export function StepsSection({
             (a, b) => a.order - b.order,
           );
 
+          // What the step needs, listed before the instruction it belongs to: it reads as the
+          // things to have ready for what comes next.
+          const amounts = usages
+            .map((usage) => {
+              const ingredient = ingredientByOrder.get(usage.order);
+
+              // A usage can outlive its ingredient if the recipe changed underneath it; showing
+              // nothing is better than showing an amount for a nameless row.
+              if (!ingredient) return null;
+
+              return formatIngredient(
+                scaledUsageAmount(
+                  Number.parseFloat(ingredient.quantity),
+                  usage,
+                  servings,
+                  defaultServings,
+                ),
+                ingredient.unit,
+                ingredient.name,
+                locale,
+              );
+            })
+            .filter((amount) => amount !== null);
+
           return (
             <div key={step.id} className="flex w-full flex-col gap-4">
               <h4 className="text-lg font-medium">
@@ -54,39 +78,26 @@ export function StepsSection({
                 </div>
               )}
 
-              <p className="text-gray-700">{step.description}</p>
-
-              {usages.length > 0 && (
-                <ul className="list-none space-y-1 text-gray-500">
-                  {usages.map((usage) => {
-                    const ingredient = ingredientByOrder.get(usage.order);
-
-                    // A usage can outlive its ingredient if the recipe changed underneath it;
-                    // showing nothing is better than showing an amount for a nameless row.
-                    if (!ingredient) return null;
-
-                    const amount = formatIngredientAmount(
-                      scaledUsageAmount(
-                        Number.parseFloat(ingredient.quantity),
-                        usage,
-                        servings,
-                        defaultServings,
-                      ),
-                      ingredient.unit,
-                      locale,
-                    );
-
-                    return (
-                      <li key={usage.order} className="flex gap-2">
-                        {amount && (
-                          <span className="font-medium">{amount}</span>
-                        )}
-                        <span>{ingredient.name}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
+              {amounts.length > 0 && (
+                <p className="text-sm font-light text-gray-500">
+                  {amounts.map((amount, index) => (
+                    <span key={`${index}-${amount}`}>
+                      {index > 0 && (
+                        <>
+                          {/* A non-breaking space on the left keeps the separator glued to the
+                              item before it, and the regular space on the right is where the line
+                              is allowed to break. The margin is what gives it its air. */}
+                          {"\u00a0"}
+                          <span className="mx-1.5">·</span>{" "}
+                        </>
+                      )}
+                      {amount}
+                    </span>
+                  ))}
+                </p>
               )}
+
+              <p className="text-gray-700">{step.description}</p>
             </div>
           );
         })}
