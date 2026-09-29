@@ -47,7 +47,7 @@ export function IngredientsSection({
         <span className="text-md text-gray-500">{t("servings")}</span>
       </div>
 
-      <ul className="list-none space-y-1">
+      <ul className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-1">
         {ingredients.map((ingredient) => {
           // An ingredient with no amount of its own (salt, pepper, "to taste") shows its name
           // alone: there is nothing to scale and "0 g" is not something anyone wants to read.
@@ -58,11 +58,14 @@ export function IngredientsSection({
           );
 
           return (
-            <li key={ingredient.id} className="flex gap-5 text-gray-700">
-              {amount && (
-                <span className="text-right font-medium">{amount}</span>
-              )}
-              <span className="flex-1">{ingredient.name}</span>
+            // Subgrid keeps the two columns aligned across every row, so the names all start at
+            // the same place however wide their amounts are.
+            <li
+              key={ingredient.id}
+              className="col-span-2 grid grid-cols-subgrid text-gray-700"
+            >
+              <span className="text-right font-medium">{amount}</span>
+              <span>{ingredient.name}</span>
             </li>
           );
         })}
