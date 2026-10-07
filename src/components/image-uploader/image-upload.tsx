@@ -88,7 +88,7 @@ export function ImageUpload({
   return (
     <div
       {...getRootProps()}
-      className="border-muted text-muted-foreground hover:bg-muted/50 focus:ring-ring data-[state=open]:bg-muted relative flex h-32 w-full cursor-pointer items-center justify-center rounded-md border-3 border-dashed bg-transparent p-6 text-sm transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed"
+      className="border-muted text-muted-foreground hover:bg-muted/50 focus:ring-ring data-[state=open]:bg-muted relative flex min-h-32 w-full cursor-pointer items-center justify-center rounded-md border-3 border-dashed bg-transparent p-6 text-sm transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed"
     >
       <Input
         {...props}
