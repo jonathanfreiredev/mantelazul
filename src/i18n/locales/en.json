@@ -468,8 +468,11 @@
     "planMealsFailed": "Some recipes could not be added: they no longer exist or are not visible to you.",
     "planMealsShared": "Shared with the household",
     "viewCalendar": "View Calendar",
-    "attachTitle": "Attach an image to the chat",
-    "attachDescription": "Send the assistant a photo of a dish, a handwritten recipe or your ingredients. It can read it, and a photo of the dish can become the recipe's image.",
+    "attachTitle": "Attach images to the chat",
+    "attachDescription": "Send the assistant photos of a dish, a handwritten recipe or your ingredients. It can read them, and a photo of the dish can become the recipe's image. You can attach up to 3 images.",
+    "removeAttachedImage": "Remove attached image",
+    "attachLimit": "You can attach up to {count} images.",
+    "imageInvalidType": "Only JPEG, PNG, WebP or HEIC images are allowed.",
     "imageTooLarge": "That image is too large. Please use one under 10 MB.",
     "imageUploadFailed": "The image could not be uploaded. Please try again."
   },

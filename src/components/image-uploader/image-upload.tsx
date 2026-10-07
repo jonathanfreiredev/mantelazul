@@ -2,7 +2,10 @@
 
 import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useDropzone } from "react-dropzone";
+import {
+  useDropzone,
+  type FileRejection,
+} from "react-dropzone";
 import { Input } from "../ui/input";
 import { processImage } from "~/lib/process-image";
 import { Spinner } from "../ui/spinner";
@@ -15,17 +18,21 @@ export type ImageWithPreview = {
 type ImageUploadProps = {
   maxImages: number;
   handleImages: (images: ImageWithPreview[]) => void;
+  /** Called with the files the dropzone would not take (too many, too large, wrong type). */
+  onRejected?: (rejections: FileRejection[]) => void;
 };
 
 export function ImageUpload({
   handleImages,
+  onRejected,
   maxImages = 1,
   ...props
 }: React.ComponentProps<"input"> & ImageUploadProps) {
   const t = useTranslations("ImageUpload");
   const [isLoading, setIsLoading] = useState(false);
   const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
+    async (acceptedFiles: File[], fileRejections: FileRejection[]) => {
+      if (fileRejections.length > 0) onRejected?.(fileRejections);
       if (acceptedFiles.length === 0) return;
 
       setIsLoading(true);
@@ -51,14 +58,14 @@ export function ImageUpload({
         setIsLoading(false);
       }
     },
-    [handleImages],
+    [handleImages, onRejected],
   );
 
   // react-dropzone expects a void handler; wrap the async work so the promise
   // is not passed through to a property that requires a void return.
   const handleDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      void onDrop(acceptedFiles);
+    (acceptedFiles: File[], fileRejections: FileRejection[]) => {
+      void onDrop(acceptedFiles, fileRejections);
     },
     [onDrop],
   );

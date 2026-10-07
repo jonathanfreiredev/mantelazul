@@ -468,8 +468,11 @@
     "planMealsFailed": "Einige Rezepte konnten nicht hinzugefügt werden: Sie existieren nicht mehr oder sind für dich nicht sichtbar.",
     "planMealsShared": "Mit dem Haushalt geteilt",
     "viewCalendar": "Kalender ansehen",
-    "attachTitle": "Bild an den Chat anhängen",
-    "attachDescription": "Sende dem Assistenten ein Foto eines Gerichts, eines handgeschriebenen Rezepts oder deiner Zutaten. Er kann es lesen, und ein Foto des Gerichts kann das Rezeptbild werden.",
+    "attachTitle": "Bilder an den Chat anhängen",
+    "attachDescription": "Sende dem Assistenten Fotos eines Gerichts, eines handgeschriebenen Rezepts oder deiner Zutaten. Er kann sie lesen, und ein Foto des Gerichts kann das Rezeptbild werden. Du kannst bis zu 3 Bilder anhängen.",
+    "removeAttachedImage": "Angehängtes Bild entfernen",
+    "attachLimit": "Du kannst bis zu {count} Bilder anhängen.",
+    "imageInvalidType": "Nur JPEG-, PNG-, WebP- oder HEIC-Bilder sind erlaubt.",
     "imageTooLarge": "Das Bild ist zu groß. Bitte verwende eines unter 10 MB.",
     "imageUploadFailed": "Das Bild konnte nicht hochgeladen werden. Bitte versuche es erneut."
   },

@@ -8,6 +8,7 @@ import {
   SquareIcon,
   XIcon,
 } from "lucide-react";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
@@ -28,8 +29,10 @@ interface ChatInputProps {
   onStop: () => void;
   isBusy: boolean;
   disabled: boolean;
-  attachedImage: ImageWithPreview | null;
-  onAttachedImageChange: (image: ImageWithPreview | null) => void;
+  attachedImages: ImageWithPreview[];
+  onAttachedImagesChange: (images: ImageWithPreview[]) => void;
+  /** How many images the message can carry in total. */
+  maxAttachedImages: number;
   showAttachButton: boolean;
   /** Hidden when no transcription provider is configured. */
   voiceEnabled: boolean;
@@ -50,8 +53,9 @@ export function ChatInput({
   onStop,
   isBusy,
   disabled,
-  attachedImage,
-  onAttachedImageChange,
+  attachedImages,
+  onAttachedImagesChange,
+  maxAttachedImages,
   showAttachButton,
   voiceEnabled,
 }: ChatInputProps) {
@@ -78,6 +82,39 @@ export function ChatInput({
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-zinc-300 bg-white/80 px-3 py-2 shadow-xl md:px-4 dark:border-zinc-800 dark:bg-zinc-900">
+      {attachedImages.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {attachedImages.map((image, index) => (
+            <div
+              key={image.preview}
+              className="relative size-16 overflow-hidden rounded-md bg-gray-100"
+            >
+              <Image
+                src={image.preview}
+                alt={t("attachedImageAlt")}
+                fill
+                className="object-cover"
+              />
+              <Button
+                type="button"
+                variant="default"
+                size="icon"
+                className="absolute top-0.5 right-0.5 size-6 rounded-full"
+                aria-label={t("removeAttachedImage")}
+                title={t("removeAttachedImage")}
+                onClick={() =>
+                  onAttachedImagesChange(
+                    attachedImages.filter((_, i) => i !== index),
+                  )
+                }
+              >
+                <XIcon className="size-3" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -163,8 +200,9 @@ export function ChatInput({
             <div className="flex items-center gap-2 md:gap-1">
               {showAttachButton && (
                 <AttachImageInput
-                  value={attachedImage}
-                  onChange={onAttachedImageChange}
+                  images={attachedImages}
+                  onImagesChange={onAttachedImagesChange}
+                  maxImages={maxAttachedImages}
                   disabled={disabled}
                 />
               )}
