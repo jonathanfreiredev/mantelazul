@@ -6,9 +6,8 @@ import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithApprovalResponses,
 } from "ai";
-import { ArrowDownIcon, SparklesIcon, Trash2Icon, XIcon } from "lucide-react";
+import { ArrowDownIcon, SparklesIcon, Trash2Icon } from "lucide-react";
 import { motion } from "motion/react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -33,6 +32,7 @@ import { isRunningToolPart, toolNameOf } from "./tools/tool-part";
 const MAX_MESSAGES = 50;
 /** Distance from the bottom within which the user is considered "at the bottom". */
 const BOTTOM_THRESHOLD_PX = 80;
+const MAX_ATTACHED_IMAGES = 3;
 const MAX_ATTACHED_IMAGE_BYTES = 10 * 1024 * 1024;
 
 /**
@@ -61,15 +61,12 @@ export default function AIAgentChat({
   voiceEnabled,
 }: AIAgentChatProps) {
   const t = useTranslations("Chat");
-  const [attachedImage, setAttachedImage] = useState<ImageWithPreview | null>(
-    null,
-  );
+  const [attachedImages, setAttachedImages] = useState<ImageWithPreview[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [opened, setOpened] = useState(false);
   const [input, setInput] = useState("");
 
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   /** Mirrors `isAtBottom` for the scroll effect, which must not re-run on every scroll. */
   const isPinnedToBottomRef = useRef(true);
@@ -127,7 +124,12 @@ export default function AIAgentChat({
   }
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
-    messagesEndRef.current?.scrollIntoView({ behavior });
+    const element = containerRef.current;
+    if (!element) return;
+
+    // Scroll the message list itself. `scrollIntoView` would also scroll every scrollable
+    // ancestor, dragging the drawer's header and composer out of view.
+    element.scrollTo({ top: element.scrollHeight, behavior });
   };
 
   const isNearBottom = () => {
@@ -183,32 +185,40 @@ export default function AIAgentChat({
   const handleSendMessage = async (text: string) => {
     if (text.trim() === "" || isBusy || isAtMessageLimit) return;
 
-    let imageUrl: string | null = null;
-
-    if (attachedImage && attachedImage.file.size > MAX_ATTACHED_IMAGE_BYTES) {
+    if (
+      attachedImages.some((image) => image.file.size > MAX_ATTACHED_IMAGE_BYTES)
+    ) {
       toast.error(t("imageTooLarge"));
       return;
     }
 
-    if (attachedImage) {
+    let attachments: { url: string; mediaType: string }[] = [];
+
+    if (attachedImages.length > 0) {
       setUploadingImage(true);
 
       try {
-        const formData = new FormData();
-        formData.append("file", attachedImage.file);
+        attachments = await Promise.all(
+          attachedImages.map(async (image) => {
+            const formData = new FormData();
+            formData.append("file", image.file);
 
-        const response = await fetch("/api/images/upload", {
-          method: "POST",
-          body: formData,
-        });
+            const response = await fetch("/api/images/upload", {
+              method: "POST",
+              body: formData,
+            });
 
-        if (!response.ok) {
-          toast.error(t("imageUploadFailed"));
-          return;
-        }
+            if (!response.ok) throw new Error("upload failed");
 
-        const resImage: { url: string } = await response.json();
-        imageUrl = resImage.url;
+            const resImage: { url: string } = await response.json();
+            return {
+              url: resImage.url,
+              // The real type of the processed file (WebP, or JPEG when the conversion
+              // failed). A hardcoded one makes the model read the image as something it is not.
+              mediaType: image.file.type || "image/jpeg",
+            };
+          }),
+        );
       } catch {
         toast.error(t("imageUploadFailed"));
         return;
@@ -221,22 +231,16 @@ export default function AIAgentChat({
       role: "user",
       parts: [
         { type: "text", text },
-        ...(imageUrl
-          ? [
-              {
-                type: "file" as const,
-                // The real type of the processed file (WebP, or JPEG when the conversion
-                // failed). A hardcoded one makes the model read the image as something it is not.
-                mediaType: attachedImage?.file.type || "image/jpeg",
-                url: imageUrl,
-              },
-            ]
-          : []),
+        ...attachments.map((attachment) => ({
+          type: "file" as const,
+          mediaType: attachment.mediaType,
+          url: attachment.url,
+        })),
       ],
     });
 
     setInput("");
-    setAttachedImage(null);
+    setAttachedImages([]);
   };
 
   const handleApprove = (approvalId: string) => {
@@ -282,8 +286,9 @@ export default function AIAgentChat({
               onStop={stop}
               isBusy={isBusy}
               disabled={uploadingImage || isAtMessageLimit}
-              attachedImage={attachedImage}
-              onAttachedImageChange={setAttachedImage}
+              attachedImages={attachedImages}
+              onAttachedImagesChange={setAttachedImages}
+              maxAttachedImages={MAX_ATTACHED_IMAGES}
               showAttachButton={false}
               voiceEnabled={voiceEnabled}
             />
@@ -294,13 +299,22 @@ export default function AIAgentChat({
   }
 
   return (
+    // On phones the drawer has to make room for the software keyboard. Vaul does that itself by
+    // watching the visual viewport; the desktop drawer has no keyboard to accommodate.
+    // The content also re-enables text selection: vaul turns it off on hover+fine-pointer
+    // devices to make dragging feel right, but the chat is read-only text meant to be copied.
     <Drawer
       direction={isDesktop ? "right" : "bottom"}
       open={opened}
       onOpenChange={setOpened}
+      repositionInputs={!isDesktop}
     >
-      <DrawerContent data-chat-composer className="w-full">
-        <DrawerHeader>
+      <DrawerContent
+        data-chat-composer
+        className="w-full overflow-clip data-[vaul-drawer-direction=bottom]:h-[85dvh]"
+        style={{ userSelect: "text", WebkitUserSelect: "text" }}
+      >
+        <DrawerHeader className="shrink-0">
           <DrawerTitle>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-lg font-normal">
@@ -324,7 +338,7 @@ export default function AIAgentChat({
           {t("description")}
         </DrawerDescription>
 
-        <div className="relative flex min-h-[55dvh] flex-col px-4 md:min-h-40">
+        <div className="relative flex min-h-0 flex-1 flex-col px-4">
           <div
             ref={containerRef}
             className="no-scrollbar flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto"
@@ -347,8 +361,6 @@ export default function AIAgentChat({
                 </p>
               </div>
             )}
-
-            <div ref={messagesEndRef} />
           </div>
 
           {!isAtBottom && (
@@ -373,27 +385,6 @@ export default function AIAgentChat({
             </motion.div>
           )}
 
-          {attachedImage && (
-            <div className="absolute bottom-1 z-100 h-32 w-32 overflow-hidden rounded-sm bg-gray-100 shadow-lg shadow-gray-500/50">
-              <div className="relative h-full w-full">
-                <Button
-                  variant="default"
-                  size="icon"
-                  className="absolute top-1 right-1 z-10 rounded-full"
-                  onClick={() => setAttachedImage(null)}
-                >
-                  <XIcon size="16" />
-                </Button>
-                <Image
-                  src={attachedImage.preview}
-                  alt={t("attachedImageAlt")}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          )}
-
           {isAtMessageLimit && (
             <motion.div
               key="limit-exceeded"
@@ -407,7 +398,7 @@ export default function AIAgentChat({
           )}
         </div>
 
-        <DrawerFooter>
+        <DrawerFooter className="shrink-0">
           <ChatInput
             value={input}
             onChange={setInput}
@@ -415,8 +406,9 @@ export default function AIAgentChat({
             onStop={stop}
             isBusy={isBusy}
             disabled={uploadingImage || isAtMessageLimit}
-            attachedImage={attachedImage}
-            onAttachedImageChange={setAttachedImage}
+            attachedImages={attachedImages}
+            onAttachedImagesChange={setAttachedImages}
+            maxAttachedImages={MAX_ATTACHED_IMAGES}
             showAttachButton
             voiceEnabled={voiceEnabled}
           />
