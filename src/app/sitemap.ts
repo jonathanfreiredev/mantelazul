@@ -29,6 +29,7 @@ const STATIC_PAGES: SitemapPage[] = [
     priority: 0.8,
     changeFrequency: "weekly" as const,
   })),
+  { path: "/impressum", priority: 0.3, changeFrequency: "yearly" },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" },
 ];

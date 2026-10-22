@@ -10,8 +10,11 @@ export async function Footer() {
     <footer className="border-t">
       <div className="flex h-full w-full flex-col items-center justify-between gap-6 px-6 py-8 text-sm text-gray-500 sm:flex-row sm:gap-4 sm:px-20 sm:py-12">
         <p>{t("rights", { year: new Date().getFullYear() })}</p>
-        <div className="flex items-center gap-6">
-          <nav className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+          <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+            <Link href="/impressum" className="hover:opacity-80">
+              {tLegal("impressumLink")}
+            </Link>
             <Link href="/privacy" className="hover:opacity-80">
               {tLegal("privacyLink")}
             </Link>
