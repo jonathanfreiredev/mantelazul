@@ -12,8 +12,11 @@
     "rights": "© {year} Mantel Azul. All rights reserved."
   },
   "Legal": {
+    "impressumLink": "Imprint",
     "privacyLink": "Privacy",
     "termsLink": "Terms",
+    "impressumTitle": "Imprint",
+    "impressumDescription": "Provider information for Mantel Azul pursuant to section 5 of the German Digital Services Act.",
     "privacyTitle": "Privacy policy",
     "privacyDescription": "What data Mantel Azul handles, why, who else sees it, and what you can do about it.",
     "termsTitle": "Terms of use",

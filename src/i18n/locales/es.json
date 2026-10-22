@@ -12,8 +12,11 @@
     "rights": "© {year} Mantel Azul. Todos los derechos reservados."
   },
   "Legal": {
+    "impressumLink": "Aviso legal",
     "privacyLink": "Privacidad",
     "termsLink": "Términos",
+    "impressumTitle": "Aviso legal",
+    "impressumDescription": "Información del proveedor de Mantel Azul conforme al § 5 de la Ley alemana de Servicios Digitales.",
     "privacyTitle": "Política de privacidad",
     "privacyDescription": "Qué datos trata Mantel Azul, para qué, quién más los ve y qué puedes hacer al respecto.",
     "termsTitle": "Términos de uso",

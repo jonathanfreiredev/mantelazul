@@ -4,10 +4,10 @@ import "server-only";
 import type { Locale } from "~/lib/locales";
 
 /**
- * The legal documents, one per route. The slug is the same in every language, so `/privacy` and
- * `/terms` stay where they are whatever the locale prefix is.
+ * The legal documents, one per route. The slug is the same in every language, so `/impressum`,
+ * `/privacy` and `/terms` stay where they are whatever the locale prefix is.
  */
-export const LEGAL_DOCUMENTS = ["privacy", "terms"] as const;
+export const LEGAL_DOCUMENTS = ["impressum", "privacy", "terms"] as const;
 
 export type LegalDocument = (typeof LEGAL_DOCUMENTS)[number];
 

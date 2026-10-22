@@ -12,8 +12,11 @@
     "rights": "© {year} Mantel Azul. Alle Rechte vorbehalten."
   },
   "Legal": {
+    "impressumLink": "Impressum",
     "privacyLink": "Datenschutz",
     "termsLink": "Nutzungsbedingungen",
+    "impressumTitle": "Impressum",
+    "impressumDescription": "Anbieterkennzeichnung für Mantel Azul gemäß § 5 des Digitale-Dienste-Gesetzes.",
     "privacyTitle": "Datenschutzerklärung",
     "privacyDescription": "Welche Daten Mantel Azul verarbeitet, zu welchem Zweck, wer sie sonst sieht und was du dagegen tun kannst.",
     "termsTitle": "Nutzungsbedingungen",
