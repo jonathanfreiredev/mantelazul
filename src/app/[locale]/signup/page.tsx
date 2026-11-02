@@ -19,7 +19,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   const isLoggedIn = !!session?.session;
 
   if (isLoggedIn) {
-    redirect("/");
+    redirect("/everything");
   }
 
   const { next, error } = await searchParams;

@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { categories } from "~/lib/categories-list";
-import { Button } from "../ui/button";
+import { Button } from "./ui/button";
 import { Link } from "~/i18n/navigation";
 import { getSession } from "~/server/better-auth/server";
 
@@ -8,6 +8,10 @@ interface CategoriesNavbarProps {
   currentCategory: string;
 }
 
+/**
+ * The horizontal category bar. It scrolls on narrow screens, so Everything sits first: it is the
+ * general listing and the page the site opens on.
+ */
 export async function CategoriesNavbar({
   currentCategory,
 }: CategoriesNavbarProps) {
@@ -18,7 +22,7 @@ export async function CategoriesNavbar({
   const isLoggedIn = !!session?.session;
 
   return (
-    <div className="h-12 border-b bg-slate-200 sm:h-20 dark:bg-slate-400">
+    <div className="bg-muted h-12 border-b sm:h-20">
       <div className="no-scrollbar flex h-full items-center overflow-x-auto px-2">
         {categories.map((cat) => {
           const isActive = currentCategory === cat.name;
@@ -29,8 +33,8 @@ export async function CategoriesNavbar({
               href={cat.href}
               className={`flex h-full items-center px-4 text-sm whitespace-nowrap sm:text-base ${
                 isActive
-                  ? "border-b-3 border-black font-semibold dark:border-white dark:text-shadow-xs"
-                  : "text-gray-700 hover:text-black dark:text-gray-900 dark:hover:text-white"
+                  ? "border-foreground text-foreground border-b-3 font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <p className="text-center">{tCategories(`${cat.name}.name`)}</p>

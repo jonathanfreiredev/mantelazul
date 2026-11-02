@@ -18,7 +18,7 @@ export default async function ProfilePage({
   const isLoggedIn = !!session?.session;
 
   if (!isLoggedIn) {
-    redirect("/");
+    redirect("/everything");
   }
 
   const { error } = await searchParams;

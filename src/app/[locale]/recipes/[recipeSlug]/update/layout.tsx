@@ -17,7 +17,7 @@ export default async function UpdateRecipeLayout({
   const isLoggedIn = !!session?.session;
 
   if (!isLoggedIn) {
-    redirect("/");
+    redirect("/everything");
   }
 
   const recipe = await api.recipes.getBySlug({

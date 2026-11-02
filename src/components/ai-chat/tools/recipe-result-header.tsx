@@ -23,7 +23,7 @@ export function RecipeResultHeader({
   return (
     <div className="flex items-center gap-3">
       {imageUrl && (
-        <div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-gray-100">
+        <div className="relative size-16 shrink-0 overflow-hidden rounded-md bg-muted">
           <Image src={imageUrl} alt={title} fill className="object-cover" />
         </div>
       )}

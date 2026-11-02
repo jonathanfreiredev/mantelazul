@@ -158,10 +158,6 @@
     "HARD": "Hard"
   },
   "CategoryPages": {
-    "explore": {
-      "name": "Explore",
-      "description": ""
-    },
     "mains": {
       "name": "Mains",
       "description": "Discover our collection of main dishes with a variety of flavors and ingredients to satisfy every palate."
@@ -434,7 +430,13 @@
     "imageAlt": "Cookbook cover"
   },
   "Chat": {
-    "title": "Assistant",
+    "title": "AI Assistant",
+    "loginRequiredTitle": "Sign in to use the assistant",
+    "loginRequiredDescription": "Log in to ask for recipes, plan meals and keep your conversations.",
+    "loginRequiredCta": "Log in",
+    "closeChat": "Close the assistant",
+    "deleteChat": "Delete chat",
+    "scrollToLatest": "Go to the latest message",
     "description": "The assistant can help you with a variety of tasks, such as answering questions, providing recommendations, and creating recipes.",
     "placeholder": "How can I help you today?",
     "limitExceeded": "Message limit exceeded. Please delete the chat to start a new conversation.",
@@ -602,6 +604,7 @@
   },
   "Menu": {
     "menu": "Menu",
+    "allRecipes": "All recipes",
     "cookbooks": "Cookbooks",
     "myRecipes": "My recipes",
     "myCookbooks": "My cookbooks",

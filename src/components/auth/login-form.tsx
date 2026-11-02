@@ -81,7 +81,7 @@ export const LoginForm = ({
           });
           form.reset();
 
-          router.replace(redirectTo ?? "/");
+          router.replace(redirectTo ?? "/everything");
           router.refresh();
         },
         onError(error) {

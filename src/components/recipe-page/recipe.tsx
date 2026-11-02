@@ -81,7 +81,7 @@ export function Recipe({ slug }: RecipeProps) {
         <div className="mt-6 flex items-center justify-center gap-8">
           <RecipeLikeButton
             recipeId={recipe.id}
-            className="text-md text-gray-800"
+            className="text-md text-foreground"
             size="xl"
             positionIcon="top"
             isLoggedIn={isLoggedIn}
@@ -89,14 +89,14 @@ export function Recipe({ slug }: RecipeProps) {
 
           <ShareButton
             recipeSlug={recipe.slug}
-            className="text-md text-gray-800"
+            className="text-md text-foreground"
             size="xl"
             positionIcon="top"
           />
 
           <SaveRecipeButton
             recipeId={recipe.id}
-            className="text-md text-gray-800"
+            className="text-md text-foreground"
             size="xl"
             positionIcon="top"
             isLoggedIn={isLoggedIn}
@@ -105,7 +105,7 @@ export function Recipe({ slug }: RecipeProps) {
           <AddToCalendarButton
             recipeId={recipe.id}
             defaultServings={recipe.defaultServings}
-            className="text-md text-gray-800"
+            className="text-md text-foreground"
             size="xl"
             isLoggedIn={isLoggedIn}
           />
@@ -113,7 +113,7 @@ export function Recipe({ slug }: RecipeProps) {
           {isLoggedIn && data.user.id === recipe.authorId && (
             <EditRecipeButton
               recipeSlug={recipe.slug}
-              className="text-md text-gray-800"
+              className="text-md text-foreground"
               size="xl"
               positionIcon="top"
             />

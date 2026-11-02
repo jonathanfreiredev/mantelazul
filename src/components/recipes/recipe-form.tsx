@@ -73,7 +73,7 @@ export function RecipeForm({
               </FieldLabel>
               <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
                 <DialogTrigger asChild>
-                  <div className="relative h-32 overflow-hidden rounded-sm bg-gray-100">
+                  <div className="relative h-32 overflow-hidden rounded-sm bg-muted">
                     {field.value ? (
                       <>
                         <Image
@@ -98,7 +98,7 @@ export function RecipeForm({
                         </Button>
                       </>
                     ) : (
-                      <p className="flex h-full w-full items-center justify-center text-gray-500">
+                      <p className="flex h-full w-full items-center justify-center text-muted-foreground">
                         {t("imagePlaceholder")}
                       </p>
                     )}

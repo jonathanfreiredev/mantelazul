@@ -9,8 +9,7 @@ interface ToolResultCardProps {
 }
 
 const toneClasses = {
-  success:
-    "border-slate-300 bg-slate-100 dark:border-slate-600 dark:bg-slate-800",
+  success: "border-border bg-muted",
   denied: "border-red-300 bg-red-100 dark:border-red-800 dark:bg-red-950",
   error:
     "border-amber-300 bg-amber-100 dark:border-amber-700 dark:bg-amber-950",

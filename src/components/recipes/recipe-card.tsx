@@ -65,7 +65,7 @@ export function RecipeCard({ recipe, isEditable = false }: RecipeCardProps) {
 
   return (
     <Card className="relative w-full rounded-sm pt-0">
-      <div className="relative h-48 w-full overflow-hidden rounded-t-sm bg-gray-300 2xl:h-56">
+      <div className="relative h-48 w-full overflow-hidden rounded-t-sm bg-muted 2xl:h-56">
         {recipe.imageUrl && (
           <Image
             src={recipe.imageUrl}

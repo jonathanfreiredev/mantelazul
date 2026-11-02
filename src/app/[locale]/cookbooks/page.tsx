@@ -13,7 +13,7 @@ export default async function CookbooksPage() {
   const isLoggedIn = !!session?.session;
 
   if (!isLoggedIn) {
-    redirect("/");
+    redirect("/everything");
   }
 
   void api.cookbooks.getAll.prefetch();

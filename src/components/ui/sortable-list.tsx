@@ -26,9 +26,9 @@ function SortableItem({ id, index, children }: SortableItemProps) {
   return (
     <li
       ref={ref}
-      className="mb-2 flex w-full cursor-move items-center rounded-sm bg-white p-4 shadow hover:bg-gray-50"
+      className="mb-2 flex w-full cursor-move items-center rounded-sm bg-background p-4 shadow hover:bg-muted"
     >
-      <GripVertical className="mr-2 inline-block text-gray-400" />
+      <GripVertical className="mr-2 inline-block text-muted-foreground" />
       {children}
     </li>
   );

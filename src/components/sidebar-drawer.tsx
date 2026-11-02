@@ -1,17 +1,17 @@
 import {
-  BookIcon,
+  BookMarkedIcon,
+  BookOpenIcon,
   CalendarDaysIcon,
   HouseIcon,
+  LogInIcon,
   MenuIcon,
   NotepadTextIcon,
   PlusIcon,
-  SquareDotIcon,
   UserIcon,
   XIcon,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "~/i18n/navigation";
-import { categories } from "~/lib/categories-list";
 import { SidebarDrawerAuth } from "./sidebar-drawer-auth";
 import { SidebarDrawerLocale } from "./sidebar-drawer-locale";
 import { Button } from "./ui/button";
@@ -31,7 +31,6 @@ interface SidebarDrawerProps {
 
 export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
   const t = await getTranslations("Menu");
-  const tCategories = await getTranslations("CategoryPages");
   const tUi = await getTranslations("Ui");
 
   return (
@@ -57,65 +56,137 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
           </DrawerClose>
         </DrawerHeader>
         <div className="flex min-h-0 w-full flex-1 flex-col gap-0 overflow-y-auto px-2 pb-4">
-          {categories
-            .filter((category) => category.name !== "explore")
-            .map((category) => (
-              <DrawerClose key={category.name} asChild>
+          {!isLoggedIn && (
+            <DrawerClose asChild>
+              <Item
+                variant="muted"
+                size="sm"
+                className="text-primary bg-primary/10 mb-2 cursor-pointer"
+                asChild
+              >
+                <Link href="/login">
+                  <ItemMedia>
+                    <LogInIcon className="size-5" />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{t("logIn")}</ItemTitle>
+                  </ItemContent>
+                </Link>
+              </Item>
+            </DrawerClose>
+          )}
+
+          <DrawerClose asChild>
+            <Item
+              variant="default"
+              size="sm"
+              className="cursor-pointer"
+              asChild
+            >
+              <Link href="/everything">
+                <ItemMedia>
+                  <BookOpenIcon className="size-5" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{t("allRecipes")}</ItemTitle>
+                </ItemContent>
+              </Link>
+            </Item>
+          </DrawerClose>
+
+          {isLoggedIn && (
+            <>
+              <DrawerClose asChild>
                 <Item
                   variant="default"
                   size="sm"
                   className="cursor-pointer"
                   asChild
                 >
-                  <Link href={category.href}>
+                  <Link href="/recipes">
                     <ItemMedia>
-                      <SquareDotIcon className="size-5" />
+                      <NotepadTextIcon className="size-5" />
                     </ItemMedia>
                     <ItemContent>
-                      <ItemTitle>
-                        {tCategories(`${category.name}.name`)}
-                      </ItemTitle>
+                      <ItemTitle>{t("myRecipes")}</ItemTitle>
                     </ItemContent>
                   </Link>
                 </Item>
               </DrawerClose>
-            ))}
 
-          <DrawerClose asChild>
-            <Item
-              variant="default"
-              size="sm"
-              className="cursor-pointer"
-              asChild
-            >
-              <Link href={isLoggedIn ? "/recipes" : "/login"}>
-                <ItemMedia>
-                  <NotepadTextIcon className="size-5" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{t("myRecipes")}</ItemTitle>
-                </ItemContent>
-              </Link>
-            </Item>
-          </DrawerClose>
+              <DrawerClose asChild>
+                <Item
+                  variant="default"
+                  size="sm"
+                  className="cursor-pointer"
+                  asChild
+                >
+                  <Link href="/cookbooks">
+                    <ItemMedia>
+                      <BookMarkedIcon className="size-5" />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{t("myCookbooks")}</ItemTitle>
+                    </ItemContent>
+                  </Link>
+                </Item>
+              </DrawerClose>
 
-          <DrawerClose asChild>
-            <Item
-              variant="default"
-              size="sm"
-              className="cursor-pointer"
-              asChild
-            >
-              <Link href={isLoggedIn ? "/cookbooks" : "/login"}>
-                <ItemMedia>
-                  <NotepadTextIcon className="size-5" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{t("myCookbooks")}</ItemTitle>
-                </ItemContent>
-              </Link>
-            </Item>
-          </DrawerClose>
+              <DrawerClose asChild>
+                <Item
+                  variant="default"
+                  size="sm"
+                  className="cursor-pointer"
+                  asChild
+                >
+                  <Link href="/calendar">
+                    <ItemMedia>
+                      <CalendarDaysIcon className="size-5" />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{t("calendar")}</ItemTitle>
+                    </ItemContent>
+                  </Link>
+                </Item>
+              </DrawerClose>
+
+              <DrawerClose asChild>
+                <Item
+                  variant="default"
+                  size="sm"
+                  className="cursor-pointer"
+                  asChild
+                >
+                  <Link href="/household">
+                    <ItemMedia>
+                      <HouseIcon className="size-5" />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{t("household")}</ItemTitle>
+                    </ItemContent>
+                  </Link>
+                </Item>
+              </DrawerClose>
+
+              <DrawerClose asChild>
+                <Item
+                  variant="default"
+                  size="sm"
+                  className="cursor-pointer"
+                  asChild
+                >
+                  <Link href="/profile">
+                    <ItemMedia>
+                      <UserIcon className="size-5" />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{t("profile")}</ItemTitle>
+                    </ItemContent>
+                  </Link>
+                </Item>
+              </DrawerClose>
+            </>
+          )}
 
           <DrawerClose asChild>
             <Item
@@ -135,63 +206,9 @@ export async function SidebarDrawer({ isLoggedIn }: SidebarDrawerProps) {
             </Item>
           </DrawerClose>
 
-          <DrawerClose asChild>
-            <Item
-              variant="default"
-              size="sm"
-              className="cursor-pointer"
-              asChild
-            >
-              <Link href={isLoggedIn ? "/calendar" : "/login"}>
-                <ItemMedia>
-                  <CalendarDaysIcon className="size-5" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{t("calendar")}</ItemTitle>
-                </ItemContent>
-              </Link>
-            </Item>
-          </DrawerClose>
-
-          <DrawerClose asChild>
-            <Item
-              variant="default"
-              size="sm"
-              className="cursor-pointer"
-              asChild
-            >
-              <Link href={isLoggedIn ? "/household" : "/login"}>
-                <ItemMedia>
-                  <HouseIcon className="size-5" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{t("household")}</ItemTitle>
-                </ItemContent>
-              </Link>
-            </Item>
-          </DrawerClose>
-
-          <DrawerClose asChild>
-            <Item
-              variant="default"
-              size="sm"
-              className="cursor-pointer"
-              asChild
-            >
-              <Link href={isLoggedIn ? "/profile" : "/login"}>
-                <ItemMedia>
-                  <UserIcon className="size-5" />
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{t("profile")}</ItemTitle>
-                </ItemContent>
-              </Link>
-            </Item>
-          </DrawerClose>
-
           <SidebarDrawerLocale />
 
-          <SidebarDrawerAuth />
+          <SidebarDrawerAuth isLoggedIn={isLoggedIn} />
         </div>
       </DrawerContent>
     </Drawer>

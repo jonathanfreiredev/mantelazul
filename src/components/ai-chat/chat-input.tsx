@@ -18,8 +18,18 @@ import {
 import { MAX_DICTATION_MS } from "~/lib/voice/recorder";
 import { AttachImageInput } from "./attach-image-input";
 import type { ImageWithPreview } from "../image-uploader/image-upload";
+import {
+  Attachment,
+  AttachmentAction,
+  AttachmentActions,
+  AttachmentMedia,
+} from "../ui/attachment";
 import { Button } from "../ui/button";
-import { Textarea } from "../ui/textarea";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupTextarea,
+} from "../ui/input-group";
 import { VoiceWaveform } from "./voice-waveform";
 
 interface ChatInputProps {
@@ -39,7 +49,7 @@ interface ChatInputProps {
 }
 
 /**
- * The chat composer. Used in both the collapsed prompt and the open drawer; `showAttachButton`
+ * The chat composer. Used in both the collapsed prompt and the open panel; `showAttachButton`
  * hides the image picker in the collapsed variant.
  *
  * Dictation replaces the button row with the recording itself: the field above stays visible but
@@ -81,48 +91,50 @@ export function ChatInput({
   const isRetry = dictation.status === "failed";
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-zinc-300 bg-white/80 px-3 py-2 shadow-xl md:px-4 dark:border-zinc-800 dark:bg-zinc-900">
-      {attachedImages.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {attachedImages.map((image, index) => (
-            <div
-              key={image.preview}
-              className="relative size-16 overflow-hidden rounded-md bg-gray-100"
-            >
-              <Image
-                src={image.preview}
-                alt={t("attachedImageAlt")}
-                fill
-                className="object-cover"
-              />
-              <Button
-                type="button"
-                variant="default"
-                size="icon"
-                className="absolute top-0.5 right-0.5 size-6 rounded-full"
-                aria-label={t("removeAttachedImage")}
-                title={t("removeAttachedImage")}
-                onClick={() =>
-                  onAttachedImagesChange(
-                    attachedImages.filter((_, i) => i !== index),
-                  )
-                }
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
+    >
+      <InputGroup className="h-auto rounded-2xl border-zinc-300 bg-white/90 px-1 shadow-xl backdrop-blur md:h-auto dark:border-zinc-800 dark:bg-zinc-900/90">
+        {attachedImages.length > 0 && (
+          <InputGroupAddon align="block-start" className="flex-wrap gap-2">
+            {attachedImages.map((image, index) => (
+              <Attachment
+                key={image.preview}
+                size="sm"
+                className="bg-background/80 min-w-0"
               >
-                <XIcon className="size-3" />
-              </Button>
-            </div>
-          ))}
-        </div>
-      )}
+                <AttachmentMedia variant="image">
+                  <Image
+                    src={image.preview}
+                    alt={t("attachedImageAlt")}
+                    fill
+                    sizes="40px"
+                    className="object-cover"
+                  />
+                </AttachmentMedia>
+                <AttachmentActions>
+                  <AttachmentAction
+                    aria-label={t("removeAttachedImage")}
+                    title={t("removeAttachedImage")}
+                    onClick={() =>
+                      onAttachedImagesChange(
+                        attachedImages.filter((_, i) => i !== index),
+                      )
+                    }
+                  >
+                    <XIcon />
+                  </AttachmentAction>
+                </AttachmentActions>
+              </Attachment>
+            ))}
+          </InputGroupAddon>
+        )}
 
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          onSubmit();
-        }}
-      >
-        <Textarea
-          className="w-full resize-none border-none focus-visible:ring-0"
+        <InputGroupTextarea
+          className="max-h-40 min-h-11 px-3 py-3 text-base md:max-h-32 md:min-h-9 md:py-2.5 md:text-sm"
           value={value}
           rows={1}
           placeholder={t("placeholder")}
@@ -143,7 +155,7 @@ export function ChatInput({
         />
 
         {isDictating ? (
-          <div className="mt-2 flex items-center gap-2 md:mt-1">
+          <InputGroupAddon align="block-end" className="gap-2 py-2">
             <span className="sr-only" aria-live="polite">
               {isTranscribing ? tVoice("transcribing") : tVoice("recording")}
             </span>
@@ -194,21 +206,19 @@ export function ChatInput({
                 <CheckIcon />
               )}
             </Button>
-          </div>
+          </InputGroupAddon>
         ) : (
-          <div className="mt-2 flex items-center justify-between md:mt-1">
-            <div className="flex items-center gap-2 md:gap-1">
-              {showAttachButton && (
-                <AttachImageInput
-                  images={attachedImages}
-                  onImagesChange={onAttachedImagesChange}
-                  maxImages={maxAttachedImages}
-                  disabled={disabled}
-                />
-              )}
-            </div>
+          <InputGroupAddon align="block-end" className="gap-1 py-1.5">
+            {showAttachButton && (
+              <AttachImageInput
+                images={attachedImages}
+                onImagesChange={onAttachedImagesChange}
+                maxImages={maxAttachedImages}
+                disabled={disabled}
+              />
+            )}
 
-            <div className="flex items-center gap-2 md:gap-1">
+            <div className="ml-auto flex items-center gap-1">
               {voiceEnabled && (
                 <Button
                   type="button"
@@ -246,10 +256,10 @@ export function ChatInput({
                 </Button>
               )}
             </div>
-          </div>
+          </InputGroupAddon>
         )}
-      </form>
-    </div>
+      </InputGroup>
+    </form>
   );
 }
 

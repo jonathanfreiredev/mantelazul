@@ -9,7 +9,7 @@ export default async function NewRecipesPage() {
   const isLoggedIn = !!session?.session;
 
   if (!isLoggedIn) {
-    redirect("/");
+    redirect("/everything");
   }
 
   return (

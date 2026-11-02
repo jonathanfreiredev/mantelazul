@@ -22,6 +22,10 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   // Zoom stays available: locking it out blocks pinch-to-zoom, which is a WCAG 1.4.4 failure.
+  //
+  // On Android the keyboard shrinks the layout viewport when this is set, so a `dvh` panel stays
+  // above it. iOS ignores the hint, which is why the chat panel also follows `visualViewport`.
+  interactiveWidget: "resizes-content",
 };
 
 export function generateStaticParams() {

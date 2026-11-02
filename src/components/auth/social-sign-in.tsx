@@ -55,7 +55,7 @@ export function SocialSignIn({ redirectTo, enabled }: SocialSignInProps) {
     setIsRedirecting(true);
 
     const origin = window.location.origin;
-    const destination = `${origin}/${locale}${redirectTo ?? ""}`;
+    const destination = `${origin}/${locale}${redirectTo ?? "/everything"}`;
 
     await authClient.signIn.social({
       provider: "google",

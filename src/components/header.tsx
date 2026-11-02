@@ -33,9 +33,11 @@ export async function Header() {
   }
 
   return (
-    <header className="h-24 px-6">
+    // Solid background, not a blur: a backdrop filter on this sticky element would become the
+    // containing block of the fixed chat panel and stop it from covering the screen.
+    <header className="bg-background sticky top-0 z-40 h-24 shrink-0 border-b px-6">
       <div className="flex h-full w-full items-center justify-between">
-        <Link href="/" passHref className="h-full">
+        <Link href="/everything" passHref className="h-full">
           <h1 className="relative h-full w-40">
             <Logo />
           </h1>
@@ -56,13 +58,12 @@ export async function Header() {
             <SidebarDrawer isLoggedIn={isLoggedIn} />
           </div>
 
-          {!!isLoggedIn && (
-            <ChatLauncher
-              chatId={chatId || createId()}
-              messages={messages}
-              voiceEnabled={voiceDictationEnabled}
-            />
-          )}
+          <ChatLauncher
+            chatId={chatId || createId()}
+            messages={messages}
+            isLoggedIn={isLoggedIn}
+            voiceEnabled={voiceDictationEnabled}
+          />
         </div>
       </div>
     </header>

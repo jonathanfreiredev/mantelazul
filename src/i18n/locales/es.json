@@ -158,10 +158,6 @@
     "HARD": "Difícil"
   },
   "CategoryPages": {
-    "explore": {
-      "name": "Explorar",
-      "description": ""
-    },
     "mains": {
       "name": "Principales",
       "description": "Descubre nuestra colección de platos principales con una gran variedad de sabores e ingredientes para todos los paladares."
@@ -434,7 +430,13 @@
     "imageAlt": "Portada del recetario"
   },
   "Chat": {
-    "title": "Asistente",
+    "title": "Asistente AI",
+    "loginRequiredTitle": "Inicia sesión para usar el asistente",
+    "loginRequiredDescription": "Inicia sesión para pedir recetas, planificar comidas y guardar tus conversaciones.",
+    "loginRequiredCta": "Iniciar sesión",
+    "closeChat": "Cerrar el asistente",
+    "deleteChat": "Eliminar chat",
+    "scrollToLatest": "Ir al último mensaje",
     "description": "El asistente puede ayudarte con diversas tareas, como responder preguntas, darte recomendaciones y crear recetas.",
     "placeholder": "¿Cómo puedo ayudarte hoy?",
     "limitExceeded": "Se superó el límite de mensajes. Elimina el chat para empezar una conversación nueva.",
@@ -602,6 +604,7 @@
   },
   "Menu": {
     "menu": "Menú",
+    "allRecipes": "Todas las recetas",
     "cookbooks": "Recetarios",
     "myRecipes": "Mis recetas",
     "myCookbooks": "Mis recetarios",

@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { CategoryHero } from "~/components/category-hero";
-import { CategoriesNavbar } from "~/components/home/categories-navbar";
+import { CategoriesNavbar } from "~/components/categories-navbar";
+import { JsonLd } from "~/components/seo/json-ld";
 import { Recipes } from "~/components/recipes/recipes";
 import { CATEGORY_BY_PATH, isCategoryPath } from "~/lib/categories";
 import { toLocale } from "~/lib/locales";
+import { websiteJsonLd } from "~/lib/seo/json-ld";
 import { buildPageMetadata } from "~/lib/seo/metadata";
 import { api, HydrateClient } from "~/trpc/server";
 
@@ -40,6 +42,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   const locale = await getLocale();
 
+  // `/everything` is the page the site opens on now, so it carries the WebSite schema the old
+  // home page used to render.
+  const tMetadata = await getTranslations({ locale, namespace: "Metadata" });
+
   // Awaited rather than fired and forgotten: the list has to be in the query cache before the
   // page renders, or the HTML arrives empty and a crawler that does not run JavaScript sees
   // nothing at all.
@@ -52,6 +58,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <HydrateClient>
+      {category === "everything" && (
+        <JsonLd
+          data={websiteJsonLd({
+            locale: toLocale(locale),
+            description: tMetadata("description"),
+          })}
+        />
+      )}
       <CategoriesNavbar currentCategory={category} />
       <CategoryHero currentCategory={category} />
 

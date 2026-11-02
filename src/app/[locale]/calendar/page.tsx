@@ -8,7 +8,7 @@ export default async function CalendarPage() {
   const session = await getSession();
 
   if (!session?.session) {
-    redirect("/");
+    redirect("/everything");
   }
 
   const t = await getTranslations("Calendar");
