@@ -68,6 +68,7 @@ export const ModelName = {
   HouseholdInvite: 'HouseholdInvite',
   MealPlanEntry: 'MealPlanEntry',
   Chat: 'Chat',
+  RateLimit: 'RateLimit',
   Message: 'Message'
 } as const
 
@@ -310,10 +311,25 @@ export const ChatScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  summary: 'summary',
+  summaryUpToMessageId: 'summaryUpToMessageId',
+  summaryUpdatedAt: 'summaryUpdatedAt',
+  summaryTokens: 'summaryTokens',
   userId: 'userId'
 } as const
 
 export type ChatScalarFieldEnum = (typeof ChatScalarFieldEnum)[keyof typeof ChatScalarFieldEnum]
+
+
+export const RateLimitScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  action: 'action',
+  windowStart: 'windowStart',
+  count: 'count'
+} as const
+
+export type RateLimitScalarFieldEnum = (typeof RateLimitScalarFieldEnum)[keyof typeof RateLimitScalarFieldEnum]
 
 
 export const MessageScalarFieldEnum = {

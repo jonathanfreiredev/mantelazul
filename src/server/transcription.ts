@@ -1,7 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { transcribe } from "ai";
 import { env } from "~/env";
-import { isLocale } from "~/lib/locales";
 
 /**
  * Groq serves an OpenAI-compatible transcription endpoint, so the OpenAI provider is pointed at it
@@ -19,21 +18,21 @@ const TRANSCRIPTION_MODEL_ID = "whisper-large-v3";
 /** Dictation is offered only when the key it needs is configured, like Google sign-in. */
 export const voiceDictationEnabled = Boolean(env.GROQ_API_KEY);
 
-/** Turns the request's language into a hint the model accepts, or nothing at all. */
-export function transcriptionLanguage(value: unknown): string | undefined {
-  return isLocale(value) ? value : undefined;
-}
-
 /**
+ * Turns a complete audio file into text.
+ *
+ * No language hint is sent on purpose. Whisper's `language` option describes the language of the
+ * audio, not the language of the interface; passing the app locale made a Spanish dictation come
+ * back translated (or garbled) when the UI was in English. Left alone, Whisper detects the spoken
+ * language and returns the words in it.
+ *
  * @param audio A complete audio file: WebM/Opus from Chrome and Firefox, MP4/AAC from Safari. The
  * SDK sniffs the format from the bytes, so no container has to be declared.
  */
 export async function transcribeAudio({
   audio,
-  language,
 }: {
   audio: Uint8Array;
-  language?: string;
 }): Promise<string> {
   const apiKey = env.GROQ_API_KEY;
   if (!apiKey) throw new Error("GROQ_API_KEY is not configured");
@@ -43,7 +42,6 @@ export async function transcribeAudio({
   const { text } = await transcribe({
     model: provider.transcription(TRANSCRIPTION_MODEL_ID),
     audio,
-    providerOptions: { openai: { language } },
   });
 
   return text;

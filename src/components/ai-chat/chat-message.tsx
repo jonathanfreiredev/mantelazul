@@ -152,7 +152,14 @@ function MessagePartFor({
   }
 
   if (isToolPart(part, ["planMeals"])) {
-    return <PlannedMealsTool part={part} onNavigate={onNavigate} />;
+    return (
+      <PlannedMealsTool
+        part={part}
+        onApprove={onApprove}
+        onDeny={onDeny}
+        onNavigate={onNavigate}
+      />
+    );
   }
 
   if (isToolPart(part, ["searchRecipes", "getFavouriteRecipes"])) {

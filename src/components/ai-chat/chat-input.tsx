@@ -9,7 +9,7 @@ import {
   XIcon,
 } from "lucide-react";
 import Image from "next/image";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   useVoiceDictation,
@@ -71,10 +71,8 @@ export function ChatInput({
 }: ChatInputProps) {
   const t = useTranslations("Chat");
   const tVoice = useTranslations("VoiceDictation");
-  const locale = useLocale();
 
   const dictation = useVoiceDictation({
-    language: locale,
     onAccept: (text) => {
       const typed = value.trim();
       onChange(typed.length > 0 ? `${typed} ${text}` : text);
@@ -279,6 +277,8 @@ function failureMessageKey(failure: DictationFailure): string {
       return "nothingHeard";
     case "too-long":
       return "tooLong";
+    case "rate-limited":
+      return "rateLimited";
     default:
       return "transcriptionFailed";
   }

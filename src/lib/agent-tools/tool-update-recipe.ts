@@ -1,6 +1,9 @@
 import { tool, zodSchema } from "ai";
 import { Category, Difficulty, Unit } from "generated/prisma/enums";
 import z from "zod";
+import { isFoodImage } from "~/lib/guardrails/image";
+import { checkRecipeContent } from "~/lib/guardrails/recipe";
+import { sanitizeInline } from "~/lib/guardrails/sanitize";
 import { LOCALES } from "~/lib/locales";
 import {
   intSchema,
@@ -34,12 +37,6 @@ const recipeInputSchema = z.object({
     .enum(Category)
     .describe(
       "The category of the recipe, in UPPERCASE (e.g. MAIN_COURSE, DESSERT). It is required.",
-    ),
-  imageUrl: z
-    .url()
-    .optional()
-    .describe(
-      "URL of the recipe image, when it does not come from the image the user attached. Omit it to keep the image the recipe already has. To use the attached image, set 'useAttachedImage' instead of writing its URL here.",
     ),
   useAttachedImage: z
     .boolean()
@@ -133,7 +130,7 @@ IMPORTANT:
   steps take from one ingredient must not add up to more than the whole.
 - To change the language the recipe is written in, set 'sourceLocale' and send the title,
   description, ingredients and steps in that language.
-- Leave 'imageUrl' out to keep the image the recipe already has, and set 'useAttachedImage'
+- Leave the image alone to keep the photo the recipe already has, and set 'useAttachedImage'
   to true when the user wants the photo they attached to become the recipe's cover.
 - This tool requires user approval before it runs.
   `,
@@ -143,9 +140,36 @@ IMPORTANT:
       // send it back, and passing null would delete it from Cloudinary.
       const imageUrl =
         (recipe.useAttachedImage ? attachedImageUrl : null) ??
-        recipe.imageUrl ??
         (await api.recipes.getOne({ id: recipe.id, locale: "source" }))
           .imageUrl;
+
+      if (recipe.useAttachedImage && attachedImageUrl) {
+        const attachedIsFood = await isFoodImage(attachedImageUrl);
+
+        if (attachedIsFood === false) {
+          return {
+            success: false as const,
+            message:
+              "The attached photo does not look like a dish, so it cannot be the recipe cover. Tell the user and offer to generate a food photo instead.",
+          };
+        }
+      }
+
+      const verdict = await checkRecipeContent({
+        title: recipe.title,
+        description: recipe.description,
+        ingredients: recipe.ingredients.map((ingredient) => ingredient.name),
+        steps: recipe.steps.map((step) => step.description),
+        tags: recipe.tags,
+      });
+
+      if (!verdict.allowed) {
+        return {
+          success: false as const,
+          message:
+            "This is not a culinary recipe for food or drink, so it was not updated. Tell the user you can only save recipes for edible food and drinks, and steer the conversation back to cooking.",
+        };
+      }
 
       // Everything goes in one write, so the recipe is translated once instead of once per part.
       const updatedRecipe = await api.recipes.update({
@@ -182,7 +206,7 @@ IMPORTANT:
       const savedRecipe = await api.recipes.getOne({ id: updatedRecipe.id });
 
       return {
-        success: true,
+        success: true as const,
         message: "Recipe updated successfully",
         recipe: savedRecipe,
       };
@@ -191,7 +215,9 @@ IMPORTANT:
       type: "text",
       // The chat renders the card itself, so the model gets a short line instead of the whole
       // recipe back, which it does not need and would only be tempted to repeat.
-      value: `Recipe "${output.recipe.title}" was updated. It is already shown in the chat: do not repeat it, just add a short sentence.`,
+      value: output.success
+        ? `Recipe "${sanitizeInline(output.recipe.title, 200)}" was updated. It is already shown in the chat: do not repeat it, just add a short sentence.`
+        : output.message,
     }),
   });
 }

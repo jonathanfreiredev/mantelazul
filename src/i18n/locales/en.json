@@ -439,7 +439,8 @@
     "scrollToLatest": "Go to the latest message",
     "description": "The assistant can help you with a variety of tasks, such as answering questions, providing recommendations, and creating recipes.",
     "placeholder": "How can I help you today?",
-    "limitExceeded": "Message limit exceeded. Please delete the chat to start a new conversation.",
+    "scopeRefusal": "I can only help with cooking, recipes, meal planning and this app. Ask me about a dish, an ingredient or your recipe library.",
+    "rateLimited": "You are sending messages too quickly. Please wait a moment and try again.",
     "attachedImageAlt": "Attached image preview",
     "generatedImage": "AI-generated image",
     "you": "YOU",
@@ -462,6 +463,7 @@
     "approveCreateRecipe": "Do you approve creating the following recipe: {title}?",
     "approveUpdateRecipe": "Do you approve updating the following recipe: {title}?",
     "approveDeleteRecipe": "Do you approve deleting this recipe? This cannot be undone.",
+    "approvePlanMeals": "Do you approve adding these {count} meals to your calendar?",
     "created": "Created successfully",
     "updated": "Updated successfully",
     "viewRecipe": "View Recipe",
@@ -471,6 +473,7 @@
     "deletionDenied": "Deletion denied. The recipe was not deleted.",
     "plannedMeals": "{count, plural, one {# meal added to your calendar} other {# meals added to your calendar}}",
     "planMealsFailed": "Some recipes could not be added: they no longer exist or are not visible to you.",
+    "planningDenied": "Meal planning denied. Nothing was added to your calendar.",
     "planMealsShared": "Shared with the household",
     "viewCalendar": "View Calendar",
     "attachTitle": "Attach images to the chat",
@@ -496,7 +499,8 @@
     "nothingRecorded": "Nothing was recorded.",
     "nothingHeard": "I did not hear anything. Try again.",
     "tooLong": "The recording is too long to transcribe.",
-    "transcriptionFailed": "The audio could not be transcribed. You can try again."
+    "transcriptionFailed": "The audio could not be transcribed. You can try again.",
+    "rateLimited": "Too many dictations. Please wait a moment and try again."
   },
   "Household": {
     "title": "Household",

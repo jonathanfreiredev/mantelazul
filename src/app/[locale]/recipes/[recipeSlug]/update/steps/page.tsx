@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { RecipeStepsForm } from "~/components/recipes/recipe-steps-form";
 import { TabsRecipeForm } from "~/components/recipes/tabs-recipe-form";
 import { api } from "~/trpc/server";
@@ -9,10 +10,12 @@ export default async function UpdateRecipeStepsPage({
 }) {
   const { recipeSlug } = await params;
 
-  const recipe = await api.recipes.getBySlug({
-    slug: recipeSlug,
-    locale: "source",
-  });
+  const recipe = await api.recipes
+    .getBySlug({
+      slug: recipeSlug,
+      locale: "source",
+    })
+    .catch(() => notFound());
 
   return (
     <TabsRecipeForm formType="update" step="steps" recipeSlug={recipeSlug}>

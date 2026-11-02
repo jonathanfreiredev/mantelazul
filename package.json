@@ -21,7 +21,8 @@
     "lint:fix": "eslint . --fix",
     "preview": "next build && next start",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/lib/guardrails/sanitize.test.ts"
   },
   "dependencies": {
     "@ai-sdk/black-forest-labs": "^2.0.48",
@@ -56,6 +57,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^18.0.3",
     "embla-carousel-react": "^8.6.0",
+    "gpt-tokenizer": "^4.1.0",
     "heic-to": "^1.5.2",
     "lucide-react": "^1.48.0",
     "motion": "^13.4.3",

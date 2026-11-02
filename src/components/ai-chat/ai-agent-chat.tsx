@@ -13,7 +13,6 @@ import {
   Trash2Icon,
   XIcon,
 } from "lucide-react";
-import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -51,7 +50,6 @@ import { ChatMessage } from "./chat-message";
 import { type AssistantActivity } from "./assistant-activity-indicator";
 import { isRunningToolPart, toolNameOf } from "./tools/tool-part";
 
-const MAX_MESSAGES = 50;
 const MAX_ATTACHED_IMAGES = 3;
 const MAX_ATTACHED_IMAGE_BYTES = 10 * 1024 * 1024;
 
@@ -114,6 +112,36 @@ export default function AIAgentChat({
     messages: savedMessages,
     transport: new DefaultChatTransport({
       api: "/api/chat",
+      // The server keeps the canonical history; sending the whole transcript every turn would
+      // grow with the conversation and hit request-size limits. Send only what the server cannot
+      // know: the new user message, plus any assistant messages carrying an approval response.
+      prepareSendMessagesRequest: ({ id, messages }) => {
+        const last = messages[messages.length - 1];
+        const withApprovals = messages.filter((message) =>
+          message.parts.some(
+            (part) =>
+              part.type.startsWith("tool-") &&
+              (part as { state?: string }).state === "approval-responded",
+          ),
+        );
+
+        const outgoing = [
+          ...withApprovals,
+          ...(last?.role === "user" ? [last] : []),
+        ];
+        const seen = new Set<string>();
+
+        return {
+          body: {
+            id,
+            messages: outgoing.filter((message) => {
+              if (seen.has(message.id)) return false;
+              seen.add(message.id);
+              return true;
+            }),
+          },
+        };
+      },
     }),
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
   });
@@ -125,7 +153,6 @@ export default function AIAgentChat({
   });
 
   const isBusy = status === "streaming" || status === "submitted";
-  const isAtMessageLimit = messages.length > MAX_MESSAGES;
   const lastMessage = messages[messages.length - 1];
 
   /**
@@ -181,7 +208,7 @@ export default function AIAgentChat({
   };
 
   const handleSendMessage = async (text: string) => {
-    if (text.trim() === "" || isBusy || isAtMessageLimit) return;
+    if (text.trim() === "" || isBusy) return;
 
     if (
       attachedImages.some((image) => image.file.size > MAX_ATTACHED_IMAGE_BYTES)
@@ -253,7 +280,7 @@ export default function AIAgentChat({
     messageId === lastMessage?.id ? activity : null;
 
   const submit = () => {
-    if (!isAtMessageLimit) void handleSendMessage(input);
+    void handleSendMessage(input);
   };
 
   const chatInput = (
@@ -263,7 +290,7 @@ export default function AIAgentChat({
       onSubmit={submit}
       onStop={stop}
       isBusy={isBusy}
-      disabled={uploadingImage || isAtMessageLimit}
+      disabled={uploadingImage}
       attachedImages={attachedImages}
       onAttachedImagesChange={setAttachedImages}
       maxAttachedImages={MAX_ATTACHED_IMAGES}
@@ -305,7 +332,6 @@ export default function AIAgentChat({
               onApprove={handleApprove}
               onDeny={handleDeny}
               onNavigate={closeChat}
-              isAtMessageLimit={isAtMessageLimit}
             />
           ) : (
             <LockedTranscript />
@@ -341,7 +367,6 @@ export default function AIAgentChat({
           onApprove={handleApprove}
           onDeny={handleDeny}
           onNavigate={closeChat}
-          isAtMessageLimit={isAtMessageLimit}
         />
       ) : (
         <LockedTranscript />
@@ -460,7 +485,6 @@ interface ChatTranscriptProps {
   onApprove: (approvalId: string) => void;
   onDeny: (approvalId: string) => void;
   onNavigate: () => void;
-  isAtMessageLimit: boolean;
 }
 
 function ChatTranscript({
@@ -469,7 +493,6 @@ function ChatTranscript({
   onApprove,
   onDeny,
   onNavigate,
-  isAtMessageLimit,
 }: ChatTranscriptProps) {
   const t = useTranslations("Chat");
 
@@ -518,18 +541,6 @@ function ChatTranscript({
             <EmptyDescription>{t("description")}</EmptyDescription>
           </EmptyHeader>
         </Empty>
-      )}
-
-      {isAtMessageLimit && (
-        <motion.div
-          key="limit-exceeded"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="absolute inset-x-0 bottom-3 z-100 mx-auto w-[90%] rounded-md border-2 border-red-400/30 bg-red-100 px-4 py-2 shadow-lg shadow-gray-400/50"
-        >
-          <p className="text-sm text-red-700">{t("limitExceeded")}</p>
-        </motion.div>
       )}
     </div>
   );

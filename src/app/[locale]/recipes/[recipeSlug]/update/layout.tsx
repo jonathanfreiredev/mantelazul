@@ -20,10 +20,9 @@ export default async function UpdateRecipeLayout({
     redirect("/everything");
   }
 
-  const recipe = await api.recipes.getBySlug({
-    slug: recipeSlug,
-    locale: "source",
-  });
+  const recipe = await api.recipes
+    .getBySlug({ slug: recipeSlug, locale: "source" })
+    .catch(() => null);
 
   if (!recipe) {
     notFound();

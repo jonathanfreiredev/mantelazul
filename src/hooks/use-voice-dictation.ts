@@ -18,13 +18,12 @@ export type DictationFailure =
   | "nothing-recorded"
   | "nothing-heard"
   | "too-long"
+  | "rate-limited"
   | "transcription-failed";
 
 export type DictationStatus = "idle" | "recording" | "transcribing" | "failed";
 
 export interface UseVoiceDictationOptions {
-  /** Language hint for the model, from the active locale. */
-  language: string;
   onAccept: (text: string) => void;
   onFailure: (failure: DictationFailure) => void;
 }
@@ -41,7 +40,6 @@ export interface UseVoiceDictationResult {
 }
 
 export function useVoiceDictation({
-  language,
   onAccept,
   onFailure,
 }: UseVoiceDictationOptions): UseVoiceDictationResult {
@@ -59,11 +57,9 @@ export function useVoiceDictation({
   const sessionRef = useRef(0);
 
   // The latest props, so the callbacks below can stay stable for the lifetime of a recording.
-  const languageRef = useRef(language);
   const onAcceptRef = useRef(onAccept);
   const onFailureRef = useRef(onFailure);
   useEffect(() => {
-    languageRef.current = language;
     onAcceptRef.current = onAccept;
     onFailureRef.current = onFailure;
   });
@@ -119,10 +115,7 @@ export function useVoiceDictation({
       }
 
       try {
-        const text = await requestTranscription({
-          audio: clip,
-          language: languageRef.current,
-        });
+        const text = await requestTranscription({ audio: clip });
 
         if (sessionRef.current !== session) return;
 
@@ -136,12 +129,16 @@ export function useVoiceDictation({
         }
 
         onAcceptRef.current(text);
-      } catch {
+      } catch (error) {
         if (sessionRef.current !== session) return;
 
         // The clip stays, so accepting again is a retry rather than a new recording.
         setStatus("failed");
-        onFailureRef.current("transcription-failed");
+        onFailureRef.current(
+          error instanceof TranscriptionRequestError && error.status === 429
+            ? "rate-limited"
+            : "transcription-failed",
+        );
       }
     } finally {
       busyRef.current = false;
@@ -197,21 +194,28 @@ export function useVoiceDictation({
   };
 }
 
+class TranscriptionRequestError extends Error {
+  constructor(readonly status: number) {
+    super(`Transcription failed with ${status}`);
+    this.name = "TranscriptionRequestError";
+  }
+}
+
 async function requestTranscription({
   audio,
-  language,
 }: {
   audio: Blob;
-  language: string;
 }): Promise<string> {
   const form = new FormData();
   form.append("audio", audio, "dictation");
-  form.append("language", language);
 
-  const response = await fetch("/api/transcribe", { method: "POST", body: form });
+  const response = await fetch("/api/transcribe", {
+    method: "POST",
+    body: form,
+  });
 
   if (!response.ok) {
-    throw new Error(`Transcription failed with ${response.status}`);
+    throw new TranscriptionRequestError(response.status);
   }
 
   const payload = (await response.json()) as { text?: unknown };

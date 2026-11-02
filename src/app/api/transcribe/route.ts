@@ -1,10 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { checkRateLimit } from "~/lib/rate-limit";
 import { getSession } from "~/server/better-auth/server";
-import {
-  transcribeAudio,
-  transcriptionLanguage,
-  voiceDictationEnabled,
-} from "~/server/transcription";
+import { transcribeAudio, voiceDictationEnabled } from "~/server/transcription";
 
 /** A couple of minutes of Opus is a few hundred kilobytes, so this is generous. */
 const MAX_AUDIO_BYTES = 4 * 1024 * 1024;
@@ -21,6 +18,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "dictation_disabled" }, { status: 503 });
   }
 
+  const limit = await checkRateLimit(session.user.id, "transcribe");
+
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "rate_limited" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
+    );
+  }
+
   const form = await req.formData();
   const audio = form.get("audio");
 
@@ -33,9 +42,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // No language is sent: Whisper detects the language that was actually spoken. Sending the
+    // app's locale made dictation in another language come back translated or garbled.
     const text = await transcribeAudio({
       audio: new Uint8Array(await audio.arrayBuffer()),
-      language: transcriptionLanguage(form.get("language")),
     });
 
     return NextResponse.json({ text });
