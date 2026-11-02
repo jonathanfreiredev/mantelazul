@@ -363,6 +363,10 @@ export const recipesRouter = createTRPCRouter({
         throw new Error("Recipe not found");
       }
 
+      if (currentRecipe.authorId !== ctx.session.user.id) {
+        throw new Error("You can only change your own recipes");
+      }
+
       const source = await readSourceContent(id);
 
       if (!source) {
@@ -467,6 +471,19 @@ export const recipesRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { ingredients, recipeId } = input;
 
+      const recipe = await ctx.db.recipe.findUnique({
+        where: { id: recipeId },
+        select: { authorId: true },
+      });
+
+      if (!recipe) {
+        throw new Error("Recipe not found");
+      }
+
+      if (recipe.authorId !== ctx.session.user.id) {
+        throw new Error("You can only change your own recipes");
+      }
+
       const source = await readSourceContent(recipeId);
 
       if (!source) {
@@ -526,6 +543,19 @@ export const recipesRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { steps, recipeId } = input;
+
+      const recipe = await ctx.db.recipe.findUnique({
+        where: { id: recipeId },
+        select: { authorId: true },
+      });
+
+      if (!recipe) {
+        throw new Error("Recipe not found");
+      }
+
+      if (recipe.authorId !== ctx.session.user.id) {
+        throw new Error("You can only change your own recipes");
+      }
 
       const source = await readSourceContent(recipeId);
 
@@ -623,6 +653,19 @@ export const recipesRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { recipeId, tags } = input;
 
+      const recipe = await ctx.db.recipe.findUnique({
+        where: { id: recipeId },
+        select: { authorId: true },
+      });
+
+      if (!recipe) {
+        throw new Error("Recipe not found");
+      }
+
+      if (recipe.authorId !== ctx.session.user.id) {
+        throw new Error("You can only change your own recipes");
+      }
+
       await ctx.db.$transaction(async (tx) => {
         await replaceRecipeTags(tx, recipeId, tags);
       });
@@ -641,6 +684,10 @@ export const recipesRouter = createTRPCRouter({
 
       if (!recipe) {
         throw new Error("Recipe not found");
+      }
+
+      if (recipe.authorId !== ctx.session.user.id) {
+        throw new Error("You can only change your own recipes");
       }
 
       const updatedRecipe = await ctx.db.recipe.update({
@@ -665,6 +712,11 @@ export const recipesRouter = createTRPCRouter({
         throw new Error("Recipe not found");
       }
 
+      // Unpublished recipes are drafts: only their author can read them by link.
+      if (!recipe.published && recipe.authorId !== ctx.session?.user?.id) {
+        throw new Error("Recipe not found");
+      }
+
       const locale =
         input.locale === "source"
           ? toLocale(recipe.sourceLocale)
@@ -682,6 +734,11 @@ export const recipesRouter = createTRPCRouter({
       });
 
       if (!recipe) {
+        throw new Error("Recipe not found");
+      }
+
+      // Unpublished recipes are drafts: only their author can read them by id.
+      if (!recipe.published && recipe.authorId !== ctx.session?.user?.id) {
         throw new Error("Recipe not found");
       }
 
@@ -909,6 +966,10 @@ export const recipesRouter = createTRPCRouter({
 
       if (!recipe) {
         throw new Error("Recipe not found");
+      }
+
+      if (recipe.authorId !== ctx.session.user.id) {
+        throw new Error("You can only delete your own recipes");
       }
 
       if (recipe.imageUrl) {

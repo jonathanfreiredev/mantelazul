@@ -24,11 +24,12 @@ export function MessagePart({ part, partIndex }: MessagePartProps) {
 
   return (
     <div className="mt-2 mr-2 inline-block align-top">
-      <div className="relative size-18 overflow-hidden rounded-sm bg-gray-100 shadow-lg shadow-gray-500/50">
+      <div className="bg-muted relative size-18 overflow-hidden rounded-sm shadow-lg shadow-gray-500/50">
         <Image
           src={part.url}
           alt={part.filename ?? `Attached image ${partIndex + 1}`}
           fill
+          sizes="72px"
           className="object-cover"
         />
       </div>

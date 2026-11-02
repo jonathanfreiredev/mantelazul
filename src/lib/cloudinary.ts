@@ -7,6 +7,10 @@ import {
   type UploadApiResponse,
 } from "cloudinary";
 import { env } from "~/env";
+import {
+  sanitizeImageStyle,
+  sanitizeImageSubject,
+} from "~/lib/guardrails/sanitize";
 
 /**
  * The model and the settings every recipe photo is generated with. Named and shared with the
@@ -57,16 +61,30 @@ export function deleteFromCloudinary(
 }
 
 function buildImagePrompt(title: string, styleHint?: string): string {
-  return `Professional gourmet food photography of ${title}${
-    styleHint ? `, ${styleHint} style` : ""
-  }, high resolution, 8K, appetizing lighting, beautifully plated, macro photography.`;
+  return [
+    "A professional editorial food photograph of one plated dish or drink:",
+    `${title}.`,
+    styleHint ? `Plating and mood: ${styleHint}.` : "",
+    "The image must contain only edible food or drink and its serving dish.",
+    "No people, no hands, no animals, no text, no logos, no packaging, no vehicles, no weapons,",
+    "no buildings and no objects that are not food. Photorealistic, appetizing, natural light,",
+    "high detail, shallow depth of field.",
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 export async function generateAndUpload(
   title: string,
   styleHint?: string,
 ): Promise<string> {
-  const prompt = buildImagePrompt(title, styleHint);
+  const subject = sanitizeImageSubject(title);
+
+  if (subject.length === 0) {
+    throw new Error("The image subject is empty");
+  }
+
+  const prompt = buildImagePrompt(subject, sanitizeImageStyle(styleHint));
 
   // The AI SDK does not instrument image generation: `generateImage` takes no telemetry option
   // and emits no span, so Langfuse would never see this call. The observation is built by hand
@@ -107,7 +125,7 @@ export async function generateAndUpload(
     const result = await uploadToCloudinary(Buffer.from(image.uint8Array));
 
     // Markdown, so the trace shows the photo that was generated and not just its URL.
-    generation.update({ output: `![${title}](${result.secure_url})` });
+    generation.update({ output: `![${subject}](${result.secure_url})` });
 
     return result.secure_url;
   } catch (error) {

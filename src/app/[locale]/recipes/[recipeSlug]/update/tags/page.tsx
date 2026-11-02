@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { RecipeTagsForm } from "~/components/recipes/recipe-tags-form";
 import { TabsRecipeForm } from "~/components/recipes/tabs-recipe-form";
 import { api, HydrateClient } from "~/trpc/server";
@@ -9,10 +10,12 @@ export default async function UpdateRecipeTagsPage({
 }) {
   const { recipeSlug } = await params;
 
-  const recipe = await api.recipes.getBySlug({
-    slug: recipeSlug,
-    locale: "source",
-  });
+  const recipe = await api.recipes
+    .getBySlug({
+      slug: recipeSlug,
+      locale: "source",
+    })
+    .catch(() => notFound());
 
   void api.tags.getAll.prefetch();
 

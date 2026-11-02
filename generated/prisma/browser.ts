@@ -6,11 +6,9 @@
 /*
  * This file should be your main import to use Prisma-related types and utilities in a browser. 
  * Use it to get access to models, enums, and input types.
- * 
- * This file does not contain a `PrismaClient` class, nor several other helpers that are intended as server-side only.
+ * * This file does not contain a `PrismaClient` class, nor several other helpers that are intended as server-side only.
  * See `client.ts` for the standard, server-side entry point.
- *
- * 🟢 You can import this file directly.
+ * * 🟢 You can import this file directly.
  */
 
 import * as Prisma from './internal/prismaNamespaceBrowser'
@@ -19,28 +17,23 @@ export * as $Enums from './enums'
 export * from './enums';
 /**
  * Model User
- * 
- */
+ * */
 export type User = Prisma.UserModel
 /**
  * Model Session
- * 
- */
+ * */
 export type Session = Prisma.SessionModel
 /**
  * Model Account
- * 
- */
+ * */
 export type Account = Prisma.AccountModel
 /**
  * Model Verification
- * 
- */
+ * */
 export type Verification = Prisma.VerificationModel
 /**
  * Model Recipe
- * 
- */
+ * */
 export type Recipe = Prisma.RecipeModel
 /**
  * Model RecipeTranslation
@@ -53,38 +46,31 @@ export type Recipe = Prisma.RecipeModel
 export type RecipeTranslation = Prisma.RecipeTranslationModel
 /**
  * Model Ingredient
- * 
- */
+ * */
 export type Ingredient = Prisma.IngredientModel
 /**
  * Model Step
- * 
- */
+ * */
 export type Step = Prisma.StepModel
 /**
  * Model Tag
- * 
- */
+ * */
 export type Tag = Prisma.TagModel
 /**
  * Model RecipeTag
- * 
- */
+ * */
 export type RecipeTag = Prisma.RecipeTagModel
 /**
  * Model RecipeLike
- * 
- */
+ * */
 export type RecipeLike = Prisma.RecipeLikeModel
 /**
  * Model Cookbook
- * 
- */
+ * */
 export type Cookbook = Prisma.CookbookModel
 /**
  * Model CookbookRecipe
- * 
- */
+ * */
 export type CookbookRecipe = Prisma.CookbookRecipeModel
 /**
  * Model Household
@@ -112,11 +98,13 @@ export type HouseholdInvite = Prisma.HouseholdInviteModel
 export type MealPlanEntry = Prisma.MealPlanEntryModel
 /**
  * Model Chat
- * 
- */
+ * */
 export type Chat = Prisma.ChatModel
 /**
+ * Model RateLimit
+ * */
+export type RateLimit = Prisma.RateLimitModel
+/**
  * Model Message
- * 
- */
+ * */
 export type Message = Prisma.MessageModel

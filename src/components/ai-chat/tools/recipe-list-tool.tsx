@@ -66,7 +66,7 @@ export function RecipeListTool({ part, onNavigate }: RecipeListToolProps) {
               onClick={onNavigate}
               className="hover:bg-background/60 -mx-2 flex items-start gap-3 rounded-md p-2 transition-colors"
             >
-              <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-gray-300">
+              <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
                 {recipe.imageUrl ? (
                   <Image
                     src={recipe.imageUrl}

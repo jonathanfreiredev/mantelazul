@@ -1,61 +1,50 @@
 "use client";
-import { LogInIcon, LogOutIcon } from "lucide-react";
+import { LogOutIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { authClient } from "~/server/better-auth/client";
 import { Item, ItemContent, ItemMedia, ItemTitle } from "./ui/item";
-import { Link, useRouter } from "~/i18n/navigation";
+import { useRouter } from "~/i18n/navigation";
 import { DrawerClose } from "./ui/drawer";
 
-export function SidebarDrawerAuth() {
+interface SidebarDrawerAuthProps {
+  /**
+   * Comes from the server, so the item is there as soon as the drawer opens. Asking the client
+   * session here made the whole block disappear while the request was in flight, which read as
+   * "there is no way to log in".
+   */
+  isLoggedIn: boolean;
+}
+
+export function SidebarDrawerAuth({ isLoggedIn }: SidebarDrawerAuthProps) {
   const t = useTranslations("Menu");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const { data, isPending } = authClient.useSession();
 
-  if (isPending) return null;
-
-  const isLoggedIn = !!data?.session;
+  if (!isLoggedIn) return null;
 
   return (
-    <>
-      {!isLoggedIn ? (
-        <DrawerClose asChild>
-          <Item variant="default" size="sm" className="cursor-pointer" asChild>
-            <Link href="/login">
-              <ItemMedia>
-                <LogInIcon className="size-5" />
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle>{t("logIn")}</ItemTitle>
-              </ItemContent>
-            </Link>
-          </Item>
-        </DrawerClose>
-      ) : (
-        <DrawerClose asChild>
-          <Item
-            variant="muted"
-            size="sm"
-            className="cursor-pointer bg-red-50"
-            onClick={async () => {
-              if (isSubmitting) return;
+    <DrawerClose asChild>
+      <Item
+        variant="muted"
+        size="sm"
+        className="text-destructive bg-destructive/10 cursor-pointer"
+        onClick={async () => {
+          if (isSubmitting) return;
 
-              setIsSubmitting(true);
-              await authClient.signOut();
-              router.refresh();
-              setIsSubmitting(false);
-            }}
-          >
-            <ItemMedia>
-              <LogOutIcon className="size-5" />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>{t("signOut")}</ItemTitle>
-            </ItemContent>
-          </Item>
-        </DrawerClose>
-      )}
-    </>
+          setIsSubmitting(true);
+          await authClient.signOut();
+          router.refresh();
+          setIsSubmitting(false);
+        }}
+      >
+        <ItemMedia>
+          <LogOutIcon className="size-5" />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>{t("signOut")}</ItemTitle>
+        </ItemContent>
+      </Item>
+    </DrawerClose>
   );
 }

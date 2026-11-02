@@ -370,12 +370,32 @@ model Chat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // The conversation memory: older messages are replaced by this summary in the model prompt,
+  // so a long chat never hits the context window. `summaryUpToMessageId` marks the last message
+  // already folded into it.
+  summary              String?   @db.Text
+  summaryUpToMessageId String?
+  summaryUpdatedAt     DateTime?
+  summaryTokens        Int?
+
   messages Message[]
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
   @@map("chat")
+}
+
+model RateLimit {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  windowStart DateTime
+  count       Int      @default(0)
+
+  @@unique([userId, action, windowStart])
+  @@index([userId, action])
+  @@map("rate_limit")
 }
 
 model Message {

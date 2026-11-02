@@ -1,6 +1,9 @@
 import { tool, zodSchema } from "ai";
 import { Category, Difficulty, Unit } from "generated/prisma/enums";
 import z from "zod";
+import { isFoodImage } from "~/lib/guardrails/image";
+import { checkRecipeContent } from "~/lib/guardrails/recipe";
+import { sanitizeInline } from "~/lib/guardrails/sanitize";
 import { LOCALES } from "~/lib/locales";
 import {
   intSchema,
@@ -29,12 +32,6 @@ const recipeInputSchema = z.object({
     .enum(Difficulty)
     .describe(
       "The difficulty level of the recipe, in UPPERCASE (e.g. EASY, MEDIUM, HARD). It is required.",
-    ),
-  imageUrl: z
-    .url()
-    .optional()
-    .describe(
-      "URL of the recipe image, only when it comes from neither the image the user attached nor one generated in this conversation. To use the attached image, set 'useAttachedImage' instead of writing its URL here.",
     ),
   useAttachedImage: z
     .boolean()
@@ -137,6 +134,7 @@ ingredient across steps the way the instructions describe it.
 IMPORTANT:
 - Only call this tool once the user has explicitly confirmed they want to save the recipe.
 - Do NOT call it during brainstorming or suggestion phases.
+- This tool requires user approval before it runs.
 - The recipe needs a cover image. If the user attached a photo of the dish, set
   'useAttachedImage': true; otherwise call 'generateRecipeImage' first. This tool refuses to
   save a recipe without an image.
@@ -149,7 +147,6 @@ IMPORTANT:
       // it may well be talking about a different dish.
       const image =
         (recipe.useAttachedImage ? attachedImageUrl : null) ??
-        recipe.imageUrl ??
         generatedImage.url ??
         (recipe.reuseGeneratedImage ? previousImageUrl : null);
 
@@ -158,6 +155,34 @@ IMPORTANT:
           success: false as const,
           message:
             "The recipe was not saved because it has no image. Call 'generateRecipeImage' with the recipe title and save it again: the generated image is used as the cover automatically. If the user attached a photo of the dish, set 'useAttachedImage': true instead.",
+        };
+      }
+
+      if (recipe.useAttachedImage && attachedImageUrl) {
+        const attachedIsFood = await isFoodImage(attachedImageUrl);
+
+        if (attachedIsFood === false) {
+          return {
+            success: false as const,
+            message:
+              "The attached photo does not look like a dish, so it cannot be the recipe cover. Tell the user and offer to generate a food photo instead.",
+          };
+        }
+      }
+
+      const verdict = await checkRecipeContent({
+        title: recipe.title,
+        description: recipe.description,
+        ingredients: recipe.ingredients.map((ingredient) => ingredient.name),
+        steps: recipe.steps.map((step) => step.description),
+        tags: recipe.tags,
+      });
+
+      if (!verdict.allowed) {
+        return {
+          success: false as const,
+          message:
+            "This is not a culinary recipe for food or drink, so it was not saved. Tell the user you can only save recipes for edible food and drinks, and steer the conversation back to cooking.",
         };
       }
 
@@ -202,7 +227,7 @@ IMPORTANT:
       // The chat renders the card itself, so the model gets a short line instead of the whole
       // recipe back, which it does not need and would only be tempted to repeat.
       value: output.success
-        ? `Recipe "${output.recipe.title}" was created. It is already shown in the chat: do not repeat it, just add a short sentence.`
+        ? `Recipe "${sanitizeInline(output.recipe.title, 200)}" was created. It is already shown in the chat: do not repeat it, just add a short sentence.`
         : output.message,
     }),
   });

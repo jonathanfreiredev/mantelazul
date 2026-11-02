@@ -21,9 +21,8 @@ interface SitemapPage {
   imageUrl?: string | null;
 }
 
-/** Pages that are public in every language: the home page, the categories and the legal pages. */
+/** Pages that are public in every language: the categories and the legal pages. */
 const STATIC_PAGES: SitemapPage[] = [
-  { path: "/", priority: 1, changeFrequency: "weekly" },
   ...CATEGORY_PATHS.map((category) => ({
     path: `/${category}`,
     priority: 0.8,

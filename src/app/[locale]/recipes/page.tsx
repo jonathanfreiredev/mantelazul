@@ -15,7 +15,7 @@ export default async function RecipesPage() {
   const isLoggedIn = !!session?.session;
 
   if (!isLoggedIn) {
-    redirect("/");
+    redirect("/everything");
   }
 
   const locale = await getLocale();

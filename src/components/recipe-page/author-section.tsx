@@ -25,7 +25,7 @@ export function AuthorSection({ authorId }: AuthorSectionProps) {
         {resAuthor ? (
           <Avatar className="h-12 w-12">
             <AvatarImage src="" alt="author" className="grayscale" />
-            <AvatarFallback className="bg-slate-100">
+            <AvatarFallback className="bg-muted">
               {resAuthor.name.charAt(0) || "A"}
             </AvatarFallback>
           </Avatar>
@@ -36,10 +36,10 @@ export function AuthorSection({ authorId }: AuthorSectionProps) {
         <div className="flex flex-col gap-2">
           {resAuthor ? (
             <>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium text-foreground">
                 {resAuthor.name}
               </span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 {t("authorRole")}
               </span>{" "}
             </>

@@ -7,7 +7,7 @@ export default async function HouseholdPage() {
   const session = await getSession();
 
   if (!session?.session) {
-    redirect("/");
+    redirect("/everything");
   }
 
   const t = await getTranslations("Household");

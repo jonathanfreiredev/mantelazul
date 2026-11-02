@@ -36,7 +36,7 @@ export function IngredientsSection({
         >
           -
         </Button>
-        <span className="text-lg text-gray-900">{servings}</span>
+        <span className="text-lg text-foreground">{servings}</span>
         <Button
           variant="outline"
           size="icon-lg"
@@ -44,7 +44,7 @@ export function IngredientsSection({
         >
           +
         </Button>
-        <span className="text-md text-gray-500">{t("servings")}</span>
+        <span className="text-md text-muted-foreground">{t("servings")}</span>
       </div>
 
       <ul className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-1">
@@ -62,7 +62,7 @@ export function IngredientsSection({
             // the same place however wide their amounts are.
             <li
               key={ingredient.id}
-              className="col-span-2 grid grid-cols-subgrid text-gray-700"
+              className="col-span-2 grid grid-cols-subgrid text-foreground"
             >
               <span className="text-right font-medium">{amount}</span>
               <span>{ingredient.name}</span>

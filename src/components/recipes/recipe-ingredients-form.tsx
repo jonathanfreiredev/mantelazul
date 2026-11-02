@@ -119,7 +119,7 @@ export const RecipeIngredientsForm = ({
                       <Drawer direction={isDesktop ? "right" : "bottom"}>
                         <DrawerTrigger className="flex w-full flex-col items-start gap-2">
                           <p>{field.name}</p>
-                          <div className="flex flex-row items-center gap-1 text-gray-700">
+                          <div className="flex flex-row items-center gap-1 text-foreground">
                             <p>{field.quantity}</p>
                             <p>{formatUnit(field.unit, locale)}</p>
                           </div>

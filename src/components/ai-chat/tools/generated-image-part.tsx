@@ -23,7 +23,7 @@ export function GeneratedImagePart({ part }: GeneratedImagePartProps) {
 
   return (
     <figure className="mb-5">
-      <div className="relative h-32 w-full overflow-hidden rounded-sm bg-gray-100 shadow-lg shadow-gray-500/50">
+      <div className="relative h-32 w-full overflow-hidden rounded-sm bg-muted shadow-lg shadow-gray-500/50">
         <Image
           src={part.output.imageUrl}
           alt={part.input.recipeTitle}

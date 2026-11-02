@@ -84,7 +84,7 @@ export function StepsSection({
               )}
 
               {amounts.length > 0 && (
-                <p className="text-sm font-light text-gray-500">
+                <p className="text-sm font-light text-muted-foreground">
                   {amounts.map((amount, index) => (
                     <span key={`${index}-${amount}`}>
                       {index > 0 && (
@@ -102,7 +102,7 @@ export function StepsSection({
                 </p>
               )}
 
-              <p className="text-gray-700">{step.description}</p>
+              <p className="text-foreground">{step.description}</p>
             </div>
           );
         })}

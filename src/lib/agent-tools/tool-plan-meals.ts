@@ -36,6 +36,7 @@ RULES:
 - Only plan recipes that already exist: use the ids returned by 'searchRecipes'. NEVER invent an id, and NEVER create a recipe from here. If nothing suitable exists, say so and offer to create the recipe first, as a separate step.
 - Read the calendar first with 'getMealPlan' and tell the user what those days already contain. Meals are added on top of what is already planned; nothing is removed or replaced.
 - Ask the user before calling this tool whenever you do not know the date range, the servings, or whether the meals are for the household or private.
+- This tool requires user approval before it runs.
 - At most ${MAX_MEALS_PER_BATCH} meals per call. It writes them all or none.
   `,
   inputSchema: z.object({

@@ -16,7 +16,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: messages.Metadata.description,
     lang: "en",
     dir: "ltr",
-    start_url: "/",
+    start_url: "/everything",
     scope: "/",
     display: "standalone",
     background_color: "#ffffff",

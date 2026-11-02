@@ -17,13 +17,12 @@ export default async function UpdateRecipeLayout({
   const isLoggedIn = !!session?.session;
 
   if (!isLoggedIn) {
-    redirect("/");
+    redirect("/everything");
   }
 
-  const recipe = await api.recipes.getBySlug({
-    slug: recipeSlug,
-    locale: "source",
-  });
+  const recipe = await api.recipes
+    .getBySlug({ slug: recipeSlug, locale: "source" })
+    .catch(() => null);
 
   if (!recipe) {
     notFound();

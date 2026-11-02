@@ -17,16 +17,13 @@ const components: Components = {
   del: ({ children }) => (
     <del className="line-through opacity-70">{children}</del>
   ),
-  a: ({ children, href }) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="underline underline-offset-2 hover:opacity-80"
-    >
-      {children}
-    </a>
+  a: ({ children }) => (
+    // Deliberately not a link: the assistant is told not to emit URLs, and a prompt-injected
+    // response must not be able to send the user to an attacker-controlled page. The text stays
+    // readable, but nothing is clickable.
+    <span className="underline underline-offset-2">{children}</span>
   ),
+  img: () => null,
   ul: ({ children }) => (
     <ul className="mb-2 list-disc space-y-1 pl-5 last:mb-0">{children}</ul>
   ),

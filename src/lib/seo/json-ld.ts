@@ -20,7 +20,7 @@ function isoDuration(minutes: number): string {
   return `PT${minutes}M`;
 }
 
-/** The site itself: name, description and canonical URL, for the home page. */
+/** The site itself: name, description and canonical URL, for the main listing page. */
 export function websiteJsonLd({
   locale,
   description,
@@ -33,7 +33,7 @@ export function websiteJsonLd({
     "@type": "WebSite",
     name: SITE_NAME,
     description,
-    url: localizedUrl(locale),
+    url: localizedUrl(locale, "/everything"),
     inLanguage: locale,
   };
 }
@@ -141,7 +141,7 @@ export function recipeBreadcrumbItems({
   const categoryPath = categoryPathFor(recipe.category);
 
   return [
-    { name: homeLabel, url: localizedUrl(locale) },
+    { name: homeLabel, url: localizedUrl(locale, "/everything") },
     ...(categoryPath
       ? [{ name: categoryLabel, url: localizedUrl(locale, categoryPath) }]
       : []),

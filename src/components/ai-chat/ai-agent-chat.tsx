@@ -6,12 +6,19 @@ import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithApprovalResponses,
 } from "ai";
-import { ArrowDownIcon, SparklesIcon, Trash2Icon } from "lucide-react";
-import { motion } from "motion/react";
+import {
+  ArrowDownIcon,
+  LockKeyholeIcon,
+  SparklesIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useMediaQuery } from "~/hooks/use-media-query";
+import { useVisualViewport } from "~/hooks/use-visual-viewport";
+import { Link, usePathname } from "~/i18n/navigation";
 import type { MyAgentUIMessage } from "~/lib/agent";
 import { api } from "~/trpc/react";
 import type { ImageWithPreview } from "../image-uploader/image-upload";
@@ -20,20 +27,35 @@ import {
   Drawer,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
   DrawerTitle,
 } from "../ui/drawer";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "../ui/empty";
+import {
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from "../ui/message-scroller";
 import { ChatInput } from "./chat-input";
 import { ChatMessage } from "./chat-message";
 import { type AssistantActivity } from "./assistant-activity-indicator";
 import { isRunningToolPart, toolNameOf } from "./tools/tool-part";
 
-const MAX_MESSAGES = 50;
-/** Distance from the bottom within which the user is considered "at the bottom". */
-const BOTTOM_THRESHOLD_PX = 80;
 const MAX_ATTACHED_IMAGES = 3;
 const MAX_ATTACHED_IMAGE_BYTES = 10 * 1024 * 1024;
+
+/** Desktop gets the side drawer; phones and tablets get the full-screen panel. */
+const DESKTOP_QUERY =
+  "(min-width: 768px) and (hover: hover) and (pointer: fine)";
 
 /**
  * A text part is still being appended while it is the last part of the message; once the
@@ -53,25 +75,29 @@ interface AIAgentChatProps {
   messages: MyAgentUIMessage[];
   /** Dictation is hidden when no transcription provider is configured. */
   voiceEnabled: boolean;
+  /** Guests can open the assistant, but only see the sign-in prompt. */
+  isLoggedIn: boolean;
+  open: boolean;
+  onClose: () => void;
 }
 
 export default function AIAgentChat({
   chatId,
   messages: savedMessages,
   voiceEnabled,
+  isLoggedIn,
+  open,
+  onClose,
 }: AIAgentChatProps) {
   const t = useTranslations("Chat");
   const [attachedImages, setAttachedImages] = useState<ImageWithPreview[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(true);
-  const [opened, setOpened] = useState(false);
   const [input, setInput] = useState("");
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  /** Mirrors `isAtBottom` for the scroll effect, which must not re-run on every scroll. */
-  const isPinnedToBottomRef = useRef(true);
-
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+  const { height, offsetTop, keyboardInset } = useVisualViewport(
+    !isDesktop && open,
+  );
 
   const {
     messages,
@@ -86,6 +112,36 @@ export default function AIAgentChat({
     messages: savedMessages,
     transport: new DefaultChatTransport({
       api: "/api/chat",
+      // The server keeps the canonical history; sending the whole transcript every turn would
+      // grow with the conversation and hit request-size limits. Send only what the server cannot
+      // know: the new user message, plus any assistant messages carrying an approval response.
+      prepareSendMessagesRequest: ({ id, messages }) => {
+        const last = messages[messages.length - 1];
+        const withApprovals = messages.filter((message) =>
+          message.parts.some(
+            (part) =>
+              part.type.startsWith("tool-") &&
+              (part as { state?: string }).state === "approval-responded",
+          ),
+        );
+
+        const outgoing = [
+          ...withApprovals,
+          ...(last?.role === "user" ? [last] : []),
+        ];
+        const seen = new Set<string>();
+
+        return {
+          body: {
+            id,
+            messages: outgoing.filter((message) => {
+              if (seen.has(message.id)) return false;
+              seen.add(message.id);
+              return true;
+            }),
+          },
+        };
+      },
     }),
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
   });
@@ -97,7 +153,6 @@ export default function AIAgentChat({
   });
 
   const isBusy = status === "streaming" || status === "submitted";
-  const isAtMessageLimit = messages.length > MAX_MESSAGES;
   const lastMessage = messages[messages.length - 1];
 
   /**
@@ -123,67 +178,37 @@ export default function AIAgentChat({
     }
   }
 
-  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
-    const element = containerRef.current;
-    if (!element) return;
-
-    // Scroll the message list itself. `scrollIntoView` would also scroll every scrollable
-    // ancestor, dragging the drawer's header and composer out of view.
-    element.scrollTo({ top: element.scrollHeight, behavior });
-  };
-
-  const isNearBottom = () => {
-    const element = containerRef.current;
-    if (!element) return true;
-
-    return (
-      element.scrollHeight - element.scrollTop - element.clientHeight <
-      BOTTOM_THRESHOLD_PX
-    );
-  };
-
-  // Track whether the user is at the bottom, both in state (for the button) and in a ref
-  // (for the scroll effect, so it does not re-run on every scroll event).
+  // On phones the chat is a full-screen panel, so the page behind it must not scroll while it is
+  // open. Without this, iOS can still move the document when the keyboard appears.
   useEffect(() => {
-    if (!opened) return;
+    if (isDesktop || !open) return;
 
-    const element = containerRef.current;
-    if (!element) return;
+    const previousOverflow = document.body.style.overflow;
+    const previousOverscroll =
+      document.documentElement.style.overscrollBehavior;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
 
-    const handleScroll = () => {
-      const nearBottom = isNearBottom();
-      isPinnedToBottomRef.current = nearBottom;
-      setIsAtBottom(nearBottom);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overscrollBehavior = previousOverscroll;
     };
+  }, [isDesktop, open]);
 
-    element.addEventListener("scroll", handleScroll, { passive: true });
-    return () => element.removeEventListener("scroll", handleScroll);
-  }, [opened]);
+  // The component stays mounted after the first open so `useChat` keeps the conversation, but
+  // there is nothing to paint while the sheet is closed.
+  if (!open) return null;
 
-  // Keep the latest message in view while the assistant streams. The container grows on every
-  // chunk (and tool step), which fires no scroll event, so we observe its height instead.
-  useEffect(() => {
-    if (!opened) return;
-
-    const element = containerRef.current;
-    if (!element) return;
-
-    const followIfPinned = () => {
-      if (isPinnedToBottomRef.current) scrollToBottom("auto");
-    };
-
-    const observer = new ResizeObserver(followIfPinned);
-    observer.observe(element);
-
-    // Pin to the bottom on open, and whenever a new message is sent.
-    isPinnedToBottomRef.current = true;
-    followIfPinned();
-
-    return () => observer.disconnect();
-  }, [opened, messages.length]);
+  /** Closing the panel also closes the keyboard: otherwise it stays open over a closed chat. */
+  const closeChat = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    onClose();
+  };
 
   const handleSendMessage = async (text: string) => {
-    if (text.trim() === "" || isBusy || isAtMessageLimit) return;
+    if (text.trim() === "" || isBusy) return;
 
     if (
       attachedImages.some((image) => image.file.size > MAX_ATTACHED_IMAGE_BYTES)
@@ -254,166 +279,269 @@ export default function AIAgentChat({
   const activityFor = (messageId: string): AssistantActivity | null =>
     messageId === lastMessage?.id ? activity : null;
 
-  if (!opened) {
-    return (
-      <>
-        <Button
-          variant="outline"
-          size="icon-lg"
-          className="rounded-sm border-slate-400"
-          aria-label={t("title")}
-          onClick={() => setOpened(true)}
-        >
-          <SparklesIcon className="text-2xl text-slate-500" />
-        </Button>
+  const submit = () => {
+    void handleSendMessage(input);
+  };
 
-        <div
-          data-chat-composer
-          className="fixed right-0 bottom-0 left-0 z-50 mx-auto w-full max-w-2xl px-3 pt-6 pb-5 md:px-4 md:py-6"
-        >
-          <div
-            onFocus={() => {
-              if (messages.length > 0) setOpened(true);
-            }}
-          >
-            <ChatInput
-              value={input}
-              onChange={setInput}
-              onSubmit={() => {
-                setOpened(true);
-                if (!isAtMessageLimit) void handleSendMessage(input);
-              }}
-              onStop={stop}
-              isBusy={isBusy}
-              disabled={uploadingImage || isAtMessageLimit}
-              attachedImages={attachedImages}
-              onAttachedImagesChange={setAttachedImages}
-              maxAttachedImages={MAX_ATTACHED_IMAGES}
-              showAttachButton={false}
-              voiceEnabled={voiceEnabled}
+  const chatInput = (
+    <ChatInput
+      value={input}
+      onChange={setInput}
+      onSubmit={submit}
+      onStop={stop}
+      isBusy={isBusy}
+      disabled={uploadingImage}
+      attachedImages={attachedImages}
+      onAttachedImagesChange={setAttachedImages}
+      maxAttachedImages={MAX_ATTACHED_IMAGES}
+      showAttachButton
+      voiceEnabled={voiceEnabled}
+    />
+  );
+
+  const header = (
+    <ChatHeader
+      messageCount={messages.length}
+      canDelete={isLoggedIn}
+      deleteDisabled={deleteChat.isPending || isBusy}
+      onDelete={() => deleteChat.mutate()}
+      onClose={closeChat}
+      asDrawerTitle={isDesktop}
+    />
+  );
+
+  if (isDesktop) {
+    return (
+      <Drawer
+        open
+        direction="right"
+        onOpenChange={(next) => {
+          if (!next) closeChat();
+        }}
+      >
+        <DrawerContent className="w-full overflow-clip data-[vaul-drawer-direction=right]:sm:max-w-md">
+          <DrawerDescription className="sr-only">
+            {t("description")}
+          </DrawerDescription>
+          {header}
+
+          {isLoggedIn ? (
+            <ChatTranscript
+              messages={messages}
+              activityFor={activityFor}
+              onApprove={handleApprove}
+              onDeny={handleDeny}
+              onNavigate={closeChat}
             />
-          </div>
-        </div>
-      </>
+          ) : (
+            <LockedTranscript />
+          )}
+
+          {isLoggedIn && (
+            <div className="shrink-0 px-4 pt-2 pb-4" data-chat-composer>
+              {chatInput}
+            </div>
+          )}
+        </DrawerContent>
+      </Drawer>
     );
   }
 
   return (
-    // On phones the drawer has to make room for the software keyboard. Vaul does that itself by
-    // watching the visual viewport; the desktop drawer has no keyboard to accommodate.
-    // The content also re-enables text selection: vaul turns it off on hover+fine-pointer
-    // devices to make dragging feel right, but the chat is read-only text meant to be copied.
-    <Drawer
-      direction={isDesktop ? "right" : "bottom"}
-      open={opened}
-      onOpenChange={setOpened}
-      repositionInputs={!isDesktop}
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("title")}
+      className="bg-background fixed inset-x-0 z-50 flex flex-col"
+      style={{
+        top: offsetTop,
+        height: height ?? "100dvh",
+      }}
     >
-      <DrawerContent
-        data-chat-composer
-        className="w-full overflow-clip data-[vaul-drawer-direction=bottom]:h-[85dvh]"
-        style={{ userSelect: "text", WebkitUserSelect: "text" }}
-      >
-        <DrawerHeader className="shrink-0">
-          <DrawerTitle>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-lg font-normal">
-                <SparklesIcon size="20" strokeWidth={1.5} /> {t("title")}
-              </div>
+      {header}
 
-              {messages.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="icon-lg"
-                  disabled={deleteChat.isPending || isBusy}
-                  onClick={() => deleteChat.mutate()}
-                >
-                  <Trash2Icon size="20" strokeWidth={1.5} />
-                </Button>
-              )}
-            </div>
-          </DrawerTitle>
-        </DrawerHeader>
-        <DrawerDescription className="sr-only">
-          {t("description")}
-        </DrawerDescription>
+      {isLoggedIn ? (
+        <ChatTranscript
+          messages={messages}
+          activityFor={activityFor}
+          onApprove={handleApprove}
+          onDeny={handleDeny}
+          onNavigate={closeChat}
+        />
+      ) : (
+        <LockedTranscript />
+      )}
 
-        <div className="relative flex min-h-0 flex-1 flex-col px-4">
-          <div
-            ref={containerRef}
-            className="no-scrollbar flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto"
-          >
-            {messages.length > 0 ? (
-              messages.map((message) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                  activity={activityFor(message.id)}
-                  onApprove={handleApprove}
-                  onDeny={handleDeny}
-                  onNavigate={() => setOpened(false)}
-                />
-              ))
-            ) : (
-              <div className="flex flex-1 flex-col items-center justify-center gap-4 px-2">
-                <p className="text-center text-sm text-neutral-500">
-                  {t("description")}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {!isAtBottom && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="absolute bottom-5 z-50 flex w-full"
-            >
-              <Button
-                className="pointer-events-auto mx-auto rounded-full shadow-lg shadow-gray-500/50"
-                size="icon-lg"
-                variant="outline"
-                onClick={() => {
-                  isPinnedToBottomRef.current = true;
-                  setIsAtBottom(true);
-                  scrollToBottom("smooth");
-                }}
-              >
-                <ArrowDownIcon />
-              </Button>
-            </motion.div>
-          )}
-
-          {isAtMessageLimit && (
-            <motion.div
-              key="limit-exceeded"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="absolute bottom-3 z-100 w-[90%] rounded-md border-2 border-red-400/30 bg-red-100 px-4 py-2 shadow-lg shadow-gray-400/50"
-            >
-              <p className="text-sm text-red-700">{t("limitExceeded")}</p>
-            </motion.div>
-          )}
+      {isLoggedIn && (
+        <div
+          data-chat-composer
+          className="shrink-0 px-3 pt-2"
+          style={{
+            paddingBottom:
+              keyboardInset > 0 ? 8 : "max(12px, env(safe-area-inset-bottom))",
+          }}
+        >
+          {chatInput}
         </div>
+      )}
+    </div>
+  );
+}
 
-        <DrawerFooter className="shrink-0">
-          <ChatInput
-            value={input}
-            onChange={setInput}
-            onSubmit={() => void handleSendMessage(input)}
-            onStop={stop}
-            isBusy={isBusy}
-            disabled={uploadingImage || isAtMessageLimit}
-            attachedImages={attachedImages}
-            onAttachedImagesChange={setAttachedImages}
-            maxAttachedImages={MAX_ATTACHED_IMAGES}
-            showAttachButton
-            voiceEnabled={voiceEnabled}
-          />
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+/** What a guest sees instead of the transcript: the assistant is locked until they sign in. */
+function LockedTranscript() {
+  const t = useTranslations("Chat");
+  const pathname = usePathname();
+
+  return (
+    <div className="flex min-h-0 flex-1 items-center justify-center p-6">
+      <Empty className="border-none">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <LockKeyholeIcon />
+          </EmptyMedia>
+          <EmptyTitle>{t("loginRequiredTitle")}</EmptyTitle>
+          <EmptyDescription>{t("loginRequiredDescription")}</EmptyDescription>
+          <EmptyContent>
+            <Button asChild>
+              <Link href={`/login?next=${encodeURIComponent(pathname)}`}>
+                {t("loginRequiredCta")}
+              </Link>
+            </Button>
+          </EmptyContent>
+        </EmptyHeader>
+      </Empty>
+    </div>
+  );
+}
+
+interface ChatHeaderProps {
+  messageCount: number;
+  canDelete: boolean;
+  deleteDisabled: boolean;
+  onDelete: () => void;
+  onClose: () => void;
+  asDrawerTitle: boolean;
+}
+
+function ChatHeader({
+  messageCount,
+  canDelete,
+  deleteDisabled,
+  onDelete,
+  onClose,
+  asDrawerTitle,
+}: ChatHeaderProps) {
+  const t = useTranslations("Chat");
+
+  const title = (
+    <>
+      <SparklesIcon size={20} strokeWidth={1.5} />
+      {t("title")}
+    </>
+  );
+
+  return (
+    <div className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-3">
+      {asDrawerTitle ? (
+        <DrawerTitle className="flex items-center gap-2 text-lg font-normal">
+          {title}
+        </DrawerTitle>
+      ) : (
+        <h2 className="flex items-center gap-2 text-lg font-normal">{title}</h2>
+      )}
+
+      <div className="flex items-center gap-1">
+        {canDelete && messageCount > 0 && (
+          <Button
+            variant="ghost"
+            size="icon-lg"
+            disabled={deleteDisabled}
+            aria-label={t("deleteChat")}
+            title={t("deleteChat")}
+            onClick={onDelete}
+          >
+            <Trash2Icon size={20} strokeWidth={1.5} />
+          </Button>
+        )}
+
+        <Button
+          variant="ghost"
+          size="icon-lg"
+          aria-label={t("closeChat")}
+          title={t("closeChat")}
+          onClick={onClose}
+        >
+          <XIcon size={20} strokeWidth={1.5} />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+interface ChatTranscriptProps {
+  messages: MyAgentUIMessage[];
+  activityFor: (messageId: string) => AssistantActivity | null;
+  onApprove: (approvalId: string) => void;
+  onDeny: (approvalId: string) => void;
+  onNavigate: () => void;
+}
+
+function ChatTranscript({
+  messages,
+  activityFor,
+  onApprove,
+  onDeny,
+  onNavigate,
+}: ChatTranscriptProps) {
+  const t = useTranslations("Chat");
+
+  return (
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      {messages.length > 0 ? (
+        <MessageScrollerProvider
+          autoScroll
+          defaultScrollPosition="last-anchor"
+          scrollPreviousItemPeek={64}
+        >
+          <MessageScroller>
+            <MessageScrollerViewport>
+              <MessageScrollerContent className="px-4 py-2">
+                {messages.map((message) => (
+                  <MessageScrollerItem
+                    key={message.id}
+                    messageId={message.id}
+                    scrollAnchor={message.role === "user"}
+                  >
+                    <ChatMessage
+                      message={message}
+                      activity={activityFor(message.id)}
+                      onApprove={onApprove}
+                      onDeny={onDeny}
+                      onNavigate={onNavigate}
+                    />
+                  </MessageScrollerItem>
+                ))}
+              </MessageScrollerContent>
+            </MessageScrollerViewport>
+
+            <MessageScrollerButton>
+              <ArrowDownIcon />
+              <span className="sr-only">{t("scrollToLatest")}</span>
+            </MessageScrollerButton>
+          </MessageScroller>
+        </MessageScrollerProvider>
+      ) : (
+        <Empty className="h-full px-6">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SparklesIcon />
+            </EmptyMedia>
+            <EmptyTitle>{t("title")}</EmptyTitle>
+            <EmptyDescription>{t("description")}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+    </div>
   );
 }

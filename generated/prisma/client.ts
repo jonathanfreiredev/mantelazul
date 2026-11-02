@@ -6,8 +6,7 @@
 /*
  * This file should be your main import to use Prisma. Through it you get access to all the models, enums, and input types.
  * If you're looking for something you can import in the client-side of your application, please refer to the `browser.ts` file instead.
- *
- * 🟢 You can import this file directly.
+ * * 🟢 You can import this file directly.
  */
 
 import * as process from 'node:process'
@@ -24,8 +23,7 @@ export * as $Enums from './enums'
 export * from "./enums"
 /**
  * ## Prisma Client
- * 
- * Type-safe database client for TypeScript
+ * * Type-safe database client for TypeScript
  * @example
  * ```
  * const prisma = new PrismaClient({
@@ -34,8 +32,7 @@ export * from "./enums"
  * // Fetch zero or more Users
  * const users = await prisma.user.findMany()
  * ```
- * 
- * Read more in our [docs](https://pris.ly/d/client).
+ * * Read more in our [docs](https://pris.ly/d/client).
  */
 export const PrismaClient = $Class.getPrismaClientClass()
 export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts extends Prisma.PrismaClientOptions["omit"] = Prisma.PrismaClientOptions["omit"], ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = $Class.PrismaClient<LogOpts, OmitOpts, ExtArgs>
@@ -43,28 +40,23 @@ export { Prisma }
 
 /**
  * Model User
- * 
- */
+ * */
 export type User = Prisma.UserModel
 /**
  * Model Session
- * 
- */
+ * */
 export type Session = Prisma.SessionModel
 /**
  * Model Account
- * 
- */
+ * */
 export type Account = Prisma.AccountModel
 /**
  * Model Verification
- * 
- */
+ * */
 export type Verification = Prisma.VerificationModel
 /**
  * Model Recipe
- * 
- */
+ * */
 export type Recipe = Prisma.RecipeModel
 /**
  * Model RecipeTranslation
@@ -77,38 +69,31 @@ export type Recipe = Prisma.RecipeModel
 export type RecipeTranslation = Prisma.RecipeTranslationModel
 /**
  * Model Ingredient
- * 
- */
+ * */
 export type Ingredient = Prisma.IngredientModel
 /**
  * Model Step
- * 
- */
+ * */
 export type Step = Prisma.StepModel
 /**
  * Model Tag
- * 
- */
+ * */
 export type Tag = Prisma.TagModel
 /**
  * Model RecipeTag
- * 
- */
+ * */
 export type RecipeTag = Prisma.RecipeTagModel
 /**
  * Model RecipeLike
- * 
- */
+ * */
 export type RecipeLike = Prisma.RecipeLikeModel
 /**
  * Model Cookbook
- * 
- */
+ * */
 export type Cookbook = Prisma.CookbookModel
 /**
  * Model CookbookRecipe
- * 
- */
+ * */
 export type CookbookRecipe = Prisma.CookbookRecipeModel
 /**
  * Model Household
@@ -136,11 +121,13 @@ export type HouseholdInvite = Prisma.HouseholdInviteModel
 export type MealPlanEntry = Prisma.MealPlanEntryModel
 /**
  * Model Chat
- * 
- */
+ * */
 export type Chat = Prisma.ChatModel
 /**
+ * Model RateLimit
+ * */
+export type RateLimit = Prisma.RateLimitModel
+/**
  * Model Message
- * 
- */
+ * */
 export type Message = Prisma.MessageModel

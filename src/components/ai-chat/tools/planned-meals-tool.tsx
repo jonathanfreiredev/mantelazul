@@ -7,11 +7,14 @@ import { toDbDate } from "~/lib/dates";
 import { toLocale } from "~/lib/locales";
 import type { MealPlanEntryDto } from "~/types/meal-plan";
 import { Button } from "../../ui/button";
+import { ApprovalActions } from "./approval-actions";
 import { ToolResultCard } from "./tool-result-card";
 import { type ToolPart } from "./tool-part";
 
 interface PlannedMealsToolProps {
   part: ToolPart<"planMeals">;
+  onApprove: (approvalId: string) => void;
+  onDeny: (approvalId: string) => void;
   /** Called once the user navigates away, so the drawer can close. */
   onNavigate: () => void;
 }
@@ -34,11 +37,34 @@ function groupByDate(entries: MealPlanEntryDto[]) {
 }
 
 /** Result of the 'planMeals' tool: the plan that was written to the calendar. */
-export function PlannedMealsTool({ part, onNavigate }: PlannedMealsToolProps) {
+export function PlannedMealsTool({
+  part,
+  onApprove,
+  onDeny,
+  onNavigate,
+}: PlannedMealsToolProps) {
   const t = useTranslations("Chat");
   const tCalendar = useTranslations("Calendar");
   const locale = toLocale(useLocale());
   const router = useRouter();
+
+  if (part.state === "approval-requested") {
+    return (
+      <ApprovalActions
+        question={t("approvePlanMeals", { count: part.input.meals.length })}
+        onApprove={() => onApprove(part.approval.id)}
+        onDeny={() => onDeny(part.approval.id)}
+      />
+    );
+  }
+
+  if (part.state === "output-denied") {
+    return (
+      <ToolResultCard tone="denied">
+        <p>{t("planningDenied")}</p>
+      </ToolResultCard>
+    );
+  }
 
   if (part.state !== "output-available") return null;
 

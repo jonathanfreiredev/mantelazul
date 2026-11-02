@@ -158,10 +158,6 @@
     "HARD": "Difícil"
   },
   "CategoryPages": {
-    "explore": {
-      "name": "Explorar",
-      "description": ""
-    },
     "mains": {
       "name": "Principales",
       "description": "Descubre nuestra colección de platos principales con una gran variedad de sabores e ingredientes para todos los paladares."
@@ -434,10 +430,17 @@
     "imageAlt": "Portada del recetario"
   },
   "Chat": {
-    "title": "Asistente",
+    "title": "Asistente AI",
+    "loginRequiredTitle": "Inicia sesión para usar el asistente",
+    "loginRequiredDescription": "Inicia sesión para pedir recetas, planificar comidas y guardar tus conversaciones.",
+    "loginRequiredCta": "Iniciar sesión",
+    "closeChat": "Cerrar el asistente",
+    "deleteChat": "Eliminar chat",
+    "scrollToLatest": "Ir al último mensaje",
     "description": "El asistente puede ayudarte con diversas tareas, como responder preguntas, darte recomendaciones y crear recetas.",
     "placeholder": "¿Cómo puedo ayudarte hoy?",
-    "limitExceeded": "Se superó el límite de mensajes. Elimina el chat para empezar una conversación nueva.",
+    "scopeRefusal": "Solo puedo ayudar con cocina, recetas, planificación de comidas y esta app. Pregúntame por un plato, un ingrediente o tu recetario.",
+    "rateLimited": "Estás enviando mensajes demasiado rápido. Espera un momento e inténtalo de nuevo.",
     "attachedImageAlt": "Vista previa de la imagen adjunta",
     "generatedImage": "Imagen generada por IA",
     "you": "TÚ",
@@ -460,6 +463,7 @@
     "approveCreateRecipe": "¿Apruebas crear la siguiente receta: {title}?",
     "approveUpdateRecipe": "¿Apruebas actualizar la siguiente receta: {title}?",
     "approveDeleteRecipe": "¿Apruebas eliminar esta receta? No se puede deshacer.",
+    "approvePlanMeals": "¿Apruebas añadir estas {count} comidas a tu calendario?",
     "created": "Creada correctamente",
     "updated": "Actualizada correctamente",
     "viewRecipe": "Ver receta",
@@ -469,6 +473,7 @@
     "deletionDenied": "Eliminación rechazada. La receta no se eliminó.",
     "plannedMeals": "{count, plural, one {# comida añadida a tu calendario} other {# comidas añadidas a tu calendario}}",
     "planMealsFailed": "Algunas recetas no se pudieron añadir: ya no existen o no son visibles para ti.",
+    "planningDenied": "Planificación denegada. No se ha añadido nada a tu calendario.",
     "planMealsShared": "Compartida con el hogar",
     "viewCalendar": "Ver calendario",
     "attachTitle": "Adjuntar imágenes al chat",
@@ -494,7 +499,8 @@
     "nothingRecorded": "No se ha grabado nada.",
     "nothingHeard": "No he oído nada. Inténtalo de nuevo.",
     "tooLong": "La grabación es demasiado larga para transcribirla.",
-    "transcriptionFailed": "No se ha podido transcribir el audio. Puedes intentarlo otra vez."
+    "transcriptionFailed": "No se ha podido transcribir el audio. Puedes intentarlo otra vez.",
+    "rateLimited": "Demasiados dictados. Espera un momento e inténtalo de nuevo."
   },
   "Household": {
     "title": "Hogar",
@@ -602,6 +608,7 @@
   },
   "Menu": {
     "menu": "Menú",
+    "allRecipes": "Todas las recetas",
     "cookbooks": "Recetarios",
     "myRecipes": "Mis recetas",
     "myCookbooks": "Mis recetarios",

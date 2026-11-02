@@ -31,7 +31,7 @@ export const DropdownAvatarMenu = ({ user }: DropdownAvatarMenuProps) => {
                   alt="@shadcn"
                   className="grayscale"
                 /> */}
-          <AvatarFallback className="bg-slate-100">
+          <AvatarFallback className="bg-primary/10 text-primary">
             {user.name
               .split(" ")
               .map((n) => n[0])

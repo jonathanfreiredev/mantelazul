@@ -57,10 +57,11 @@ export default async function RecipePage({ params }: RecipePageProps) {
   // until the browser has fetched them.
   const [seo] = await Promise.all([
     getRecipeSeo(recipeSlug, resolvedLocale),
-    api.recipes.getBySlug.prefetch({
-      slug: recipeSlug,
-      locale: resolvedLocale,
-    }),
+    // The prefetch is rejected for a draft the visitor does not own. The page decides the 404
+    // below; letting that rejection win would replace the not-found page with an API error.
+    api.recipes.getBySlug
+      .prefetch({ slug: recipeSlug, locale: resolvedLocale })
+      .catch(() => undefined),
   ]);
 
   if (

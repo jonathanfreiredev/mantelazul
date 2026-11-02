@@ -3,7 +3,8 @@ import { absoluteUrl } from "~/lib/seo/site";
 
 /**
  * Paths that only exist for a signed-in user. They are kept out of the crawl entirely: every one
- * of them redirects anonymous visitors home, and none of them is linked from a public page.
+ * of them redirects anonymous visitors to the public listing, and none of them is linked from a
+ * public page.
  *
  * The sign-in pages are deliberately missing: a crawler has to be able to read their `noindex`
  * for it to mean anything, and a disallowed URL can still be indexed from links alone.

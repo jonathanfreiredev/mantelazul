@@ -14,7 +14,7 @@ export function TagsSection({ tags }: TagsSectionProps) {
 
       <div className="flex w-full flex-wrap gap-4">
         {tags.map((tag) => (
-          <span key={tag.id} className="block text-gray-700">
+          <span key={tag.id} className="block text-foreground">
             #{tag.name}
           </span>
         ))}
