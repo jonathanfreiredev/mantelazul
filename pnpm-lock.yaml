@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@ai-sdk/black-forest-labs':
-        specifier: ^2.0.48
-        version: 2.0.48(zod@4.6.5)
       '@ai-sdk/devtools':
         specifier: ^1.0.24
         version: 1.0.24
@@ -236,12 +233,6 @@ importers:
         version: 8.70.1(eslint@10.11.0(jiti@2.7.0))(typescript@5.9.3)
 
 packages:
-
-  '@ai-sdk/black-forest-labs@2.0.48':
-    resolution: {integrity: sha512-mLI6YwT+tpvVzqH2iXitAwi/hUdPN48kEHbSzDFGCRafEmOdc7PRPdvaKZ7Oe8rxpxMqVD1BX5nAeYzs9OLlmQ==}
-    engines: {node: '>=22'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
 
   '@ai-sdk/devtools@1.0.24':
     resolution: {integrity: sha512-zLeAu1NuYvD51sP4Vq/DOMZdUddF9w524cmWZWJq3iJuKVmv8sAtqe6rVUAYr7qLg15vPHkpy9LL+BcisbV+qA==}
@@ -6458,12 +6449,6 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
-
-  '@ai-sdk/black-forest-labs@2.0.48(zod@4.6.5)':
-    dependencies:
-      '@ai-sdk/provider': 4.0.18
-      '@ai-sdk/provider-utils': 5.0.47(zod@4.6.5)
-      zod: 4.6.5
 
   '@ai-sdk/devtools@1.0.24':
     dependencies:
