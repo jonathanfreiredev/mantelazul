@@ -25,7 +25,6 @@
     "test": "tsx --test src/lib/guardrails/sanitize.test.ts"
   },
   "dependencies": {
-    "@ai-sdk/black-forest-labs": "^2.0.48",
     "@ai-sdk/devtools": "^1.0.24",
     "@ai-sdk/openai": "^4.0.74",
     "@ai-sdk/react": "^4.0.116",
